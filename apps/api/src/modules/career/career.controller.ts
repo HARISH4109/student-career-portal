@@ -41,27 +41,27 @@ function catalog(
 }
 export class CareerController {
   constructor(private readonly service = new CareerService()) {}
-  paths = catalog((req) =>
+  paths: RequestHandler = catalog((req) =>
     this.service.paths(
       careerCatalogQuerySchema.parse(req.query),
       requestUser(req).permissions.includes('career_paths.manage'),
     ),
   );
-  path = action((req) =>
+  path: RequestHandler = action((req) =>
     this.service.path(id(req), requestUser(req).permissions.includes('career_paths.manage')),
   );
-  createPath = action(
+  createPath: RequestHandler = action(
     (req) => this.service.savePath(careerPathInputSchema.parse(req.body), requestUser(req).id),
     true,
   );
-  updatePath = action((req) =>
+  updatePath: RequestHandler = action((req) =>
     this.service.savePath(careerPathInputSchema.parse(req.body), requestUser(req).id, id(req)),
   );
-  resources = catalog((req) =>
+  resources: RequestHandler = catalog((req) =>
     this.service.resources(careerCatalogQuerySchema.parse(req.query), requestUser(req)),
   );
-  resource = action((req) => this.service.resource(id(req), requestUser(req)));
-  createResource = action(
+  resource: RequestHandler = action((req) => this.service.resource(id(req), requestUser(req)));
+  createResource: RequestHandler = action(
     async (req) => {
       if (Array.isArray(req.body)) {
         const inputs = z.array(resourceInputSchema).parse(req.body);
@@ -73,24 +73,24 @@ export class CareerController {
     },
     true,
   );
-  updateResource = action((req) =>
+  updateResource: RequestHandler = action((req) =>
     this.service.saveResource(resourceInputSchema.parse(req.body), requestUser(req).id, id(req)),
   );
-  progress = action((req) =>
+  progress: RequestHandler = action((req) =>
     this.service.updateProgress(
       id(req),
       resourceStatusSchema.parse(req.body).status,
       requestUser(req).id,
     ),
   );
-  roadmaps = action((req) => this.service.roadmaps(requestUser(req).id));
-  roadmap = action((req) => this.service.roadmap(id(req), requestUser(req).id));
-  start = action(
+  roadmaps: RequestHandler = action((req) => this.service.roadmaps(requestUser(req).id));
+  roadmap: RequestHandler = action((req) => this.service.roadmap(id(req), requestUser(req).id));
+  start: RequestHandler = action(
     (req) =>
       this.service.start(startRoadmapSchema.parse(req.body).careerPathId, requestUser(req).id),
     true,
   );
-  stage = action((req) =>
+  stage: RequestHandler = action((req) =>
     this.service.completeStage(
       id(req),
       id(req, 'stageId'),
@@ -98,10 +98,10 @@ export class CareerController {
       requestUser(req).id,
     ),
   );
-  analyze = action(
+  analyze: RequestHandler = action(
     (req) => this.service.analyze(skillGapInputSchema.parse(req.body), requestUser(req)),
     true,
   );
-  analyses = action((req) => this.service.analyses(requestUser(req).id));
-  analysis = action((req) => this.service.analysis(id(req), requestUser(req).id));
+  analyses: RequestHandler = action((req) => this.service.analyses(requestUser(req).id));
+  analysis: RequestHandler = action((req) => this.service.analysis(id(req), requestUser(req).id));
 }

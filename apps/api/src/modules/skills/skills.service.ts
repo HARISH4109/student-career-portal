@@ -16,6 +16,9 @@ export class SkillsService {
 
   async createSkill(name: string, category = 'technical'): Promise<SkillDto> {
     const raw = await this.skillsRepo.findOrCreateSkill(name, category);
+    if (!raw) {
+      throw new Error(`Failed to find or create skill: ${name}`);
+    }
     return {
       id: raw.id,
       name: raw.name,
