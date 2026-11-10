@@ -1,0 +1,20 @@
+{
+  "extends": "../config/tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "types": ["node"],
+
+    // Drizzle's relation/column typings rely on structural patterns (optional-but-present
+    // keys, internal proxy indexing) that are incompatible with these two flags — they
+    // produce false-positive errors on every `references()`/`relations()` call, not real
+    // bugs. Every other strict flag from the base config stays on. Tracked upstream:
+    // https://github.com/drizzle-team/drizzle-orm/issues (exactOptionalPropertyTypes / noUncheckedIndexedAccess)
+    "exactOptionalPropertyTypes": false,
+    "noUncheckedIndexedAccess": false
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist", "drizzle"]
+}

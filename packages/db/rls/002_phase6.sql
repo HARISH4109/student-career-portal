@@ -1,0 +1,21 @@
+-- Apply after Drizzle migrations in Supabase. Express uses the service connection;
+-- browser roles may read catalogs but must use the API for validated writes.
+ALTER TABLE career_paths ENABLE ROW LEVEL SECURITY;
+ALTER TABLE resource_skills ENABLE ROW LEVEL SECURITY;
+ALTER TABLE resource_career_paths ENABLE ROW LEVEL SECURITY;
+ALTER TABLE career_roadmaps ENABLE ROW LEVEL SECURITY;
+ALTER TABLE roadmap_stages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE roadmap_stage_skills ENABLE ROW LEVEL SECURITY;
+ALTER TABLE roadmap_stage_resources ENABLE ROW LEVEL SECURITY;
+ALTER TABLE resource_progress ENABLE ROW LEVEL SECURITY;
+ALTER TABLE skill_gap_analyses ENABLE ROW LEVEL SECURITY;
+ALTER TABLE phase6_legacy_resource_progress ENABLE ROW LEVEL SECURITY;
+CREATE POLICY career_paths_authenticated_read ON career_paths FOR SELECT TO authenticated USING (is_active);
+CREATE POLICY resource_skills_authenticated_read ON resource_skills FOR SELECT TO authenticated USING (EXISTS (SELECT 1 FROM learning_resources r WHERE r.id = resource_id AND r.is_active));
+CREATE POLICY resource_career_paths_authenticated_read ON resource_career_paths FOR SELECT TO authenticated USING (EXISTS (SELECT 1 FROM career_paths c WHERE c.id = career_path_id AND c.is_active));
+CREATE POLICY career_roadmaps_owner_read ON career_roadmaps FOR SELECT TO authenticated USING (student_id IN (SELECT id FROM student_profiles WHERE user_id = auth.uid()));
+CREATE POLICY roadmap_stages_owner_read ON roadmap_stages FOR SELECT TO authenticated USING (roadmap_id IN (SELECT id FROM career_roadmaps));
+CREATE POLICY roadmap_stage_skills_owner_read ON roadmap_stage_skills FOR SELECT TO authenticated USING (stage_id IN (SELECT id FROM roadmap_stages));
+CREATE POLICY roadmap_stage_resources_owner_read ON roadmap_stage_resources FOR SELECT TO authenticated USING (stage_id IN (SELECT id FROM roadmap_stages));
+CREATE POLICY resource_progress_owner_read ON resource_progress FOR SELECT TO authenticated USING (student_id IN (SELECT id FROM student_profiles WHERE user_id = auth.uid()));
+CREATE POLICY skill_gap_analyses_owner_read ON skill_gap_analyses FOR SELECT TO authenticated USING (student_id IN (SELECT id FROM student_profiles WHERE user_id = auth.uid()));

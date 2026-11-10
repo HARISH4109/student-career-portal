@@ -1,0 +1,4 @@
+ALTER TABLE "career_roadmaps" ADD CONSTRAINT "career_roadmaps_career_path_id_career_paths_id_fk" FOREIGN KEY ("career_path_id") REFERENCES "public"."career_paths"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "roadmap_stage_resources" ADD CONSTRAINT "roadmap_stage_resources_resource_id_learning_resources_id_fk" FOREIGN KEY ("resource_id") REFERENCES "public"."learning_resources"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "skill_gap_analyses" ADD CONSTRAINT "skill_gap_analyses_career_path_id_career_paths_id_fk" FOREIGN KEY ("career_path_id") REFERENCES "public"."career_paths"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "skill_gap_analyses" ADD CONSTRAINT "skill_gap_analyses_opportunity_id_opportunities_id_fk" FOREIGN KEY ("opportunity_id") REFERENCES "public"."opportunities"("id") ON DELETE no action ON UPDATE no action;

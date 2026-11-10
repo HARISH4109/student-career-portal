@@ -1,0 +1,156 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+
+env:
+  NODE_VERSION: '20'
+  PYTHON_VERSION: '3.12'
+
+jobs:
+  node-quality:
+    name: Lint, Typecheck & Test (Node)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: career_portal_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build shared packages
+        run: npm run build -w packages/shared-types && npm run build -w packages/db
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck API
+        run: npx tsc --noEmit -p apps/api/tsconfig.json
+
+      - name: Typecheck Web
+        run: npx tsc --noEmit -p apps/web/tsconfig.json
+
+      - name: Run migrations (test DB)
+        run: npm run migrate -w packages/db
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/career_portal_test
+
+      - name: Test API
+        run: npm run test -w apps/api
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/career_portal_test
+          REDIS_URL: redis://localhost:6379
+          SUPABASE_URL: http://localhost:54321
+          SUPABASE_SERVICE_ROLE_KEY: test-service-role-key
+          SUPABASE_ANON_KEY: test-anon-key
+          JWT_SECRET: test-secret-at-least-16-chars
+          AI_SERVICE_BASE_URL: http://localhost:8000
+          AI_SERVICE_INTERNAL_TOKEN: test-internal-token
+
+      - name: Test Web
+        run: npm run test -w apps/web
+
+      - name: Install browser for UI tests
+        run: npx playwright install --with-deps chromium
+
+      - name: Test browser workflows
+        run: npm run test:e2e -w apps/web
+
+      - name: Production build
+        run: npm run build
+
+      - name: Compiled API startup
+        run: node scripts/production-smoke.cjs
+
+  python-quality:
+    name: Lint, Typecheck & Test (AI Service)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+          cache-dependency-path: apps/ai-service/requirements-dev.txt
+
+      - name: Install dependencies
+        working-directory: apps/ai-service
+        run: pip install -r requirements-dev.txt
+
+      - name: Lint (ruff)
+        working-directory: apps/ai-service
+        run: ruff check .
+
+      - name: Typecheck (mypy)
+        working-directory: apps/ai-service
+        run: mypy app --ignore-missing-imports
+
+      - name: Test
+        working-directory: apps/ai-service
+        env:
+          OPENAI_API_KEY: test-key
+          AI_SERVICE_INTERNAL_TOKEN: test-internal-token
+        run: pytest -v
+
+  docker-build:
+    name: Docker Build Verification
+    runs-on: ubuntu-latest
+    needs: [node-quality, python-quality]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build API image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: infra/docker/api.Dockerfile
+          push: false
+          tags: career-portal-api:ci
+
+      - name: Build AI service image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: infra/docker/ai-service.Dockerfile
+          push: false
+          tags: career-portal-ai-service:ci
+
+      - name: Build Web image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: infra/docker/web.Dockerfile
+          push: false
+          tags: career-portal-web:ci

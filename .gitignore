@@ -1,0 +1,53 @@
+# Dependencies & Caches
+node_modules/
+.pnp
+.pnp.js
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.venv/
+venv/
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+*.tsbuildinfo
+
+# Env
+.env
+.env.local
+.env.*.local
+*.dump
+
+# Logs
+*.log
+npm-debug.log*
+logs/
+
+# Testing
+coverage/
+playwright-report/
+test-results/
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local verification scratch and backups
+.maintenance/
+lint-results.json
+phase3-before-fixes.zip
+
+# Docker
+docker-compose.override.yml
+.local-backups/
+scripts/.phase6-preflight.json
