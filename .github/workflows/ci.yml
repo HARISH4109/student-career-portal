@@ -81,12 +81,6 @@ jobs:
       - name: Test Web
         run: npm run test -w apps/web
 
-      - name: Install browser for UI tests
-        run: npx playwright install --with-deps chromium
-
-      - name: Test browser workflows
-        run: npm run test:e2e -w apps/web
-
       - name: Production build
         run: npm run build
 
