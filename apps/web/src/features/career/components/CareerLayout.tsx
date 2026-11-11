@@ -101,31 +101,32 @@ export function Frame({ title, children }: { title: string; children: ReactNode 
   const own = useHasPermission('roadmaps.manage_own');
   const gaps = useHasPermission('skill_gap.analyze_own');
   const manage = useHasPermission('career_paths.manage');
+  const isManage = pathname.includes('/manage');
 
   const tabs = [
-    { to: '/dashboard/careers', label: 'Career paths', Icon: Compass, show: true },
+    { to: '/dashboard/careers', label: 'Career paths', Icon: Compass, show: !isManage },
     {
       to: '/dashboard/roadmap',
       label: 'My roadmap',
       Icon: Route,
-      show: own && !pathname.includes('/manage'),
+      show: own && !isManage,
     },
-    { to: '/dashboard/resources', label: 'Learning resources', Icon: BookOpen, show: true },
+    { to: '/dashboard/resources', label: 'Learning resources', Icon: BookOpen, show: !isManage },
     {
       to: '/dashboard/skill-gap',
       label: 'Skill gaps',
       Icon: Target,
-      show: gaps && !pathname.includes('/manage'),
+      show: gaps && !isManage,
     },
     {
       to: '/dashboard/careers/manage',
       label: 'Manage catalog',
       Icon: Settings2,
-      show: manage && pathname.includes('/manage'),
+      show: manage && isManage,
     },
   ];
 
-  const active = pathname.includes('/manage')
+  const active = isManage
     ? '/dashboard/careers/manage'
     : (tabs.find((tab) => tab.to !== '/dashboard/careers' && pathname.startsWith(tab.to))?.to ??
       '/dashboard/careers');
