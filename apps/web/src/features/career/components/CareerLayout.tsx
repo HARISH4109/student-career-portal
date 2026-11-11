@@ -6,7 +6,6 @@ import {
   Compass,
   Loader2,
   Route,
-  Settings2,
   Sparkles,
   Target,
 } from 'lucide-react';
@@ -100,7 +99,6 @@ export function Frame({ title, children }: { title: string; children: ReactNode 
   const { pathname } = useLocation();
   const own = useHasPermission('roadmaps.manage_own');
   const gaps = useHasPermission('skill_gap.analyze_own');
-  const manage = useHasPermission('career_paths.manage');
   const isManage = pathname.includes('/manage');
 
   const tabs = [
@@ -118,12 +116,6 @@ export function Frame({ title, children }: { title: string; children: ReactNode 
       Icon: Target,
       show: gaps && !isManage,
     },
-    {
-      to: '/dashboard/careers/manage',
-      label: 'Manage catalog',
-      Icon: Settings2,
-      show: manage && isManage,
-    },
   ];
 
   const active = isManage
@@ -140,6 +132,8 @@ export function Frame({ title, children }: { title: string; children: ReactNode 
         : active.endsWith('/skill-gap')
           ? 'Understand where you stand, see the evidence behind each recommendation, and choose what to work on next.'
           : 'Explore your next role and turn your career interests into a practical learning journey.';
+
+  const visibleTabs = tabs.filter((tab) => tab.show);
 
   return (
     <div className="min-w-0 space-y-6 text-sm leading-relaxed text-slate-600 sm:space-y-8">
@@ -162,14 +156,13 @@ export function Frame({ title, children }: { title: string; children: ReactNode 
         </div>
       </header>
 
-      {/* ── Secondary Pill Tab Navigation ── */}
-      <nav
-        aria-label="Career preparation"
-        className="flex flex-wrap items-center gap-1.5 rounded-2xl border border-slate-200/80 bg-white p-1.5 shadow-sm"
-      >
-        {tabs
-          .filter((tab) => tab.show)
-          .map(({ to, label, Icon: TabIcon }) => {
+      {/* ── Secondary Pill Tab Navigation (only displayed when multiple navigation options exist) ── */}
+      {visibleTabs.length > 1 && (
+        <nav
+          aria-label="Career preparation"
+          className="flex flex-wrap items-center gap-1.5 rounded-2xl border border-slate-200/80 bg-white p-1.5 shadow-sm"
+        >
+          {visibleTabs.map(({ to, label, Icon: TabIcon }) => {
             const isTabActive = active === to;
             return (
               <Link
@@ -187,7 +180,8 @@ export function Frame({ title, children }: { title: string; children: ReactNode 
               </Link>
             );
           })}
-      </nav>
+        </nav>
+      )}
 
       {children}
     </div>

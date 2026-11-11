@@ -329,12 +329,9 @@ test('faculty tabs hide student routes and surface server validation errors', as
     });
   });
   await page.goto('/dashboard/careers/manage');
-  const tabs = page.getByRole('navigation', { name: 'Career preparation' });
-  await expect(tabs.getByRole('link', { name: 'My roadmap' })).toHaveCount(0);
-  await expect(tabs.getByRole('link', { name: 'Skill gaps' })).toHaveCount(0);
-  await expect(tabs.getByRole('link', { name: 'Career paths' })).toHaveCount(0);
-  await expect(tabs.getByRole('link', { name: 'Learning resources' })).toHaveCount(0);
-  await expect(tabs.getByRole('link', { name: 'Manage catalog' })).toHaveCount(1);
+  await expect(page.getByRole('navigation', { name: 'Career preparation' })).toHaveCount(0);
+  await expect(page.getByRole('tab', { name: 'Career paths' })).toBeVisible();
+  await expect(page.getByRole('tab', { name: 'Learning resources' })).toBeVisible();
   await page.getByLabel('Career title', { exact: true }).fill('New career');
   await page.getByLabel('Published career').check();
   await page.getByRole('button', { name: 'Save career', exact: true }).click();
