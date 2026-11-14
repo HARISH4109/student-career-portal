@@ -228,7 +228,7 @@ describe('Phase 9 — Opportunity Lifecycle Integration Tests', () => {
       .set(auth(studentUserId));
 
     expect(listRes.status).toBe(200);
-    const opps = responseValue(listRes, 'data.opportunities') as Array<{ id: string }>;
+    const opps = (responseValue(listRes, 'data') ?? []) as Array<{ id: string }>;
     expect(opps.some((o) => o.id === createdOppId)).toBe(false);
   });
 
@@ -305,7 +305,7 @@ describe('Phase 9 — Opportunity Lifecycle Integration Tests', () => {
       .set(auth(studentUserId));
 
     expect(listRes.status).toBe(200);
-    const opps = responseValue(listRes, 'data.opportunities') as Array<{
+    const opps = (responseValue(listRes, 'data') ?? []) as Array<{
       id: string;
       status: string;
       isEligible: boolean;
