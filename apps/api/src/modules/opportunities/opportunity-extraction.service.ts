@@ -13,7 +13,7 @@ import { InternalError, ValidationError } from '@/shared/errors/app-error';
  * - Parses numeric strings: "₹6,25,000" -> 625000
  * - Parses comma-separated strings: "Java, Python" -> ["Java", "Python"]
  */
-function normalizeN8nPayload(raw: unknown): unknown {
+export function normalizeN8nPayload(raw: unknown): unknown {
   if (!raw || typeof raw !== 'object') return raw;
 
   const isRecord = (value: unknown): value is Record<string, unknown> =>
