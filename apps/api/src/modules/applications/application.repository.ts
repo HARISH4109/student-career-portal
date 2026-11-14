@@ -1,7 +1,7 @@
 import { db, schema } from '@career-portal/db';
 import { and, count, eq } from 'drizzle-orm';
 
-import { ConflictError } from '@/shared/errors/app-error';
+import { ConflictError, NotFoundError } from '@/shared/errors/app-error';
 
 export type ApplicationStatus = typeof schema.opportunityApplications.$inferSelect.status;
 
@@ -29,6 +29,30 @@ export class ApplicationRepository {
     });
   }
 
+  async findStudentProfileByUserId(userId: string) {
+    return db.query.studentProfiles.findFirst({
+      where: eq(schema.studentProfiles.userId, userId),
+    });
+  }
+
+  async findResumeById(resumeId: string) {
+    return db.query.resumes.findFirst({
+      where: eq(schema.resumes.id, resumeId),
+    });
+  }
+
+  async findDefaultResumeByStudentId(studentId: string) {
+    return db.query.resumes.findFirst({
+      where: eq(schema.resumes.studentId, studentId),
+    });
+  }
+
+  async findOpportunityById(opportunityId: string) {
+    return db.query.opportunities.findFirst({
+      where: eq(schema.opportunities.id, opportunityId),
+    });
+  }
+
   async create(data: {
     opportunityId: string;
     studentId: string;
@@ -37,13 +61,17 @@ export class ApplicationRepository {
     changedBy: string;
   }) {
     return db.transaction(async (tx) => {
-      const [application] = await tx.insert(schema.opportunityApplications).values({
-        opportunityId: data.opportunityId,
-        studentId: data.studentId,
-        resumeId: data.resumeId,
-        coverNote: data.coverNote,
-        status: 'applied',
-      }).onConflictDoNothing().returning();
+      const [application] = await tx
+        .insert(schema.opportunityApplications)
+        .values({
+          opportunityId: data.opportunityId,
+          studentId: data.studentId,
+          resumeId: data.resumeId,
+          coverNote: data.coverNote,
+          status: 'applied',
+        })
+        .onConflictDoNothing()
+        .returning();
       if (!application) throw new ConflictError('You have already applied to this opportunity');
       await tx.insert(schema.applicationStatusHistory).values({
         applicationId: application.id,
@@ -55,15 +83,48 @@ export class ApplicationRepository {
     });
   }
 
-  async updateStatus(id: string, previousStatus: ApplicationStatus, status: ApplicationStatus,
-    changedBy: string, remarks: string | null): Promise<void> {
+  async updateStatus(
+    id: string,
+    previousStatus: ApplicationStatus,
+    status: ApplicationStatus,
+    changedBy: string,
+    remarks: string | null,
+  ): Promise<void> {
     await db.transaction(async (tx) => {
-      const updated = await tx.update(schema.opportunityApplications)
+      const updated = await tx
+        .update(schema.opportunityApplications)
         .set({ status, updatedAt: new Date() })
-        .where(and(eq(schema.opportunityApplications.id, id), eq(schema.opportunityApplications.status, previousStatus)))
+        .where(
+          and(
+            eq(schema.opportunityApplications.id, id),
+            eq(schema.opportunityApplications.status, previousStatus),
+          ),
+        )
         .returning({ id: schema.opportunityApplications.id });
-      if (updated.length === 0) throw new ConflictError('Application changed. Refresh and try again.');
-      await tx.insert(schema.applicationStatusHistory).values({ applicationId: id, status, changedBy, remarks });
+      if (updated.length === 0)
+        throw new ConflictError('Application changed. Refresh and try again.');
+      await tx
+        .insert(schema.applicationStatusHistory)
+        .values({ applicationId: id, status, changedBy, remarks });
+    });
+  }
+
+  async updateStudentApplicationStatus(
+    id: string,
+    status: ApplicationStatus,
+    changedBy: string,
+    remarks: string | null,
+  ): Promise<void> {
+    await db.transaction(async (tx) => {
+      const updated = await tx
+        .update(schema.opportunityApplications)
+        .set({ status, updatedAt: new Date() })
+        .where(eq(schema.opportunityApplications.id, id))
+        .returning({ id: schema.opportunityApplications.id });
+      if (updated.length === 0) throw new NotFoundError('Application');
+      await tx
+        .insert(schema.applicationStatusHistory)
+        .values({ applicationId: id, status, changedBy, remarks });
     });
   }
 
@@ -89,7 +150,7 @@ export class ApplicationRepository {
       .select({ total: count() })
       .from(schema.opportunityApplications)
       .where(whereClause);
-    const total = (countResult[0]?.total ?? 0);
+    const total = countResult[0]?.total ?? 0;
 
     const applications = await db.query.opportunityApplications.findMany({
       where: whereClause,
@@ -129,7 +190,7 @@ export class ApplicationRepository {
       .select({ total: count() })
       .from(schema.opportunityApplications)
       .where(whereClause);
-    const total = (countResult[0]?.total ?? 0);
+    const total = countResult[0]?.total ?? 0;
 
     const applications = await db.query.opportunityApplications.findMany({
       where: whereClause,

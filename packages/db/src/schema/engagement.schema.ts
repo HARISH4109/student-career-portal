@@ -11,11 +11,21 @@ export const noticeCategoryEnum = pgEnum('notice_category', [
   'general',
 ]);
 
+export const noticeStatusEnum = pgEnum('notice_status', [
+  'draft',
+  'scheduled',
+  'published',
+  'expired',
+  'archived',
+]);
+
 export const notices = pgTable('notices', {
   id: uuid('id').primaryKey().defaultRandom(),
   title: varchar('title', { length: 200 }).notNull(),
   content: text('content').notNull(),
   category: noticeCategoryEnum('category').notNull().default('general'),
+  status: noticeStatusEnum('status').notNull().default('published'),
+  publishedAt: timestamp('published_at', { withTimezone: true }).notNull().defaultNow(),
   postedBy: uuid('posted_by')
     .notNull()
     .references(() => users.id),
@@ -26,6 +36,9 @@ export const notices = pgTable('notices', {
   targetDepartmentId: uuid('target_department_id').references(() => departments.id),
   /** Optional FK for targeted notices to a specific batch */
   targetBatchId: uuid('target_batch_id').references(() => batches.id),
+  attachments: jsonb('attachments').notNull().default('[]'),
+  posterUrl: text('poster_url'),
+  actionUrl: text('action_url'),
   isPinned: boolean('is_pinned').notNull().default(false),
   expiresAt: timestamp('expires_at', { withTimezone: true }),
   ...timestamps,

@@ -37,6 +37,14 @@ export const OPPORTUNITY_STATUSES = [
 ] as const;
 export type OpportunityStatus = (typeof OPPORTUNITY_STATUSES)[number];
 
+// ── Notice Categories & Statuses ────────────────────────────────────────
+
+export const NOTICE_CATEGORIES = ['placement', 'academic', 'event', 'general'] as const;
+export type NoticeCategory = (typeof NOTICE_CATEGORIES)[number];
+
+export const NOTICE_STATUSES = ['draft', 'scheduled', 'published', 'expired', 'archived'] as const;
+export type NoticeStatus = (typeof NOTICE_STATUSES)[number];
+
 // ── Notification Types ──────────────────────────────────────────────────
 
 export const NOTIFICATION_TYPES = [
@@ -46,6 +54,10 @@ export const NOTIFICATION_TYPES = [
   'interview_reminder',
   'recommendation',
   'system',
+  'opportunity_deadline',
+  'test_assigned',
+  'test_result_ready',
+  'roadmap_reminder',
 ] as const;
 export type NotificationType = (typeof NOTIFICATION_TYPES)[number];
 

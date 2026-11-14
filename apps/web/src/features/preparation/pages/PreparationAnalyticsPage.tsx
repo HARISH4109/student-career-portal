@@ -4,6 +4,7 @@ import {
   BarChart3,
   CheckCircle2,
   Clock,
+  TrendingUp,
   XCircle,
 } from 'lucide-react';
 import { Link } from 'react-router';
@@ -28,29 +29,25 @@ export function PreparationAnalyticsPage(): React.JSX.Element {
   const avgScore = analytics?.averageScorePercentage ?? 0;
 
   return (
-    <div className="space-y-8 max-w-5xl mx-auto pb-12">
-      {/* ── Top Bar ──────────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between">
+    <div className="space-y-6 max-w-6xl mx-auto pb-12">
+      {/* ── Page Header ─────────────────────────────────────────────────── */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 pb-5">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+            <TrendingUp className="h-6 w-6 text-indigo-600" /> Placement Preparation Analytics
+          </h1>
+          <p className="mt-1 text-sm text-slate-500">
+            Historical assessment performance, category strengths, and weak area tracking
+          </p>
+        </div>
+
         <Link
           to="/dashboard/preparation"
-          className="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-slate-800 transition"
+          className="inline-flex items-center gap-2 rounded-xl bg-white hover:bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-700 border border-slate-200 shadow-sm transition-all"
         >
           <ArrowLeft className="h-4 w-4" />
-          <span>Back to Tests Catalog</span>
+          <span>Back to Tests</span>
         </Link>
-        <span className="text-xs font-semibold text-indigo-600 uppercase tracking-wider">
-          Student Preparation Analytics
-        </span>
-      </div>
-
-      {/* ── Header ───────────────────────────────────────────────────────── */}
-      <div>
-        <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900">
-          Placement Preparation Analytics
-        </h1>
-        <p className="text-sm text-slate-500 mt-1">
-          Historical assessment performance, category strengths, and weak area tracking.
-        </p>
       </div>
 
       {/* ── KPI Cards ────────────────────────────────────────────────────── */}

@@ -1,5 +1,5 @@
 import { relations } from 'drizzle-orm';
-import { boolean, integer, pgTable, primaryKey, text, uuid, varchar } from 'drizzle-orm/pg-core';
+import { boolean, integer, pgTable, primaryKey, text, uniqueIndex, uuid, varchar } from 'drizzle-orm/pg-core';
 
 import { timestamps } from './_shared';
 
@@ -18,17 +18,40 @@ export const departments = pgTable('departments', {
   ...timestamps,
 });
 
-export const academicPrograms = pgTable('academic_programs', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  departmentId: uuid('department_id')
-    .notNull()
-    .references(() => departments.id, { onDelete: 'cascade' }),
-  name: varchar('name', { length: 200 }).notNull(), // e.g. 'B.Tech Computer Science'
-  degreeLevel: varchar('degree_level', { length: 50 }).notNull(), // e.g. 'B.Tech', 'M.Tech', 'MSc', 'MBA', 'PhD'
-  durationYears: integer('duration_years').notNull(),
-  isActive: boolean('is_active').notNull().default(true),
-  ...timestamps,
-});
+export const academicPrograms = pgTable(
+  'academic_programs',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    departmentId: uuid('department_id')
+      .notNull()
+      .references(() => departments.id, { onDelete: 'cascade' }),
+    name: varchar('name', { length: 200 }).notNull(), // e.g. 'B.Tech Computer Science'
+    degreeLevel: varchar('degree_level', { length: 50 }).notNull(), // e.g. 'B.Tech', 'M.Tech', 'MSc', 'MBA', 'PhD'
+    durationYears: integer('duration_years').notNull(),
+    isActive: boolean('is_active').notNull().default(true),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex('academic_programs_dept_name_idx').on(table.departmentId, table.name),
+  ],
+);
+
+export const academicStreams = pgTable(
+  'academic_streams',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    programId: uuid('program_id')
+      .notNull()
+      .references(() => academicPrograms.id, { onDelete: 'cascade' }),
+    name: varchar('name', { length: 200 }).notNull(),
+    code: varchar('code', { length: 50 }).notNull(),
+    isActive: boolean('is_active').notNull().default(true),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex('academic_streams_program_code_idx').on(table.programId, table.code),
+  ],
+);
 
 export const batches = pgTable('batches', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -106,10 +129,18 @@ export const departmentsRelations = relations(departments, ({ many }) => ({
   academicPrograms: many(academicPrograms),
 }));
 
-export const academicProgramsRelations = relations(academicPrograms, ({ one }) => ({
+export const academicProgramsRelations = relations(academicPrograms, ({ one, many }) => ({
   department: one(departments, {
     fields: [academicPrograms.departmentId],
     references: [departments.id],
+  }),
+  streams: many(academicStreams),
+}));
+
+export const academicStreamsRelations = relations(academicStreams, ({ one }) => ({
+  program: one(academicPrograms, {
+    fields: [academicStreams.programId],
+    references: [academicPrograms.id],
   }),
 }));
 

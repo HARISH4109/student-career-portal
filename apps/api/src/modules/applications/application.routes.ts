@@ -17,6 +17,11 @@ applicationsRouter.post('/', requirePermission('applications.apply'), controller
 applicationsRouter.get('/me', requirePermission('applications.view_own'), controller.getMyApplications);
 applicationsRouter.get('/:id', controller.getById);
 applicationsRouter.delete('/:id', requirePermission('applications.apply'), controller.withdraw);
+applicationsRouter.patch(
+  '/:id/student-status',
+  requirePermission('applications.view_own'),
+  controller.updateStudentSelfStatus,
+);
 
 // Faculty: view and manage applications by opportunity
 applicationsRouter.get(

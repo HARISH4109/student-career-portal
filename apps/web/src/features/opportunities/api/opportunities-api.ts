@@ -262,6 +262,33 @@ export function useUpdateApplicationStatus() {
   });
 }
 
+export function useUpdateStudentApplicationStatus() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, dto }: { id: string; dto: UpdateApplicationStatusDto }) => {
+      const res = await apiClient.patch<{ success: true; data: ApplicationResponseDto }>(
+        `/api/v1/applications/${id}/student-status`,
+        dto,
+      );
+      return res.data.data;
+    },
+    onSuccess: (updatedApp) => {
+      queryClient.setQueriesData<{ data: ApplicationResponseDto[]; meta?: PaginationMeta }>(
+        { queryKey: opportunityKeys.applications },
+        (old) => {
+          if (!old?.data) return old;
+          return {
+            ...old,
+            data: old.data.map((app) => (app.id === updatedApp.id ? updatedApp : app)),
+          };
+        },
+      );
+      queryClient.setQueryData(opportunityKeys.applicationDetail(updatedApp.id), updatedApp);
+      void queryClient.invalidateQueries({ queryKey: opportunityKeys.applications });
+    },
+  });
+}
+
 export function useSaveOpportunity() {
   const queryClient = useQueryClient();
   return useMutation({

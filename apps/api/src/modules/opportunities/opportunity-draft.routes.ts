@@ -2,6 +2,7 @@ import { Router } from 'express';
 
 import { OpportunityDraftController } from './opportunity-draft.controller';
 
+import { aiRateLimiter } from '@/middlewares/ai-rate-limit.middleware';
 import { requireAuth } from '@/middlewares/require-auth.middleware';
 import { requirePermission } from '@/middlewares/require-permission.middleware';
 
@@ -13,12 +14,12 @@ export const opportunityDraftRouter = Router();
 opportunityDraftRouter.use(requireAuth);
 
 // Draft ingestion, listing, viewing, editing (faculty with create permission)
-opportunityDraftRouter.post('/ingest', requirePermission('opportunities.create'), controller.ingest);
+opportunityDraftRouter.post('/ingest', requirePermission('opportunities.create'), aiRateLimiter, controller.ingest);
 opportunityDraftRouter.get('/counts', requirePermission('opportunities.create'), controller.getCounts);
 opportunityDraftRouter.get('/', requirePermission('opportunities.create'), controller.list);
 opportunityDraftRouter.get('/:id', requirePermission('opportunities.create'), controller.getById);
 opportunityDraftRouter.patch('/:id', requirePermission('opportunities.create'), controller.update);
-opportunityDraftRouter.post('/:id/retry', requirePermission('opportunities.create'), controller.retry);
+opportunityDraftRouter.post('/:id/retry', requirePermission('opportunities.create'), aiRateLimiter, controller.retry);
 
 // Review decision endpoints (faculty with publish permission)
 opportunityDraftRouter.post('/:id/approve', requirePermission('opportunities.publish'), controller.approve);

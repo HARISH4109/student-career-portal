@@ -7,7 +7,7 @@ import { useAuth } from '@/features/auth/use-auth';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole?: RoleName;
+  requiredRole?: RoleName | RoleName[];
   requiredPermission?: string;
 }
 
@@ -42,17 +42,22 @@ export function ProtectedRoute({
   }
 
   // Role check
-  if (requiredRole && !user?.roles.includes(requiredRole)) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-slate-900">Access Denied</h1>
-          <p className="mt-2 text-slate-500">
-            You don&apos;t have the required role to access this page.
-          </p>
+  if (requiredRole) {
+    const hasRole = Array.isArray(requiredRole)
+      ? requiredRole.some((r) => user?.roles.includes(r))
+      : user?.roles.includes(requiredRole);
+    if (!hasRole) {
+      return (
+        <div className="flex min-h-screen items-center justify-center bg-slate-50">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-slate-900">Access Denied</h1>
+            <p className="mt-2 text-slate-500">
+              You don&apos;t have the required role to access this page.
+            </p>
+          </div>
         </div>
-      </div>
-    );
+      );
+    }
   }
 
   // Permission check

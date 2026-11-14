@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { useAuth } from '@/features/auth/use-auth';
 import {
   ArrowLeft,
+  Settings2,
   ArrowUpRight,
   BookOpen,
   CheckCircle,
@@ -132,7 +134,11 @@ export function CareerDetailPage() {
   const query = useCareerData<CareerPathDto>(`career-paths/${id}`);
   const start = useCareerAction<RoadmapDto>();
   const navigate = useNavigate();
-  const own = useHasPermission('roadmaps.manage_own');
+  const { user } = useAuth();
+  const isStudent = user?.roles?.includes('STUDENT');
+  const isStaff = user?.roles?.some((r: string) => r === 'ADMIN' || r === 'PLACEMENT_FACULTY');
+  const canManage = user?.permissions?.includes('career_paths.manage');
+  const own = isStudent && user?.permissions?.includes('roadmaps.manage_own');
   const skills = useCareerData<Array<{ id: string; name: string }>>('skills');
 
   return (
@@ -187,6 +193,21 @@ export function CareerDetailPage() {
                     <span>Analyze my skills</span>
                   </Link>
                 </div>
+              </div>
+            )}
+
+            {isStaff && (
+              <div className="pt-4 border-t border-slate-200/80 flex items-center justify-between">
+                <span className="text-xs font-semibold text-slate-500">Curriculum Preview</span>
+                {canManage && (
+                  <Link
+                    to="/dashboard/careers/manage"
+                    className="inline-flex items-center gap-2 rounded-xl bg-indigo-50 border border-indigo-200 px-4 py-2 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 transition"
+                  >
+                    <Settings2 className="h-4 w-4" />
+                    <span>Manage in Career Catalog</span>
+                  </Link>
+                )}
               </div>
             )}
           </div>
@@ -248,6 +269,9 @@ export function CareerDetailPage() {
 }
 
 export function RoadmapPage() {
+  const { user } = useAuth();
+  const isStudent = user?.roles?.includes('STUDENT');
+  const isStaff = user?.roles?.some((r: string) => r === 'ADMIN' || r === 'PLACEMENT_FACULTY');
   const query = useCareerData<RoadmapDto[]>('roadmaps/me');
   const action = useCareerAction<RoadmapDto>();
   const progress = useCareerAction<unknown>();
@@ -255,6 +279,25 @@ export function RoadmapPage() {
   const maps = query.data?.data ?? [];
   const map =
     maps.find((m) => m.id === selected) ?? maps.find((m) => m.status === 'active') ?? maps[0];
+
+  if (!isStudent && isStaff) {
+    return (
+      <Frame title="Roadmap Management">
+        <div className={`${card} py-12 text-center space-y-3`}>
+          <Compass className="mx-auto h-12 w-12 text-indigo-400" />
+          <h3 className="text-lg font-bold text-slate-800">Student Roadmap Tracker</h3>
+          <p className="text-slate-600 text-sm max-w-md mx-auto">
+            Interactive roadmap milestone tracking is student-specific. To author or review curriculum roadmaps for your academic programs, please visit Career Catalog Management.
+          </p>
+          <div className="pt-4">
+            <Link className={button} to="/dashboard/careers/manage">
+              Go to Career Catalog Management
+            </Link>
+          </div>
+        </div>
+      </Frame>
+    );
+  }
 
   return (
     <Frame title="My roadmap">
@@ -668,6 +711,9 @@ export function ResourcesPage() {
 }
 
 export function SkillGapPage() {
+  const { user } = useAuth();
+  const isStudent = user?.roles?.includes('STUDENT');
+  const isStaff = user?.roles?.some((r: string) => r === 'ADMIN' || r === 'PLACEMENT_FACULTY');
   const [params] = useSearchParams();
   const [career, setCareer] = useState(params.get('careerPathId') ?? '');
   const opportunityId = params.get('opportunityId');
@@ -678,6 +724,25 @@ export function SkillGapPage() {
   const snapshot = useCareerData<SkillGapDto>(historyId ? `skill-gap/${historyId}` : null);
   const action = useCareerAction<SkillGapDto>();
   const result = action.isPending ? undefined : historyId ? snapshot.data?.data : action.data;
+
+  if (!isStudent && isStaff) {
+    return (
+      <Frame title="Skill Gap Intelligence">
+        <div className={`${card} py-12 text-center space-y-3`}>
+          <Target className="mx-auto h-12 w-12 text-indigo-400" />
+          <h3 className="text-lg font-bold text-slate-800">Institutional Skill Analysis</h3>
+          <p className="text-slate-600 text-sm max-w-md mx-auto">
+            Individual skill gap analysis evaluates enrolled student self-assessments. To inspect department-wide skill proficiencies and batch readiness, view the Analytics portal.
+          </p>
+          <div className="pt-4">
+            <Link className={button} to="/dashboard/analytics">
+              View Institutional Analytics
+            </Link>
+          </div>
+        </div>
+      </Frame>
+    );
+  }
 
   return (
     <Frame title="Understand your skill gaps">

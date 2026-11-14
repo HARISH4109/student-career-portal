@@ -8,6 +8,7 @@ import axios from 'axios';
 
 import { env } from '@/config/env';
 import { logger } from '@/infrastructure/logger';
+import { aiJobLogger } from '@/modules/audit/ai-job-logger';
 
 export class ResumeAiService {
   private readonly client = axios.create({
@@ -58,7 +59,17 @@ export class ResumeAiService {
         };
       }
     } catch (error) {
+      const errMsg = error instanceof Error ? error.message : 'AI service unavailable or error during resume analysis';
       logger.warn({ err: error, resumeId }, 'AI service unavailable or error during resume analysis — using local fallback');
+      void aiJobLogger.logFailure({
+        serviceName: 'FastAPI AI Microservice (/v1/resume/analyze)',
+        taskType: 'resume_analysis',
+        modelUsed: 'llama-3.3-70b / fast-api',
+        status: 'fallback',
+        errorMessage: errMsg,
+        payloadPreview: content.summary ? `Resume: ${content.fullName} | ${content.summary.slice(0, 200)}` : `Resume ID: ${resumeId}`,
+        metadata: { resumeId, fallback: 'localDeterministicAnalyzer' },
+      });
     }
 
     // Local deterministic fallback analyzer
@@ -84,7 +95,17 @@ export class ResumeAiService {
         return response.data.data;
       }
     } catch (error) {
+      const errMsg = error instanceof Error ? error.message : 'AI service unavailable for text enhancement';
       logger.warn({ err: error }, 'AI service unavailable for text enhancement — using fallback');
+      void aiJobLogger.logFailure({
+        serviceName: 'FastAPI AI Microservice (/v1/resume/enhance-text)',
+        taskType: 'resume_enhancement',
+        modelUsed: 'llama-3.3-70b / fast-api',
+        status: 'fallback',
+        errorMessage: errMsg,
+        payloadPreview: text.slice(0, 200),
+        metadata: { sectionType, fallback: 'punctuationCleanup' },
+      });
     }
 
     // Fallback enhancement
@@ -122,7 +143,17 @@ export class ResumeAiService {
         return response.data.data;
       }
     } catch (error) {
+      const errMsg = error instanceof Error ? error.message : 'AI service unavailable for opportunity matching';
       logger.warn({ err: error }, 'AI service unavailable for opportunity matching — using local fallback');
+      void aiJobLogger.logFailure({
+        serviceName: 'FastAPI AI Microservice (/v1/resume/match-opportunity)',
+        taskType: 'resume_match',
+        modelUsed: 'llama-3.3-70b / fast-api',
+        status: 'fallback',
+        errorMessage: errMsg,
+        payloadPreview: `Skills: ${opportunitySkills.join(', ')}`,
+        metadata: { fallback: 'localJaccardMatcher' },
+      });
     }
 
     return this.fallbackMatch(resumeContent, opportunitySkills, eligibilityContext);

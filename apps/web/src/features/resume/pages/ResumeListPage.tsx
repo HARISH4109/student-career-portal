@@ -162,12 +162,14 @@ export function ResumeListPage(): React.JSX.Element {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8">
+    <div className="space-y-6 max-w-6xl mx-auto pb-12">
       {/* ── Page Header ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 pb-5">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">My Resumes</h1>
-          <p className="text-sm text-slate-500 mt-1">
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+            <FileText className="h-6 w-6 text-indigo-600" /> My Resumes
+          </h1>
+          <p className="mt-1 text-sm text-slate-500">
             Build, upload, and optimize tailored resume versions with AI scoring for placement applications
           </p>
         </div>
@@ -181,37 +183,41 @@ export function ResumeListPage(): React.JSX.Element {
               setUploadError(null);
               setShowUploadModal(true);
             }}
-            className="inline-flex items-center gap-2 rounded-xl border border-purple-200 bg-purple-50 px-4 py-2.5 text-sm font-semibold text-purple-700 shadow-sm hover:bg-purple-100 transition"
+            className="inline-flex items-center gap-2 rounded-xl border border-purple-200 bg-purple-50 px-4 py-2 text-sm font-semibold text-purple-700 shadow-sm hover:bg-purple-100 transition"
           >
             <Upload className="h-4 w-4" />
-            Upload Resume
+            <span>Upload Resume</span>
           </button>
 
           <Link
             to="/dashboard/resumes/new"
-            className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 transition"
+            className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 transition"
           >
             <Plus className="h-4 w-4" />
-            Create Resume
+            <span>Create Resume</span>
           </Link>
         </div>
       </div>
 
       {/* ── Separation Filter Tabs ── */}
-      <div className="flex flex-wrap items-center gap-2">
+      <nav
+        aria-label="Resume categories"
+        className="flex flex-wrap items-center gap-1.5 rounded-2xl border border-slate-200/80 bg-white p-1.5 shadow-sm"
+      >
         <button
           type="button"
           onClick={() => setActiveTab('all')}
-          className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition ${
+          className={`inline-flex min-h-10 items-center gap-2 rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-all ${
             activeTab === 'all'
-              ? 'bg-slate-900 text-white shadow-sm'
-              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
+              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
           }`}
         >
-          All Resumes
+          <FileText className="h-4 w-4 shrink-0" />
+          <span>All Resumes</span>
           <span
-            className={`rounded-full px-2 py-0.5 text-[10px] ${
-              activeTab === 'all' ? 'bg-slate-700 text-slate-200' : 'bg-white text-slate-600'
+            className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+              activeTab === 'all' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700'
             }`}
           >
             {resumes?.length || 0}
@@ -221,17 +227,17 @@ export function ResumeListPage(): React.JSX.Element {
         <button
           type="button"
           onClick={() => setActiveTab('builder')}
-          className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition ${
+          className={`inline-flex min-h-10 items-center gap-2 rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-all ${
             activeTab === 'builder'
-              ? 'bg-blue-600 text-white shadow-sm'
-              : 'bg-blue-50/60 text-blue-700 hover:bg-blue-100/70 border border-blue-100'
+              ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
+              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
           }`}
         >
-          <Sparkles className="h-3.5 w-3.5" />
-          Builder Created
+          <Sparkles className="h-4 w-4 shrink-0" />
+          <span>Builder Created</span>
           <span
-            className={`rounded-full px-2 py-0.5 text-[10px] ${
-              activeTab === 'builder' ? 'bg-blue-500 text-blue-100' : 'bg-white text-blue-700'
+            className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+              activeTab === 'builder' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700'
             }`}
           >
             {builderResumes.length}
@@ -241,23 +247,23 @@ export function ResumeListPage(): React.JSX.Element {
         <button
           type="button"
           onClick={() => setActiveTab('uploaded')}
-          className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition ${
+          className={`inline-flex min-h-10 items-center gap-2 rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-all ${
             activeTab === 'uploaded'
-              ? 'bg-purple-600 text-white shadow-sm'
-              : 'bg-purple-50/60 text-purple-700 hover:bg-purple-100/70 border border-purple-100'
+              ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
+              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
           }`}
         >
-          <Upload className="h-3.5 w-3.5" />
-          Uploaded Resumes
+          <Upload className="h-4 w-4 shrink-0" />
+          <span>Uploaded Resumes</span>
           <span
-            className={`rounded-full px-2 py-0.5 text-[10px] ${
-              activeTab === 'uploaded' ? 'bg-purple-500 text-purple-100' : 'bg-white text-purple-700'
+            className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+              activeTab === 'uploaded' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700'
             }`}
           >
             {uploadedResumes.length}
           </span>
         </button>
-      </div>
+      </nav>
 
       {/* Error Alert */}
       {errorMessage && (

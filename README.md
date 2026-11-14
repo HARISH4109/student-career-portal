@@ -1,6 +1,6 @@
 # AI-Powered Student Career Success Portal
 
-Current implementation and verification status: [Phase 6 report](docs/PHASE-6-STATUS.md).
+Current implementation and verification status: [Phase 8 report](docs/PHASE-8-STATUS.md).
 
 Enterprise placement management platform for a single institution: student profiles and
 resumes, job/internship postings with AI-assisted extraction, application tracking, mock

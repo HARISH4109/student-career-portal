@@ -18,6 +18,7 @@ export function OpportunitiesPage(): React.JSX.Element {
   const isFaculty = useHasRole('PLACEMENT_FACULTY');
   const isAdmin = useHasRole('ADMIN');
 
+
   const [filters, setFilters] = useState<Partial<OpportunityListQuery>>({
     page: 1,
     pageSize: 20,
@@ -48,24 +49,26 @@ export function OpportunitiesPage(): React.JSX.Element {
   const meta = data?.meta;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-6xl mx-auto pb-12">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 pb-5">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Opportunities</h1>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+            <Briefcase className="h-6 w-6 text-blue-600" /> Opportunities
+          </h1>
           <p className="mt-1 text-sm text-slate-500">
             {isStudent
-              ? 'Browse and apply to available job and internship opportunities'
-              : 'Manage placement opportunities'}
+              ? 'Browse and apply to available campus job and internship opportunities'
+              : 'Browse active placement drives and campus opportunities'}
           </p>
         </div>
         {(isFaculty || isAdmin) && (
           <button
             onClick={() => { void (navigate('/dashboard/opportunities/manage')); }}
-            className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-700 hover:shadow-md"
+            className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-700"
           >
             <Briefcase className="h-4 w-4" />
-            Manage Opportunities
+            <span>Manage Opportunities</span>
           </button>
         )}
       </div>

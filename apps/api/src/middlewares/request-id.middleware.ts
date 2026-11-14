@@ -2,6 +2,8 @@ import crypto from 'node:crypto';
 
 import type { NextFunction, Request, Response } from 'express';
 
+import { requestContextStorage } from '@/shared/context/request-context';
+
 /**
  * Assigns a unique request ID to every incoming request for structured
  * log correlation across the entire request lifecycle.
@@ -12,6 +14,7 @@ import type { NextFunction, Request, Response } from 'express';
  * - Otherwise, generate a random UUID v4.
  * - Attach to `req.id` (for downstream middleware / pino-http) and echo
  *   back via the `X-Request-Id` response header (for client debugging).
+ * - Establishes AsyncLocalStorage context for automatic audit & log correlation.
  */
 export function requestId(req: Request, res: Response, next: NextFunction): void {
   const id =
@@ -24,5 +27,28 @@ export function requestId(req: Request, res: Response, next: NextFunction): void
   // Echo back so clients / load balancers can correlate
   res.setHeader('X-Request-Id', id);
 
-  next();
+  const ipAddress =
+    req.ip ||
+    (typeof req.headers['x-forwarded-for'] === 'string' ? req.headers['x-forwarded-for'] : undefined);
+
+  const userAgent =
+    typeof req.headers['user-agent'] === 'string' ? req.headers['user-agent'] : undefined;
+
+  const origin =
+    (typeof req.headers['origin'] === 'string' && req.headers['origin']) ||
+    (typeof req.headers['referer'] === 'string' && req.headers['referer']) ||
+    (typeof req.headers['host'] === 'string' && req.headers['host']) ||
+    undefined;
+
+  requestContextStorage.run(
+    {
+      requestId: id,
+      ipAddress,
+      userAgent,
+      origin,
+    },
+    () => {
+      next();
+    },
+  );
 }

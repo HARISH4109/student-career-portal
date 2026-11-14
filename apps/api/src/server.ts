@@ -5,32 +5,27 @@ import { Server as SocketIOServer } from 'socket.io';
 
 import { createApp } from '@/app';
 import { env } from '@/config/env';
+import { cronManager } from '@/infrastructure/cron';
 import { logger } from '@/infrastructure/logger';
+import { initSocketServer } from '@/infrastructure/socket';
 
 const app = createApp();
 const httpServer = createServer(app);
 
-// Socket.io instance is created here at the composition root and will be
-// injected into modules that need real-time push (Notifications, Notice
-// Board) once those are built in Phase 5 — never instantiated ad-hoc inside
-// a service.
 export const io = new SocketIOServer(httpServer, {
   cors: { origin: env.CORS_ALLOWED_ORIGINS, credentials: true },
 });
 
-io.on('connection', (socket) => {
-  logger.debug({ socketId: socket.id }, 'Socket connected');
-  socket.on('disconnect', () => {
-    logger.debug({ socketId: socket.id }, 'Socket disconnected');
-  });
-});
+initSocketServer(io);
 
 httpServer.listen(env.API_PORT, () => {
   logger.info(`🚀 API listening on port ${String(env.API_PORT)} [${env.NODE_ENV}]`);
+  cronManager.startAll();
 });
 
 function gracefulShutdown(signal: string): void {
   logger.info(`${signal} received — shutting down gracefully`);
+  cronManager.stopAll();
   httpServer.close(() => {
     logger.info('HTTP server closed');
     process.exit(0);

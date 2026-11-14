@@ -1,12 +1,18 @@
 import { Router } from 'express';
 
 import { academicRouter } from '@/modules/academic/academic.routes';
+import { analyticsRouter } from '@/modules/analytics/analytics.routes';
 import { applicationsRouter } from '@/modules/applications/application.routes';
+import { auditRouter } from '@/modules/audit/audit.routes';
+import { careerPathsRouter, resourcesRouter, roadmapsRouter, skillGapRouter } from '@/modules/career/career.routes';
 import { companiesRouter } from '@/modules/companies/company.routes';
-import { careerPathsRouter, roadmapsRouter, resourcesRouter, skillGapRouter } from '@/modules/career/career.routes';
-import { healthRouter } from '@/modules/health/health.routes';
+import { healthController, healthRouter } from '@/modules/health/health.routes';
 import { authRouter } from '@/modules/identity/auth/auth.routes';
 import { userManagementRouter } from '@/modules/identity/user-management/user-management.routes';
+import { requireAuth } from '@/middlewares/require-auth.middleware';
+import { requireRole } from '@/middlewares/require-role.middleware';
+import { noticesRouter } from '@/modules/notices/notices.routes';
+import { notificationsRouter } from '@/modules/notifications/notifications.routes';
 import { opportunityDraftRouter } from '@/modules/opportunities/opportunity-draft.routes';
 import { opportunitiesRouter } from '@/modules/opportunities/opportunity.routes';
 import {
@@ -31,6 +37,8 @@ export const apiRouter = Router();
 apiRouter.use('/health', healthRouter);
 apiRouter.use('/auth', authRouter);
 apiRouter.use('/admin/users', userManagementRouter);
+apiRouter.use('/admin/audit-logs', auditRouter);
+apiRouter.use('/admin/health', requireAuth, requireRole('ADMIN'), healthController.checkDetailed);
 apiRouter.use('/academic', academicRouter);
 apiRouter.use('/skills', skillsRouter);
 apiRouter.use('/students', studentRouter);
@@ -48,4 +56,8 @@ apiRouter.use('/career-paths', careerPathsRouter);
 apiRouter.use('/roadmaps', roadmapsRouter);
 apiRouter.use('/resources', resourcesRouter);
 apiRouter.use('/skill-gap', skillGapRouter);
+apiRouter.use('/notices', noticesRouter);
+apiRouter.use('/notifications', notificationsRouter);
+apiRouter.use('/analytics', analyticsRouter);
+
 

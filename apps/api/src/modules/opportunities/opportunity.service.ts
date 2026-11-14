@@ -16,6 +16,8 @@ import { OpportunityRepository } from './opportunity.repository';
 import { validateCompensation } from './validate-compensation';
 
 import { CompanyService } from '@/modules/companies/company.service';
+import { NotificationsService } from '@/modules/notifications/notifications.service';
+import { auditService } from '@/modules/audit/audit.service';
 import { ForbiddenError, NotFoundError, ValidationError } from '@/shared/errors/app-error';
 
 /** Valid status transitions for the opportunity lifecycle */
@@ -34,7 +36,8 @@ export class OpportunityService {
     private readonly companyService: CompanyService = new CompanyService(),
     private readonly eligibilityService: EligibilityService = new EligibilityService(),
     private readonly duplicateService: DuplicateDetectionService = new DuplicateDetectionService(),
-  ) {}
+    private readonly notificationsService: NotificationsService = new NotificationsService(),
+  ) { }
 
   async create(
     dto: CreateOpportunityDto,
@@ -52,47 +55,56 @@ export class OpportunityService {
     }
 
     return this.oppRepo.transaction(async (repository) => {
-    const opportunity = await repository.create({
-      companyId,
-      title: dto.title,
-      type: dto.type,
-      description: dto.description,
-      workMode: dto.workMode,
-      location: dto.location ?? null,
-      salaryMin: dto.salaryMin != null ? String(dto.salaryMin) : null,
-      salaryMax: dto.salaryMax != null ? String(dto.salaryMax) : null,
-      applicationDeadline: dto.applicationDeadline ? new Date(dto.applicationDeadline) : null,
-      applyUrl: dto.applyUrl ?? null,
-      applicationEmail: dto.applicationEmail ?? null,
-      status: 'draft',
-      postedBy: user.id,
-    });
+      const opportunity = await repository.create({
+        companyId,
+        title: dto.title,
+        type: dto.type,
+        description: dto.description,
+        workMode: dto.workMode,
+        location: dto.location ?? null,
+        salaryMin: dto.salaryMin != null ? String(dto.salaryMin) : null,
+        salaryMax: dto.salaryMax != null ? String(dto.salaryMax) : null,
+        applicationDeadline: dto.applicationDeadline ? new Date(dto.applicationDeadline) : null,
+        applyUrl: dto.applyUrl ?? null,
+        applicationEmail: dto.applicationEmail ?? null,
+        status: 'draft',
+        postedBy: user.id,
+      });
 
-    if (!opportunity) {
-      throw new Error('Failed to create opportunity');
-    }
+      if (!opportunity) {
+        throw new Error('Failed to create opportunity');
+      }
 
-    // Add eligibility criteria
-    if (dto.eligibility.length > 0) {
-      await repository.addEligibility(
-        opportunity.id,
-        dto.eligibility.map((e) => ({
-          departmentId: e.departmentId ?? null,
-          programId: e.programId ?? null,
-          batchId: e.batchId ?? null,
-          minCgpa: e.minCgpa != null ? String(e.minCgpa) : null,
-        })),
-      );
-    }
+      // Add eligibility criteria
+      if (dto.eligibility.length > 0) {
+        await repository.addEligibility(
+          opportunity.id,
+          dto.eligibility.map((e) => ({
+            departmentId: e.departmentId ?? null,
+            programId: e.programId ?? null,
+            batchId: e.batchId ?? null,
+            minCgpa: e.minCgpa != null ? String(e.minCgpa) : null,
+          })),
+        );
+      }
 
-    // Add required skills
-    if (dto.skills.length > 0) {
-      await repository.addSkills(opportunity.id, dto.skills);
-    }
+      // Add required skills
+      if (dto.skills.length > 0) {
+        await repository.addSkills(opportunity.id, dto.skills);
+      }
 
-    const full = await repository.findById(opportunity.id);
-    if (!full) throw new NotFoundError('Opportunity');
-    return this.mapToResponse(full);
+      const full = await repository.findById(opportunity.id);
+      if (!full) throw new NotFoundError('Opportunity');
+
+      void auditService.log({
+        userId: user.id,
+        action: 'opportunity.created',
+        entityType: 'opportunity',
+        entityId: opportunity.id,
+        metadata: { title: full.title, companyId: full.companyId },
+      });
+
+      return this.mapToResponse(full);
     });
   }
 
@@ -131,43 +143,52 @@ export class OpportunityService {
     }
 
     return this.oppRepo.transaction(async (repository) => {
-    await repository.update(id, {
-      ...(companyId ? { companyId } : {}),
-      ...(dto.title ? { title: dto.title } : {}),
-      ...(dto.type ? { type: dto.type } : {}),
-      ...(dto.description ? { description: dto.description } : {}),
-      ...(dto.workMode ? { workMode: dto.workMode } : {}),
-      ...(dto.location !== undefined ? { location: dto.location ?? null } : {}),
-      ...(dto.salaryMin !== undefined ? { salaryMin: dto.salaryMin != null ? String(dto.salaryMin) : null } : {}),
-      ...(dto.salaryMax !== undefined ? { salaryMax: dto.salaryMax != null ? String(dto.salaryMax) : null } : {}),
-      ...(dto.applicationDeadline !== undefined
-        ? { applicationDeadline: dto.applicationDeadline ? new Date(dto.applicationDeadline) : null }
-        : {}),
-      ...(dto.applyUrl !== undefined ? { applyUrl: dto.applyUrl ?? null } : {}),
-      ...(dto.applicationEmail !== undefined ? { applicationEmail: dto.applicationEmail ?? null } : {}),
-    });
+      await repository.update(id, {
+        ...(companyId ? { companyId } : {}),
+        ...(dto.title ? { title: dto.title } : {}),
+        ...(dto.type ? { type: dto.type } : {}),
+        ...(dto.description ? { description: dto.description } : {}),
+        ...(dto.workMode ? { workMode: dto.workMode } : {}),
+        ...(dto.location !== undefined ? { location: dto.location ?? null } : {}),
+        ...(dto.salaryMin !== undefined ? { salaryMin: dto.salaryMin != null ? String(dto.salaryMin) : null } : {}),
+        ...(dto.salaryMax !== undefined ? { salaryMax: dto.salaryMax != null ? String(dto.salaryMax) : null } : {}),
+        ...(dto.applicationDeadline !== undefined
+          ? { applicationDeadline: dto.applicationDeadline ? new Date(dto.applicationDeadline) : null }
+          : {}),
+        ...(dto.applyUrl !== undefined ? { applyUrl: dto.applyUrl ?? null } : {}),
+        ...(dto.applicationEmail !== undefined ? { applicationEmail: dto.applicationEmail ?? null } : {}),
+      });
 
-    // Replace eligibility if provided
-    if (dto.eligibility !== undefined) {
-      await repository.replaceEligibility(
-        id,
-        dto.eligibility.map((e) => ({
-          departmentId: e.departmentId ?? null,
-          programId: e.programId ?? null,
-          batchId: e.batchId ?? null,
-          minCgpa: e.minCgpa != null ? String(e.minCgpa) : null,
-        })),
-      );
-    }
+      // Replace eligibility if provided
+      if (dto.eligibility !== undefined) {
+        await repository.replaceEligibility(
+          id,
+          dto.eligibility.map((e) => ({
+            departmentId: e.departmentId ?? null,
+            programId: e.programId ?? null,
+            batchId: e.batchId ?? null,
+            minCgpa: e.minCgpa != null ? String(e.minCgpa) : null,
+          })),
+        );
+      }
 
-    // Replace skills if provided
-    if (dto.skills !== undefined) {
-      await repository.replaceSkills(id, dto.skills);
-    }
+      // Replace skills if provided
+      if (dto.skills !== undefined) {
+        await repository.replaceSkills(id, dto.skills);
+      }
 
-    const full = await repository.findById(id);
-    if (!full) throw new NotFoundError('Opportunity');
-    return this.mapToResponse(full);
+      const full = await repository.findById(id);
+      if (!full) throw new NotFoundError('Opportunity');
+
+      void auditService.log({
+        userId: user.id,
+        action: 'opportunity.updated',
+        entityType: 'opportunity',
+        entityId: id,
+        metadata: { title: full.title },
+      });
+
+      return this.mapToResponse(full);
     });
   }
 
@@ -207,6 +228,30 @@ export class OpportunityService {
     await this.oppRepo.updateStatus(id, dto.status);
     const full = await this.oppRepo.findById(id);
     if (!full) throw new NotFoundError('Opportunity');
+
+    await auditService.log({
+      userId: user.id,
+      action: dto.status === 'published' ? 'opportunity.published' : dto.status === 'rejected' ? 'opportunity.rejected' : 'opportunity.status_changed',
+      entityType: 'opportunity',
+      entityId: id,
+      metadata: { previousStatus: existing.status, newStatus: dto.status, title: full.title },
+    });
+
+    if (dto.status === 'published') {
+      void (async () => {
+        try {
+          const students = await db.select({ userId: schema.studentProfiles.userId }).from(schema.studentProfiles);
+          await this.notificationsService.notifyNewOpportunity({
+            opportunityId: id,
+            title: full.title,
+            companyName: full.company?.name ?? 'A Company',
+            targetUserIds: students.map((s) => s.userId),
+          });
+        } catch {
+          // non-blocking
+        }
+      })();
+    }
     return this.mapToResponse(full);
   }
 
@@ -290,12 +335,12 @@ export class OpportunityService {
       closingSoon: query.closingSoon,
       studentProfile: studentProfile
         ? {
-            id: studentProfile.id,
-            departmentId: studentProfile.departmentId,
-            programId: studentProfile.programId,
-            batchId: studentProfile.batchId,
-            cgpa: studentProfile.cgpa,
-          }
+          id: studentProfile.id,
+          departmentId: studentProfile.departmentId,
+          programId: studentProfile.programId,
+          batchId: studentProfile.batchId,
+          cgpa: studentProfile.cgpa,
+        }
         : null,
       eligibleOnly: query.eligibleOnly,
     };
@@ -406,15 +451,15 @@ export class OpportunityService {
       id: opp.id,
       companyId: opp.companyId,
       company: {
-            id: opp.company.id,
-            name: opp.company.name,
-            logoUrl: opp.company.logoUrl ?? null,
-            website: opp.company.website ?? null,
-            industry: opp.company.industry ?? null,
-            description: opp.company.description ?? null,
-            createdAt: opp.company.createdAt,
-            updatedAt: opp.company.updatedAt,
-          },
+        id: opp.company.id,
+        name: opp.company.name,
+        logoUrl: opp.company.logoUrl ?? null,
+        website: opp.company.website ?? null,
+        industry: opp.company.industry ?? null,
+        description: opp.company.description ?? null,
+        createdAt: opp.company.createdAt,
+        updatedAt: opp.company.updatedAt,
+      },
       title: opp.title,
       type: opp.type,
       description: opp.description,

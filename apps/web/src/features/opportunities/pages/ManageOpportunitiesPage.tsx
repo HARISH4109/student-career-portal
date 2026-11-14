@@ -1,6 +1,7 @@
 import type { OpportunityListQuery, OpportunityResponseDto } from '@career-portal/shared-types';
 import {
   ArrowLeft,
+  Briefcase,
   CheckCircle,
   Eye,
   Loader2,
@@ -103,27 +104,30 @@ export function ManageOpportunitiesPage(): React.JSX.Element {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-6xl mx-auto pb-12">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 pb-5">
         <div className="flex items-center gap-3">
           <button
             onClick={() => { void (navigate('/dashboard/opportunities')); }}
-            className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+            className="rounded-xl p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+            title="Back to Opportunities"
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Manage Opportunities</h1>
-            <p className="mt-1 text-sm text-slate-500">Create, edit, and publish placement opportunities</p>
+            <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+              <Briefcase className="h-6 w-6 text-blue-600" /> Manage Opportunities
+            </h1>
+            <p className="mt-1 text-sm text-slate-500">Create, edit, and publish campus placement opportunities</p>
           </div>
         </div>
         <button
           onClick={() => { setShowCreateForm(true); }}
-          className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-700 hover:shadow-md"
+          className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-700"
         >
           <Plus className="h-4 w-4" />
-          Create Opportunity
+          <span>Create Opportunity</span>
         </button>
       </div>
 
@@ -147,37 +151,45 @@ export function ManageOpportunitiesPage(): React.JSX.Element {
       )}
 
       {/* Main Tabs: Published Opportunities vs AI Ingestion Queue */}
-      <div className="flex border-b border-slate-200 gap-6">
+      <nav
+        aria-label="Manage opportunities sections"
+        className="flex flex-wrap items-center gap-1.5 rounded-2xl border border-slate-200/80 bg-white p-1.5 shadow-sm"
+      >
         <button
           type="button"
           onClick={() => { setMainTab('published'); }}
-          className={`flex items-center gap-2 pb-3 text-sm font-semibold border-b-2 transition ${
+          className={`inline-flex min-h-10 items-center gap-2 rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-all ${
             mainTab === 'published'
-              ? 'border-blue-600 text-blue-600'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
+              ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
+              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
           }`}
         >
-          Published & Direct Opportunities
+          <Briefcase className="h-4 w-4 shrink-0" />
+          <span>Published & Direct Opportunities</span>
         </button>
 
         <button
           type="button"
           onClick={() => { setMainTab('drafts'); }}
-          className={`flex items-center gap-2 pb-3 text-sm font-semibold border-b-2 transition ${
+          className={`inline-flex min-h-10 items-center gap-2 rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-all ${
             mainTab === 'drafts'
-              ? 'border-indigo-600 text-indigo-600'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
+              ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
+              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
           }`}
         >
-          <Sparkles className="h-4 w-4" />
-          AI Agent Extraction & Ingestion
+          <Sparkles className="h-4 w-4 shrink-0" />
+          <span>AI Agent Extraction & Ingestion</span>
           {pendingDraftsCount > 0 && (
-            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-800">
+            <span
+              className={`rounded-full px-2 py-0.5 text-xs font-bold ${
+                mainTab === 'drafts' ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-800'
+              }`}
+            >
               {pendingDraftsCount} pending
             </span>
           )}
         </button>
-      </div>
+      </nav>
 
       {mainTab === 'drafts' ? (
         <DraftReviewQueue />

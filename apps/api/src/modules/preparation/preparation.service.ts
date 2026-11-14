@@ -28,6 +28,8 @@ import type {
 } from '@career-portal/shared-types';
 
 import { evaluateInterviewAnswers } from './interview-evaluator';
+import { NotificationsService } from '@/modules/notifications/notifications.service';
+import { auditService } from '@/modules/audit/audit.service';
 import { PreparationRepository } from './preparation.repository';
 
 import {
@@ -38,7 +40,10 @@ import {
 } from '@/shared/errors/app-error';
 
 export class PreparationService {
-  constructor(private readonly repo: PreparationRepository = new PreparationRepository()) {}
+  constructor(
+    private readonly repo: PreparationRepository = new PreparationRepository(),
+    private readonly notificationsService: NotificationsService = new NotificationsService(),
+  ) {}
 
   private async getStudentProfile(userId: string) {
     const profile = await this.repo.findStudentProfileByUserId(userId);
@@ -60,6 +65,14 @@ export class PreparationService {
       passingMarks: dto.passingMarks,
       createdBy: userId,
       isActive: dto.isActive,
+    });
+
+    void auditService.log({
+      userId,
+      action: 'test.created',
+      entityType: 'mock_test',
+      entityId: test.id,
+      metadata: { title: test.title, category: test.category },
     });
 
     return {
@@ -581,6 +594,21 @@ export class PreparationService {
       gradedAnswers,
     });
 
+    void this.notificationsService.notifyTestResultReady({
+      studentUserId: userId,
+      testTitle: attempt.test.title,
+      score: totalMarks > 0 ? Math.round((totalScore / totalMarks) * 100) : totalScore,
+      attemptId,
+    });
+
+    void auditService.log({
+      userId,
+      action: 'test.attempt_submitted',
+      entityType: 'mock_test_attempt',
+      entityId: attemptId,
+      metadata: { score: totalScore, totalMarks, isPassed },
+    });
+
     const topicAccuracies: TopicAccuracyDto[] = Array.from(topicStatsMap.entries()).map(([topic, stat]) => ({
       topic,
       totalQuestions: stat.total,
@@ -852,6 +880,14 @@ export class PreparationService {
     });
 
     if (!updated) throw new Error('Failed to update mock interview');
+
+    void auditService.log({
+      userId,
+      action: 'interview.ai_evaluated',
+      entityType: 'mock_interview',
+      entityId: interviewId,
+      metadata: { targetRole: updated.targetRole, overallScore },
+    });
 
     return {
       id: updated.id,

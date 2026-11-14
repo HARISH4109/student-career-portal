@@ -25,7 +25,9 @@
     "format": "prettier --write .",
     "test": "npm run test -w apps/api && npm run test -w apps/web",
     "prepare": "husky install",
-    "test:smoke": "node scripts/production-smoke.cjs"
+    "test:smoke": "node scripts/production-smoke.cjs",
+    "test:e2e": "node scripts/verify-portal.cjs",
+    "verify": "node scripts/verify-portal.cjs"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.8",

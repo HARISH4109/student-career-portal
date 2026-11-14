@@ -45,6 +45,7 @@ async def validation_exception_handler(
 
 
 app.include_router(health_router, prefix="/v1")
+app.include_router(health_router)
 app.include_router(resume_router, prefix="/v1")
 
 # Phase 3+: app.include_router(job_extraction_router, prefix="/v1/jobs")

@@ -8,6 +8,7 @@ import type { NextFunction, Request, Response } from 'express';
 import type { UserManagementService } from './user-management.service';
 
 import { ValidationError } from '@/shared/errors/app-error';
+import { requestUser } from '@/shared/http/request-user';
 import { sendSuccess } from '@/shared/http/send-success';
 
 /**
@@ -56,7 +57,13 @@ export class UserManagementController {
       if (!parsed.success) {
         throw new ValidationError('Invalid role assignment data');
       }
-      await this.userManagementService.assignRole(parsed.data);
+      const actor = req.user ? requestUser(req) : undefined;
+      const ctx = {
+        requestId: (req as Request & { id?: string }).id,
+        ipAddress: req.ip,
+        userAgent: typeof req.headers['user-agent'] === 'string' ? req.headers['user-agent'] : undefined,
+      };
+      await this.userManagementService.assignRole(parsed.data, actor?.id, ctx);
       sendSuccess(res, { message: 'Role assigned successfully' }, 201);
     } catch (error) {
       next(error);
@@ -67,7 +74,13 @@ export class UserManagementController {
     try {
       const userId = String(req.params.id);
       const roleName = String(req.params.role) as RoleName;
-      await this.userManagementService.revokeRole(userId, roleName);
+      const actor = req.user ? requestUser(req) : undefined;
+      const ctx = {
+        requestId: (req as Request & { id?: string }).id,
+        ipAddress: req.ip,
+        userAgent: typeof req.headers['user-agent'] === 'string' ? req.headers['user-agent'] : undefined,
+      };
+      await this.userManagementService.revokeRole(userId, roleName, actor?.id, ctx);
       sendSuccess(res, { message: 'Role revoked successfully' });
     } catch (error) {
       next(error);
@@ -77,7 +90,13 @@ export class UserManagementController {
   activateUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const id = String(req.params.id);
-      await this.userManagementService.activateUser(id);
+      const actor = req.user ? requestUser(req) : undefined;
+      const ctx = {
+        requestId: (req as Request & { id?: string }).id,
+        ipAddress: req.ip,
+        userAgent: typeof req.headers['user-agent'] === 'string' ? req.headers['user-agent'] : undefined,
+      };
+      await this.userManagementService.activateUser(id, actor?.id, ctx);
       sendSuccess(res, { message: 'User activated successfully' });
     } catch (error) {
       next(error);
@@ -87,7 +106,13 @@ export class UserManagementController {
   deactivateUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const id = String(req.params.id);
-      await this.userManagementService.deactivateUser(id);
+      const actor = req.user ? requestUser(req) : undefined;
+      const ctx = {
+        requestId: (req as Request & { id?: string }).id,
+        ipAddress: req.ip,
+        userAgent: typeof req.headers['user-agent'] === 'string' ? req.headers['user-agent'] : undefined,
+      };
+      await this.userManagementService.deactivateUser(id, actor?.id, ctx);
       sendSuccess(res, { message: 'User deactivated successfully' });
     } catch (error) {
       next(error);

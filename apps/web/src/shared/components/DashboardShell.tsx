@@ -1,6 +1,8 @@
 import type { RoleName } from '@career-portal/shared-types';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
+  BarChart3,
+  Bell,
   BookOpen,
   Briefcase,
   ChevronDown,
@@ -12,6 +14,7 @@ import {
   Menu,
   Route,
   Settings2,
+  Shield,
   Target,
   User,
   X,
@@ -20,6 +23,7 @@ import { useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router';
 
 import { useAuth } from '@/features/auth/use-auth';
+import { NotificationBell } from '@/features/engagement/components/NotificationBell';
 
 interface NavItem {
   label: string;
@@ -62,6 +66,12 @@ const NAV_ITEMS: NavItem[] = [
     permission: 'career_paths.manage',
   },
   {
+    label: 'Academic Programs',
+    path: '/dashboard/programs',
+    icon: <GraduationCap className="h-5 w-5" />,
+    roles: ['ADMIN'],
+  },
+  {
     label: 'Applications',
     path: '/dashboard/applications',
     icon: <FileText className="h-5 w-5" />,
@@ -93,6 +103,23 @@ const NAV_ITEMS: NavItem[] = [
     icon: <Target className="h-5 w-5" />,
     roles: ['STUDENT'],
     permission: 'skill_gap.analyze_own',
+  },
+  {
+    label: 'Notice Board',
+    path: '/dashboard/notices',
+    icon: <Bell className="h-5 w-5" />,
+    permission: 'notices.view',
+  },
+  {
+    label: 'Analytics',
+    path: '/dashboard/analytics',
+    icon: <BarChart3 className="h-5 w-5" />,
+  },
+  {
+    label: 'Administration',
+    path: '/dashboard/admin',
+    icon: <Shield className="h-5 w-5" />,
+    roles: ['ADMIN'],
   },
 ];
 
@@ -273,8 +300,12 @@ export function DashboardShell(): React.JSX.Element {
 
           <div className="hidden lg:block" />
 
-          {/* User menu */}
-          <div className="relative z-50">
+          {/* Right actions: Notifications & User menu */}
+          <div className="flex items-center gap-3">
+            <NotificationBell />
+
+            {/* User menu */}
+            <div className="relative z-50">
             <button
               onClick={() => {
                 setUserMenuOpen(!userMenuOpen);
@@ -328,6 +359,7 @@ export function DashboardShell(): React.JSX.Element {
                 </motion.div>
               )}
             </AnimatePresence>
+          </div>
           </div>
         </header>
 

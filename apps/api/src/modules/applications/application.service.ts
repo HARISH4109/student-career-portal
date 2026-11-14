@@ -1,4 +1,3 @@
-import { db, schema } from '@career-portal/db';
 import type {
   ApplicationListQuery,
   ApplicationResponseDto,
@@ -7,11 +6,11 @@ import type {
   PaginationMeta,
   UpdateApplicationStatusDto,
 } from '@career-portal/shared-types';
-import { eq } from 'drizzle-orm';
 
 import { ApplicationRepository, type ApplicationStatus } from './application.repository';
 
 import { EligibilityService } from '@/modules/opportunities/eligibility.service';
+import { auditService } from '@/modules/audit/audit.service';
 import { ConflictError, ForbiddenError, NotFoundError, ValidationError } from '@/shared/errors/app-error';
 
 /** Application statuses that allow withdrawal */
@@ -28,9 +27,7 @@ export class ApplicationService {
     user: AuthenticatedUser,
   ): Promise<ApplicationResponseDto> {
     // Get student profile
-    const studentProfile = await db.query.studentProfiles.findFirst({
-      where: eq(schema.studentProfiles.userId, user.id),
-    });
+    const studentProfile = await this.appRepo.findStudentProfileByUserId(user.id);
     if (!studentProfile) {
       throw new NotFoundError('Student profile');
     }
@@ -38,9 +35,7 @@ export class ApplicationService {
     if (!studentProfile.isPlacementEligible) throw new ForbiddenError('Your profile is not eligible for placements');
 
     // Check opportunity exists and is published
-    const opportunity = await db.query.opportunities.findFirst({
-      where: eq(schema.opportunities.id, dto.opportunityId),
-    });
+    const opportunity = await this.appRepo.findOpportunityById(dto.opportunityId);
     if (!opportunity) {
       throw new NotFoundError('Opportunity');
     }
@@ -49,18 +44,12 @@ export class ApplicationService {
     }
 
     // Check deadline
-    if (opportunity.applicationDeadline) {
-      const deadline = new Date(opportunity.applicationDeadline);
-      if (deadline <= new Date()) {
-        throw new ForbiddenError('Application deadline has passed');
-      }
+    if (opportunity.applicationDeadline && new Date() > opportunity.applicationDeadline) {
+      throw new ForbiddenError('Application deadline has passed');
     }
 
     // Check duplicate application
-    const existing = await this.appRepo.findByStudentAndOpportunity(
-      studentProfile.id,
-      dto.opportunityId,
-    );
+    const existing = await this.appRepo.findByStudentAndOpportunity(studentProfile.id, dto.opportunityId);
     if (existing) {
       throw new ConflictError('You have already applied to this opportunity');
     }
@@ -79,17 +68,13 @@ export class ApplicationService {
     // Verify resume belongs to student if provided, or fallback to first resume
     let resumeId: string | null = null;
     if (dto.resumeId) {
-      const resume = await db.query.resumes.findFirst({
-        where: eq(schema.resumes.id, dto.resumeId),
-      });
+      const resume = await this.appRepo.findResumeById(dto.resumeId);
       if (!resume || resume.studentId !== studentProfile.id) {
         throw new ValidationError('Resume not found or does not belong to you');
       }
       resumeId = resume.id;
     } else {
-      const defaultResume = await db.query.resumes.findFirst({
-        where: eq(schema.resumes.studentId, studentProfile.id),
-      });
+      const defaultResume = await this.appRepo.findDefaultResumeByStudentId(studentProfile.id);
       resumeId = defaultResume?.id ?? null;
     }
 
@@ -102,10 +87,17 @@ export class ApplicationService {
       changedBy: user.id,
     });
 
-    
-
     const full = await this.appRepo.findById(application.id);
     if (!full) throw new NotFoundError('Application');
+
+    void auditService.log({
+      userId: user.id,
+      action: 'application.submitted',
+      entityType: 'job_application',
+      entityId: application.id,
+      metadata: { opportunityId: dto.opportunityId, resumeId },
+    });
+
     return this.mapToResponse(full);
   }
 
@@ -114,24 +106,35 @@ export class ApplicationService {
     if (!application) throw new NotFoundError('Application');
 
     // Verify ownership
-    const studentProfile = await db.query.studentProfiles.findFirst({
-      where: eq(schema.studentProfiles.userId, user.id),
-    });
+    const studentProfile = await this.appRepo.findStudentProfileByUserId(user.id);
     if (!studentProfile || application.studentId !== studentProfile.id) {
       throw new ForbiddenError('You can only withdraw your own applications');
     }
 
-    // Check if withdrawal is allowed
+    // Check status allows withdrawal
     if (!WITHDRAWABLE_STATUSES.includes(application.status)) {
-      throw new ForbiddenError(
-        `Cannot withdraw application in "${application.status}" status. Allowed statuses: ${WITHDRAWABLE_STATUSES.join(', ')}`,
-      );
+      throw new ConflictError(`Cannot withdraw application with status '${application.status}'`);
     }
 
-    await this.appRepo.updateStatus(id, application.status, 'withdrawn', user.id, 'Withdrawn by student');
+    await this.appRepo.updateStatus(
+      id,
+      application.status,
+      'withdrawn',
+      user.id,
+      'Application withdrawn by student',
+    );
 
     const full = await this.appRepo.findById(id);
     if (!full) throw new NotFoundError('Application');
+
+    void auditService.log({
+      userId: user.id,
+      action: 'application.withdrawn',
+      entityType: 'job_application',
+      entityId: id,
+      metadata: { previousStatus: application.status },
+    });
+
     return this.mapToResponse(full);
   }
 
@@ -143,20 +146,108 @@ export class ApplicationService {
     const application = await this.appRepo.findById(id);
     if (!application) throw new NotFoundError('Application');
 
-    if (!user.permissions.includes('applications.update_status')) throw new ForbiddenError();
-    if (application.opportunity.postedBy !== user.id && !user.roles.includes('ADMIN')) {
-      throw new ForbiddenError('Only the opportunity owner or an administrator can manage applications');
+    if (
+      !user.roles.includes('ADMIN') &&
+      application.opportunity?.postedBy &&
+      application.opportunity.postedBy !== user.id
+    ) {
+      throw new ForbiddenError('You can only update applications for your own opportunities');
     }
-    const stages: ApplicationStatus[] = ['applied', 'under_review', 'shortlisted', 'assessment', 'interview', 'selected'];
-    if (['selected', 'rejected', 'withdrawn'].includes(application.status)
-      || dto.status === 'withdrawn'
-      || (dto.status !== 'rejected' && stages.indexOf(dto.status) <= stages.indexOf(application.status))) {
-      throw new ValidationError(`Cannot transition from "${application.status}" to "${dto.status}"`);
+
+    if (['withdrawn', 'rejected', 'selected'].includes(application.status)) {
+      throw new ValidationError(
+        `Cannot transition application status from terminal status '${application.status}'`,
+      );
     }
-    await this.appRepo.updateStatus(id, application.status, dto.status, user.id, dto.remarks ?? null);
+
+    // Valid transitions
+    const validTransitions: Record<string, string[]> = {
+      applied: ['under_review', 'rejected', 'withdrawn'],
+      under_review: ['shortlisted', 'rejected', 'withdrawn'],
+      shortlisted: ['assessment', 'interview', 'rejected', 'withdrawn'],
+      assessment: ['interview', 'rejected', 'withdrawn'],
+      interview: ['selected', 'rejected'],
+      selected: [],
+      rejected: [],
+      withdrawn: [],
+    };
+
+    const allowed = validTransitions[application.status] ?? [];
+    if (!allowed.includes(dto.status)) {
+      throw new ConflictError(
+        `Cannot transition application status from '${application.status}' to '${dto.status}'`,
+      );
+    }
+
+    await this.appRepo.updateStatus(
+      id,
+      application.status,
+      dto.status,
+      user.id,
+      dto.remarks || null,
+    );
 
     const full = await this.appRepo.findById(id);
     if (!full) throw new NotFoundError('Application');
+
+    await auditService.log({
+      userId: user.id,
+      action: 'application.status_changed',
+      entityType: 'application',
+      entityId: id,
+      metadata: { previousStatus: application.status, newStatus: dto.status, remarks: dto.remarks },
+    });
+
+    return this.mapToResponse(full);
+  }
+
+  async updateStudentSelfStatus(
+    id: string,
+    dto: UpdateApplicationStatusDto,
+    user: AuthenticatedUser,
+  ): Promise<ApplicationResponseDto> {
+    const application = await this.appRepo.findById(id);
+    if (!application) throw new NotFoundError('Application');
+
+    // Verify ownership
+    const studentProfile = await this.appRepo.findStudentProfileByUserId(user.id);
+    if (!studentProfile || application.studentId !== studentProfile.id) {
+      throw new ForbiddenError('You can only update the status of your own applications');
+    }
+
+    const allowedStatuses: ApplicationStatus[] = [
+      'applied',
+      'under_review',
+      'shortlisted',
+      'assessment',
+      'interview',
+      'selected',
+      'rejected',
+      'withdrawn',
+    ];
+
+    if (!allowedStatuses.includes(dto.status as ApplicationStatus)) {
+      throw new ValidationError(`Invalid application status: ${dto.status}`);
+    }
+
+    await this.appRepo.updateStudentApplicationStatus(
+      id,
+      dto.status as ApplicationStatus,
+      user.id,
+      dto.remarks || 'Self-updated by student in tracker',
+    );
+
+    const full = await this.appRepo.findById(id);
+    if (!full) throw new NotFoundError('Application');
+
+    void auditService.log({
+      userId: user.id,
+      action: 'application.withdrawn',
+      entityType: 'job_application',
+      entityId: id,
+      metadata: { previousStatus: application.status },
+    });
+
     return this.mapToResponse(full);
   }
 
@@ -166,9 +257,7 @@ export class ApplicationService {
 
     // Students can only view own applications
     if (!user.permissions.includes('applications.view_all')) {
-      const studentProfile = await db.query.studentProfiles.findFirst({
-        where: eq(schema.studentProfiles.userId, user.id),
-      });
+      const studentProfile = await this.appRepo.findStudentProfileByUserId(user.id);
       if (!studentProfile || application.studentId !== studentProfile.id) {
         throw new ForbiddenError('You can only view your own applications');
       }
@@ -181,9 +270,7 @@ export class ApplicationService {
     user: AuthenticatedUser,
     query: ApplicationListQuery,
   ): Promise<{ applications: ApplicationResponseDto[]; meta: PaginationMeta }> {
-    const studentProfile = await db.query.studentProfiles.findFirst({
-      where: eq(schema.studentProfiles.userId, user.id),
-    });
+    const studentProfile = await this.appRepo.findStudentProfileByUserId(user.id);
     if (!studentProfile) {
       return { applications: [], meta: { page: 1, pageSize: 20, totalItems: 0, totalPages: 0 } };
     }
@@ -222,7 +309,7 @@ export class ApplicationService {
         id: h.id,
         status: h.status,
         changedBy: h.changedBy,
-        changedByName: h.changedByUser.fullName,
+        changedByName: h.changedByUser?.fullName ?? 'User',
         remarks: h.remarks ?? null,
         changedAt: h.changedAt,
       }));
@@ -231,43 +318,43 @@ export class ApplicationService {
       id: app.id,
       opportunityId: app.opportunityId,
       opportunity: {
-            id: app.opportunity.id,
-            companyId: app.opportunity.companyId,
-            company: {
-                  id: app.opportunity.company.id,
-                  name: app.opportunity.company.name,
-                  logoUrl: app.opportunity.company.logoUrl ?? null,
-                  website: app.opportunity.company.website ?? null,
-                  industry: app.opportunity.company.industry ?? null,
-                  description: app.opportunity.company.description ?? null,
-                  createdAt: app.opportunity.company.createdAt,
-                  updatedAt: app.opportunity.company.updatedAt,
-                },
-            title: app.opportunity.title,
-            type: app.opportunity.type,
-            description: app.opportunity.description,
-            workMode: app.opportunity.workMode,
-            location: app.opportunity.location ?? null,
-            salaryMin: app.opportunity.salaryMin ? parseFloat(app.opportunity.salaryMin) : null,
-            salaryMax: app.opportunity.salaryMax ? parseFloat(app.opportunity.salaryMax) : null,
-            applicationDeadline: app.opportunity.applicationDeadline
-              ? new Date(app.opportunity.applicationDeadline).toISOString()
-              : null,
-            status: app.opportunity.status,
-            postedBy: app.opportunity.postedBy,
-            sourceDraftId: app.opportunity.sourceDraftId ?? null,
-            skills:
-              app.opportunity.opportunitySkills.map((os) => ({
-                skillId: os.skillId,
-                name: os.skill.name,
-                category: os.skill.category,
-                isRequired: os.isRequired,
-              })),
-            eligibility: [],
-            applicationCount: 0,
-            createdAt: app.opportunity.createdAt,
-            updatedAt: app.opportunity.updatedAt,
-          },
+        id: app.opportunity.id,
+        companyId: app.opportunity.companyId,
+        company: {
+          id: app.opportunity.company.id,
+          name: app.opportunity.company.name,
+          logoUrl: app.opportunity.company.logoUrl ?? null,
+          website: app.opportunity.company.website ?? null,
+          industry: app.opportunity.company.industry ?? null,
+          description: app.opportunity.company.description ?? null,
+          createdAt: app.opportunity.company.createdAt,
+          updatedAt: app.opportunity.company.updatedAt,
+        },
+        title: app.opportunity.title,
+        type: app.opportunity.type,
+        description: app.opportunity.description,
+        workMode: app.opportunity.workMode,
+        location: app.opportunity.location ?? null,
+        salaryMin: app.opportunity.salaryMin ? parseFloat(app.opportunity.salaryMin) : null,
+        salaryMax: app.opportunity.salaryMax ? parseFloat(app.opportunity.salaryMax) : null,
+        applicationDeadline: app.opportunity.applicationDeadline
+          ? new Date(app.opportunity.applicationDeadline).toISOString()
+          : null,
+        status: app.opportunity.status,
+        postedBy: app.opportunity.postedBy,
+        sourceDraftId: app.opportunity.sourceDraftId ?? null,
+        skills:
+          app.opportunity.opportunitySkills.map((os) => ({
+            skillId: os.skillId,
+            name: os.skill.name,
+            category: os.skill.category,
+            isRequired: os.isRequired,
+          })),
+        eligibility: [],
+        applicationCount: 0,
+        createdAt: app.opportunity.createdAt,
+        updatedAt: app.opportunity.updatedAt,
+      },
       studentId: app.studentId,
       studentName: app.student.user.fullName,
       studentRollNumber: app.student.rollNumber,

@@ -1,4 +1,3 @@
-import { db, schema } from '@career-portal/db';
 import { opportunityDraftResponseSchema } from '@career-portal/shared-types';
 import type {
   ApproveDraftDto,
@@ -14,6 +13,10 @@ import type {
 
 import { DuplicateDetectionService } from './duplicate-detection.service';
 import { OpportunityDraftRepository } from './opportunity-draft.repository';
+import { aiJobLogger } from '@/modules/audit/ai-job-logger';
+import { auditService } from '@/modules/audit/audit.service';
+import { containsPromptInjectionPatterns, sanitizeAiInput } from '@/shared/security/ai-input-guard';
+import { validateUrlForFetch } from '@/shared/security/ssrf-guard';
 import { OpportunityExtractionService } from './opportunity-extraction.service';
 
 
@@ -52,6 +55,23 @@ export class OpportunityDraftService {
     dto: IngestOpportunitySourceDto,
     user: AuthenticatedUser,
   ): Promise<OpportunityDraftResponseDto> {
+    // SSRF Check if sourceType is url
+    if (dto.sourceType === 'url') {
+      const urlCheck = validateUrlForFetch(dto.content);
+      if (!urlCheck.valid) {
+        throw new ValidationError(`URL validation failed: ${urlCheck.reason}`);
+      }
+    }
+
+    // AI Input sanitization and prompt injection heuristic check
+    dto.content = sanitizeAiInput(dto.content);
+    if (containsPromptInjectionPatterns(dto.content)) {
+      logger.warn(
+        { userId: user.id, sourceType: dto.sourceType },
+        'Potential prompt injection pattern detected in AI ingestion input',
+      );
+    }
+
     // 1. Content hash (salted so multiple drafts can be created from the same source content without unique collision)
     const contentHash = this.duplicateService.generateContentHash(
       `${dto.sourceType}:${dto.content}:${user.id}:${String(Date.now())}:${String(Math.random())}`,
@@ -164,6 +184,16 @@ export class OpportunityDraftService {
       // A failed run must remain visible so faculty can retry it.
       const existingDraft = await this.draftRepo.findDraftByExtractionRunId(run.id);
       if (!existingDraft) await this.draftRepo.createDraft({ extractionRunId: run.id, status: 'needs_correction' });
+
+      void aiJobLogger.logFailure({
+        serviceName: 'Opportunity Ingestion Agent (n8n Webhook)',
+        taskType: 'opportunity_extraction',
+        modelUsed: 'n8n-agent-v1',
+        status: 'failed',
+        errorMessage,
+        payloadPreview: dto.content ? dto.content.slice(0, 200) : undefined,
+        metadata: { runId: run.id, sourceType: dto.sourceType, durationMs },
+      });
 
 
       logger.error({ err: error, runId: run.id }, 'Extraction pipeline failed');
@@ -292,6 +322,14 @@ export class OpportunityDraftService {
 
     const updated = await this.draftRepo.approve(id, dto, user.id, draft.updatedAt);
     if (!updated) throw new NotFoundError('Draft');
+
+    await this.writeAuditLog(user.id, 'draft.approved', 'opportunity_draft', id, {
+      opportunityId: updated.resultingOpportunityId,
+      draftTitle: updated.title,
+      companyName: updated.companyName,
+      publishImmediately: dto.publishImmediately,
+    });
+
     return this.mapToResponse(updated);
   }
 
@@ -446,6 +484,16 @@ export class OpportunityDraftService {
 
       await this.draftRepo.updateSourceStatus(source.id, 'failed');
       await this.draftRepo.updateDraft(draftId, { status: 'needs_correction' });
+
+      void aiJobLogger.logFailure({
+        serviceName: 'Opportunity Ingestion Agent (n8n Webhook)',
+        taskType: 'opportunity_extraction_retry',
+        modelUsed: 'n8n-agent-v1',
+        status: 'failed',
+        errorMessage,
+        payloadPreview: source.rawContent ? source.rawContent.slice(0, 200) : undefined,
+        metadata: { runId: newRun.id, draftId, durationMs },
+      });
       logger.error({ err: error, draftId, newRunId: newRun.id }, 'Extraction retry failed');
       throw error;
     }
@@ -491,17 +539,12 @@ export class OpportunityDraftService {
     entityId: string,
     metadata: Record<string, unknown>,
   ): Promise<void> {
-    try {
-      await db.insert(schema.auditLogs).values({
-        userId,
-        action,
-        entityType,
-        entityId,
-        metadata,
-      });
-    } catch (error) {
-      // Audit logging should never break the main operation
-      logger.error({ err: error, action, entityType, entityId }, 'Failed to write audit log');
-    }
+    await auditService.log({
+      userId,
+      action,
+      entityType,
+      entityId,
+      metadata,
+    });
   }
 }

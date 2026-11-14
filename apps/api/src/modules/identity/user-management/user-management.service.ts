@@ -10,7 +10,14 @@ import { and, count, eq, ilike, sql } from 'drizzle-orm';
 
 import { logger } from '@/infrastructure/logger';
 import { CacheKeys, redis } from '@/infrastructure/redis';
-import { ConflictError, NotFoundError } from '@/shared/errors/app-error';
+import { auditService } from '@/modules/audit/audit.service';
+import { ConflictError, ForbiddenError, NotFoundError } from '@/shared/errors/app-error';
+
+export interface AuditContext {
+  requestId?: string | undefined;
+  ipAddress?: string | undefined;
+  userAgent?: string | undefined;
+}
 
 interface UserListItem {
   id: string;
@@ -143,7 +150,7 @@ export class UserManagementService {
   }
 
   // ── Assign Role ─────────────────────────────────────────────────────────
-  async assignRole(dto: AssignRoleDto): Promise<void> {
+  async assignRole(dto: AssignRoleDto, actorId?: string, ctx?: AuditContext): Promise<void> {
     const user = await db.query.users.findFirst({
       where: eq(schema.users.id, dto.userId),
     });
@@ -171,14 +178,36 @@ export class UserManagementService {
 
     await this.invalidateUserCache(dto.userId);
     logger.info({ userId: dto.userId, role: dto.role }, 'Role assigned');
+
+    await auditService.log({
+      userId: actorId ?? null,
+      action: 'user.role_assigned',
+      entityType: 'user',
+      entityId: dto.userId,
+      requestId: ctx?.requestId,
+      ipAddress: ctx?.ipAddress,
+      userAgent: ctx?.userAgent,
+      metadata: { role: dto.role, targetUserEmail: user.email },
+    });
   }
 
   // ── Revoke Role ─────────────────────────────────────────────────────────
-  async revokeRole(userId: string, roleName: RoleName): Promise<void> {
+  async revokeRole(userId: string, roleName: RoleName, actorId?: string, ctx?: AuditContext): Promise<void> {
+    if (actorId && actorId === userId && roleName === 'ADMIN') {
+      throw new ForbiddenError('Cannot revoke your own ADMIN role');
+    }
+
     const role = await db.query.roles.findFirst({
       where: eq(schema.roles.name, roleName),
     });
     if (!role) throw new NotFoundError('Role');
+
+    if (roleName === 'ADMIN') {
+      const activeAdmins = await this.countActiveAdmins();
+      if (activeAdmins <= 1) {
+        throw new ForbiddenError('Cannot revoke the last active ADMIN role in the system');
+      }
+    }
 
     const deleted = await db
       .delete(schema.userRoles)
@@ -196,18 +225,98 @@ export class UserManagementService {
 
     await this.invalidateUserCache(userId);
     logger.info({ userId, role: roleName }, 'Role revoked');
+
+    await auditService.log({
+      userId: actorId ?? null,
+      action: 'user.role_revoked',
+      entityType: 'user',
+      entityId: userId,
+      requestId: ctx?.requestId,
+      ipAddress: ctx?.ipAddress,
+      userAgent: ctx?.userAgent,
+      metadata: { role: roleName },
+    });
   }
 
   // ── Activate / Deactivate ───────────────────────────────────────────────
-  async activateUser(userId: string): Promise<void> {
+  async activateUser(userId: string, actorId?: string, ctx?: AuditContext): Promise<void> {
     await this.setUserActiveStatus(userId, true);
+
+    await auditService.log({
+      userId: actorId ?? null,
+      action: 'user.activated',
+      entityType: 'user',
+      entityId: userId,
+      requestId: ctx?.requestId,
+      ipAddress: ctx?.ipAddress,
+      userAgent: ctx?.userAgent,
+      metadata: { isActive: true },
+    });
   }
 
-  async deactivateUser(userId: string): Promise<void> {
+  async deactivateUser(userId: string, actorId?: string, ctx?: AuditContext): Promise<void> {
+    if (actorId && actorId === userId) {
+      throw new ForbiddenError('Cannot deactivate your own account');
+    }
+
+    const targetIsAdmin = await this.isUserAdmin(userId);
+    if (targetIsAdmin) {
+      const activeAdmins = await this.countActiveAdmins();
+      if (activeAdmins <= 1) {
+        throw new ForbiddenError('Cannot deactivate the last active administrator');
+      }
+    }
+
     await this.setUserActiveStatus(userId, false);
+
+    await auditService.log({
+      userId: actorId ?? null,
+      action: 'user.deactivated',
+      entityType: 'user',
+      entityId: userId,
+      requestId: ctx?.requestId,
+      ipAddress: ctx?.ipAddress,
+      userAgent: ctx?.userAgent,
+      metadata: { isActive: false },
+    });
   }
 
   // ── Private Helpers ────────────────────────────────────────────────────
+
+  private async isUserAdmin(userId: string): Promise<boolean> {
+    const adminRole = await db.query.roles.findFirst({
+      where: eq(schema.roles.name, 'ADMIN'),
+    });
+    if (!adminRole) return false;
+
+    const row = await db.query.userRoles.findFirst({
+      where: and(
+        eq(schema.userRoles.userId, userId),
+        eq(schema.userRoles.roleId, adminRole.id),
+      ),
+    });
+    return !!row;
+  }
+
+  private async countActiveAdmins(): Promise<number> {
+    const adminRole = await db.query.roles.findFirst({
+      where: eq(schema.roles.name, 'ADMIN'),
+    });
+    if (!adminRole) return 0;
+
+    const result = await db
+      .select({ total: count() })
+      .from(schema.userRoles)
+      .innerJoin(schema.users, eq(schema.userRoles.userId, schema.users.id))
+      .where(
+        and(
+          eq(schema.userRoles.roleId, adminRole.id),
+          eq(schema.users.isActive, true),
+        ),
+      );
+
+    return Number(result[0]?.total ?? 0);
+  }
 
   private async setUserActiveStatus(userId: string, isActive: boolean): Promise<void> {
     const result = await db

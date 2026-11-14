@@ -6,3 +6,6 @@ export * from './dto/resume.dto';
 export * from './dto/opportunity.dto';
 export * from './dto/preparation.dto';
 export * from './dto/career.dto';
+export * from './dto/engagement.dto';
+export * from './dto/analytics.dto';
+export * from './dto/academic.dto';

@@ -6,13 +6,12 @@ import {
   Compass,
   Loader2,
   Route,
-  Sparkles,
   Target,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router';
 
-import { useHasPermission } from '@/features/auth/use-permission';
+import { useAuth } from '@/features/auth/use-auth';
 import { ApiClientError } from '@/shared/lib/api-client';
 
 export const input =
@@ -97,8 +96,10 @@ export function EmptyState({ title, description }: { title: string; description?
 
 export function Frame({ title, children }: { title: string; children: ReactNode }) {
   const { pathname } = useLocation();
-  const own = useHasPermission('roadmaps.manage_own');
-  const gaps = useHasPermission('skill_gap.analyze_own');
+  const { user } = useAuth();
+  const isStudent = user?.roles?.includes('STUDENT');
+  const own = isStudent && user?.permissions?.includes('roadmaps.manage_own');
+  const gaps = isStudent && user?.permissions?.includes('skill_gap.analyze_own');
   const isManage = pathname.includes('/manage');
 
   const tabs = [
@@ -107,14 +108,14 @@ export function Frame({ title, children }: { title: string; children: ReactNode 
       to: '/dashboard/roadmap',
       label: 'My roadmap',
       Icon: Route,
-      show: own && !isManage,
+      show: Boolean(own && !isManage),
     },
     { to: '/dashboard/resources', label: 'Learning resources', Icon: BookOpen, show: !isManage },
     {
       to: '/dashboard/skill-gap',
       label: 'Skill gaps',
       Icon: Target,
-      show: gaps && !isManage,
+      show: Boolean(gaps && !isManage),
     },
   ];
 
@@ -136,25 +137,18 @@ export function Frame({ title, children }: { title: string; children: ReactNode 
   const visibleTabs = tabs.filter((tab) => tab.show);
 
   return (
-    <div className="min-w-0 space-y-6 text-sm leading-relaxed text-slate-600 sm:space-y-8">
-      {/* ── Top Hero Card ── */}
-      <header className="relative overflow-hidden rounded-2xl border border-indigo-900/40 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 p-6 text-white shadow-xl sm:p-8">
-        <div className="pointer-events-none absolute -right-12 -top-12 h-64 w-64 rounded-full bg-indigo-500/10 blur-3xl" />
-        <div className="pointer-events-none absolute bottom-0 left-1/3 -mb-12 h-48 w-48 rounded-full bg-blue-500/10 blur-2xl" />
-
-        <div className="relative z-10 space-y-2 max-w-3xl">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-500/20 px-3 py-1 text-xs font-semibold text-indigo-300 border border-indigo-500/30">
-            <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
-            <span>Career Intelligence & Pathways</span>
-          </span>
-          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-white">
-            {title}
+    <div className="min-w-0 space-y-6 text-sm leading-relaxed text-slate-600 max-w-6xl mx-auto pb-12">
+      {/* ── Page Header ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 pb-5">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+            <Compass className="h-6 w-6 text-indigo-600" /> {title}
           </h1>
-          <p className="text-sm md:text-base text-slate-300 leading-relaxed max-w-2xl">
+          <p className="mt-1 text-sm text-slate-500">
             {description}
           </p>
         </div>
-      </header>
+      </div>
 
       {/* ── Secondary Pill Tab Navigation (only displayed when multiple navigation options exist) ── */}
       {visibleTabs.length > 1 && (

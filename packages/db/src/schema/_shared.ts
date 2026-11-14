@@ -57,6 +57,10 @@ export const notificationTypeEnum = pgEnum('notification_type', [
   'interview_reminder',
   'recommendation',
   'system',
+  'opportunity_deadline',
+  'test_assigned',
+  'test_result_ready',
+  'roadmap_reminder',
 ]);
 
 // ── AI Ingestion Pipeline enums ────────────────────────────────────────────

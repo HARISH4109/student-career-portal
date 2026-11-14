@@ -13,6 +13,7 @@ import { env } from '@/config/env';
 import { logger } from '@/infrastructure/logger';
 import { CacheKeys, redis } from '@/infrastructure/redis';
 import { createAuthClient, supabaseAdmin } from '@/infrastructure/supabase';
+import { auditService } from '@/modules/audit/audit.service';
 import {
   ConflictError,
   InternalError,
@@ -81,6 +82,13 @@ export class AuthService {
 
     // 5. Build response
     const userContext = await this.buildUserContext(supabaseUser.id);
+    void auditService.log({
+      userId: supabaseUser.id,
+      action: 'auth.registered',
+      entityType: 'user',
+      entityId: supabaseUser.id,
+      metadata: { email: dto.email, fullName: dto.fullName, role },
+    });
     const tokens = this.extractTokens(sessionData.session);
 
     return { user: userContext, tokens };
@@ -98,6 +106,13 @@ export class AuthService {
     }
 
     const userContext = await this.buildUserContext(data.user.id);
+    void auditService.log({
+      userId: data.user.id,
+      action: 'auth.login',
+      entityType: 'user',
+      entityId: data.user.id,
+      metadata: { email, roles: userContext.roles },
+    });
     const tokens = this.extractTokens(data.session);
 
     return { user: userContext, tokens };
@@ -109,6 +124,12 @@ export class AuthService {
     if (error) throw new InternalError('Could not sign out. Please try again.');
     // Clear cached permissions so stale data isn't served on next login
     await redis.del(CacheKeys.userPermissions(userId)).catch(() => {});
+    void auditService.log({
+      userId,
+      action: 'auth.logout',
+      entityType: 'user',
+      entityId: userId,
+    });
   }
 
   // ── Refresh Token ───────────────────────────────────────────────────────
@@ -165,6 +186,11 @@ export class AuthService {
 
   // ── Forgot Password ────────────────────────────────────────────────────
   async forgotPassword(email: string): Promise<void> {
+    void auditService.log({
+      action: 'auth.password_reset_requested',
+      entityType: 'user',
+      metadata: { email },
+    });
     // Always return success to prevent email enumeration
     await supabaseAdmin.auth.resetPasswordForEmail(email, {
       redirectTo: new URL('/reset-password', env.WEB_BASE_URL).toString(),

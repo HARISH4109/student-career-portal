@@ -39,6 +39,11 @@ export interface PaginationMeta {
   pageSize: number;
   totalItems: number;
   totalPages: number;
+  aiService?: {
+    baseUrl: string;
+    status: 'ok' | 'offline' | 'unconfigured';
+    latencyMs: number;
+  } | undefined;
 }
 
 export const paginationQuerySchema = z.object({

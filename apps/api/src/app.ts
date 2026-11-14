@@ -7,6 +7,7 @@ import pinoHttp from 'pino-http';
 
 import { env } from '@/config/env';
 import { logger } from '@/infrastructure/logger';
+import { getUploadsDir } from '@/infrastructure/uploads';
 import { errorHandler } from '@/middlewares/error-handler.middleware';
 import { requestId } from '@/middlewares/request-id.middleware';
 import { apiRouter } from '@/routes';
@@ -15,7 +16,11 @@ export function createApp(): Express {
   const app = express();
 
   // ── Security ─────────────────────────────────────────────────────────
-  app.use(helmet());
+  app.use(
+    helmet({
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+    }),
+  );
   app.use(
     cors({
       origin: env.CORS_ALLOWED_ORIGINS.length > 0 ? env.CORS_ALLOWED_ORIGINS : false,
@@ -42,6 +47,17 @@ export function createApp(): Express {
     pinoHttp({
       logger,
       genReqId: (req) => (req as Express.Request & { id: string }).id,
+    }),
+  );
+
+  // ── Static assets ────────────────────────────────────────────────────
+  const uploadsDir = getUploadsDir();
+  app.use(
+    '/uploads',
+    express.static(uploadsDir, {
+      setHeaders: (res) => {
+        res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+      },
     }),
   );
 

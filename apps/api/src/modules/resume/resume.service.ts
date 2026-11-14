@@ -16,6 +16,7 @@ import { StudentRepository } from '../student/student.repository';
 import { ResumeAiService } from './resume-ai.service';
 import { parseResumeText } from './resume-parser';
 import { ResumeRepository } from './resume.repository';
+import { auditService } from '../audit/audit.service';
 
 import { ForbiddenError, NotFoundError, ValidationError } from '@/shared/errors/app-error';
 
@@ -65,6 +66,14 @@ export class ResumeService {
       content: dto.content,
       isPrimary,
       version: 1,
+    });
+
+    void auditService.log({
+      userId,
+      action: 'resume.created',
+      entityType: 'resume',
+      entityId: created.id,
+      metadata: { title: created.title },
     });
 
     return this.mapToResponse(created);
@@ -127,6 +136,14 @@ export class ResumeService {
       fileUrl: dto.fileType === 'pdf' && dto.fileContent.startsWith('data:') ? dto.fileContent : null,
       isPrimary,
       version: 1,
+    });
+
+    void auditService.log({
+      userId,
+      action: 'resume.uploaded',
+      entityType: 'resume',
+      entityId: created.id,
+      metadata: { title, fileName: dto.fileName },
     });
 
     return this.mapToResponse(created);
@@ -271,6 +288,14 @@ export class ResumeService {
     }
 
     await this.resumeRepo.deleteResume(resumeId, student.id);
+
+    void auditService.log({
+      userId,
+      action: 'resume.deleted',
+      entityType: 'resume',
+      entityId: resumeId,
+      metadata: { title: resume.title },
+    });
   }
 
   async analyzeResume(userId: string, resumeId: string): Promise<ResumeAnalysisResponseDto> {
@@ -298,6 +323,14 @@ export class ResumeService {
       aiInsights: analysisData.aiInsights,
       aiSummaryRewrite: analysisData.aiSummaryRewrite ?? null,
       modelVersion: analysisData.modelVersion,
+    });
+
+    void auditService.log({
+      userId,
+      action: 'resume.ai_analyzed',
+      entityType: 'resume',
+      entityId: resumeId,
+      metadata: { atsScore: analysisData.atsScore, overallScore: analysisData.overallScore },
     });
 
     return {

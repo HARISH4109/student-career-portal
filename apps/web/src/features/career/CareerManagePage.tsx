@@ -1,7 +1,14 @@
 import { useState } from 'react';
+import { Link } from 'react-router';
 import {
   ArrowDown,
+  ArrowLeft,
   ArrowUp,
+  ExternalLink,
+  Eye,
+  Pencil,
+  Search,
+  Settings2,
   BookOpen,
   CheckCircle,
   Compass,
@@ -9,9 +16,6 @@ import {
   Plus,
   Save,
   Trash2,
-  Video,
-  Globe,
-  FileText,
   Sparkles,
 } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
@@ -30,7 +34,6 @@ import { useAuth } from '@/features/auth/use-auth';
 import { apiClient } from '@/shared/lib/api-client';
 import { useCareerAction, useCareerData, useCareerOptions } from './career-api';
 import {
-  Frame,
   Field,
   ErrorMessage,
   input,
@@ -74,11 +77,29 @@ export function CareerManagePage() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [editor, setEditor] = useState<'paths' | 'resources'>('paths');
+  const [viewMode, setViewMode] = useState<'list' | 'editor'>('list');
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Catalogs
   const paths = useCareerOptions<CareerPathDto>('career-paths?status=all');
   const resources = useCareerOptions<LearningResourceDto>('resources?status=all');
   const skills = useCareerData<Array<{ id: string; name: string }>>('skills');
+
+  const filteredPaths = (paths.data?.data || []).filter((p) => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase().trim();
+    return p.title.toLowerCase().includes(q) || (p.description || '').toLowerCase().includes(q);
+  });
+
+  const filteredResources = (resources.data?.data || []).filter((r) => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase().trim();
+    return (
+      r.title.toLowerCase().includes(q) ||
+      (r.category || '').toLowerCase().includes(q) ||
+      (r.type || '').toLowerCase().includes(q)
+    );
+  });
 
   // Career Path state
   const [pathId, setPathId] = useState('');
@@ -122,18 +143,6 @@ export function CareerManagePage() {
     setPath({ ...path, stages: path.stages.map((s, i) => (i === index ? next : s)) });
   };
 
-  // ── Existing & Category Resources Lookup ──────────────────────────────────
-  const currentExistingIds = new Set(resourceItems.map((it) => it.existingId).filter(Boolean));
-  const availableOtherResources = (resources.data?.data || []).filter(
-    (r) => !currentExistingIds.has(r.id),
-  );
-  const matchingCategoryResources = sharedCategory.trim()
-    ? (resources.data?.data || []).filter(
-        (r) =>
-          r.category.trim().toLowerCase() === sharedCategory.trim().toLowerCase() &&
-          !currentExistingIds.has(r.id),
-      )
-    : [];
 
   const handleSelectResource = (val: string) => {
     setResourceId(val);
@@ -167,48 +176,6 @@ export function CareerManagePage() {
       setSharedCareerPathIds([]);
       setResourceItems([emptyResourceItem(selectedFormats[0] ?? 'video')]);
     }
-  };
-
-  const handleAddExistingResourceToEditor = (existingIdToAdd: string) => {
-    if (!existingIdToAdd) return;
-    const row = resources.data?.data.find((r) => r.id === existingIdToAdd);
-    if (!row) return;
-    if (resourceItems.some((it) => it.existingId === row.id)) return;
-
-    setResourceItems((prev) => [
-      ...prev,
-      {
-        id: `res-exist-${row.id}`,
-        existingId: row.id,
-        title: row.title,
-        url: row.url,
-        type: row.type,
-        description: row.description || '',
-      },
-    ]);
-    setSharedSkillIds((prev) => Array.from(new Set([...prev, ...(row.skillIds || [])])));
-    setSharedCareerPathIds((prev) =>
-      Array.from(new Set([...prev, ...(row.careerPathIds || [])])),
-    );
-    if (!selectedFormats.includes(row.type)) {
-      setSelectedFormats((prev) => [...prev, row.type]);
-    }
-  };
-
-  const handleLoadCategoryResources = () => {
-    if (!sharedCategory.trim()) return;
-    if (matchingCategoryResources.length === 0) return;
-
-    const itemsToAdd: MultiResourceItem[] = matchingCategoryResources.map((r) => ({
-      id: `res-exist-${r.id}`,
-      existingId: r.id,
-      title: r.title,
-      url: r.url,
-      type: r.type,
-      description: r.description || '',
-    }));
-
-    setResourceItems((prev) => [...prev, ...itemsToAdd]);
   };
 
   // ── Custom Skill / Career Creation ───────────────────────────────────────
@@ -281,35 +248,6 @@ export function CareerManagePage() {
       }, 4000);
     } catch (err) {
       setValidation(err instanceof Error ? err.message : 'Failed to create custom career');
-    }
-  };
-
-  // ── Multi-Format Toggle ──────────────────────────────────────────────────
-  const toggleFormat = (fmt: ResourceInput['type']) => {
-    if (selectedFormats.includes(fmt)) {
-      if (selectedFormats.length > 1) {
-        setSelectedFormats(selectedFormats.filter((f) => f !== fmt));
-      }
-    } else {
-      setSelectedFormats([...selectedFormats, fmt]);
-    }
-  };
-
-  // ── Multi-Resource Item Handlers ─────────────────────────────────────────
-  const updateResourceItem = (index: number, patch: Partial<MultiResourceItem>) => {
-    setResourceItems(
-      resourceItems.map((item, idx) => (idx === index ? { ...item, ...patch } : item)),
-    );
-  };
-
-  const addResourceItem = (defaultType?: ResourceInput['type']) => {
-    const typeToUse = defaultType ?? selectedFormats[0] ?? 'video';
-    setResourceItems([...resourceItems, emptyResourceItem(typeToUse)]);
-  };
-
-  const removeResourceItem = (index: number) => {
-    if (resourceItems.length > 1) {
-      setResourceItems(resourceItems.filter((_, idx) => idx !== index));
     }
   };
 
@@ -547,41 +485,85 @@ export function CareerManagePage() {
   );
 
   return (
-    <Frame title="Manage career catalog">
-      {/* ── Tab Switcher ── */}
-      <div role="tablist" aria-label="Catalog editor" className="flex flex-wrap gap-2">
-        <button
-          id="paths-tab"
-          role="tab"
-          aria-selected={editor === 'paths'}
-          aria-controls="paths-editor"
-          className={editor === 'paths' ? button : secondaryButton}
-          onClick={() => {
-            setEditor('paths');
-          }}
-        >
-          <Compass className="h-4 w-4" />
-          <span>Career paths</span>
-        </button>
-        <button
-          id="resources-tab"
-          role="tab"
-          aria-selected={editor === 'resources'}
-          aria-controls="resources-editor"
-          className={editor === 'resources' ? button : secondaryButton}
-          onClick={() => {
-            setEditor('resources');
-          }}
-        >
-          <BookOpen className="h-4 w-4" />
-          <span>Learning resources</span>
-        </button>
+    <div className="space-y-6 max-w-6xl mx-auto pb-12">
+      {/* ── Page Header (Isolated from Career Paths & Learning Resources explorer) ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 pb-5">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+            <Settings2 className="h-6 w-6 text-indigo-600" /> Career Catalog Management
+          </h1>
+          <p className="mt-1 text-sm text-slate-500">
+            Author and configure degree career paths, curriculum milestones, and curated learning resources.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          {viewMode === 'list' ? (
+            editor === 'paths' ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setPathId('');
+                  setPath({
+                    title: '',
+                    description: '',
+                    isActive: true,
+                    stages: [emptyStage()],
+                  });
+                  setValidation('');
+                  setViewMode('editor');
+                }}
+                className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition"
+              >
+                <Plus className="h-4 w-4" /> Create Career Path
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  setResourceId('');
+                  setSharedCategory('');
+                  setSharedDifficulty('beginner');
+                  setSharedIsActive(true);
+                  setSharedSkillIds([]);
+                  setSharedCareerPathIds([]);
+                  setResourceItems([emptyResourceItem('video')]);
+                  setValidation('');
+                  setViewMode('editor');
+                }}
+                className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition"
+              >
+                <Plus className="h-4 w-4" /> Add Learning Resource
+              </button>
+            )
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                setViewMode('list');
+                setValidation('');
+              }}
+              className="inline-flex items-center gap-2 rounded-xl bg-white border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 transition"
+            >
+              <ArrowLeft className="h-4 w-4" /> Back to Catalog List
+            </button>
+          )}
+        </div>
       </div>
 
       {customActionMsg && (
-        <div className="rounded-xl bg-indigo-50 border border-indigo-200 p-3 text-xs font-semibold text-indigo-900 flex items-center gap-2">
-          <Sparkles className="h-4 w-4 text-indigo-600" />
-          <span>{customActionMsg}</span>
+        <div className="rounded-xl bg-indigo-50 border border-indigo-200 p-3 text-xs font-semibold text-indigo-900 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-indigo-600" />
+            <span>{customActionMsg}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setCustomActionMsg('')}
+            className="text-indigo-400 hover:text-indigo-700 text-xs font-bold"
+          >
+            ✕
+          </button>
         </div>
       )}
 
@@ -596,790 +578,966 @@ export function CareerManagePage() {
       />
 
       {/* ══════════════════════════════════════════════════════════════════════ */}
-      {/* ── Career Path Editor ────────────────────────────────────────────── */}
+      {/* ── 1. LIST VIEW (Like Manage Opportunities with edit options beside) ─ */}
       {/* ══════════════════════════════════════════════════════════════════════ */}
-      <section
-        id="paths-editor"
-        role="tabpanel"
-        aria-labelledby="paths-tab"
-        hidden={editor !== 'paths'}
-        className={`${card} space-y-6`}
-      >
-        <div className="border-b border-slate-100 pb-4 flex items-center justify-between">
-          <div>
-            <h2 className="text-xl font-bold tracking-tight text-slate-900">Career path editor</h2>
-            <p className="text-xs text-slate-500 mt-0.5">Author and publish curriculum roadmaps</p>
-          </div>
-          <span className="rounded-full bg-indigo-50 text-indigo-700 px-3 py-1 text-xs font-semibold">
-            {path.stages.length} stages configured
-          </span>
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Edit career">
-            <select
-              className={input}
-              value={pathId}
-              onChange={(e) => {
-                const row = paths.data?.data.find((p) => p.id === e.target.value);
-                setPathId(e.target.value);
-                setPath(
-                  row
-                    ? {
-                        title: row.title,
-                        description: row.description,
-                        isActive: row.isActive,
-                        stages: row.stages,
-                      }
-                    : { title: '', description: '', isActive: false, stages: [] },
-                );
-              }}
+      {viewMode === 'list' && (
+        <div className="space-y-4">
+          {/* ── Sub Navigation Tabs & Search Bar ── */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <nav
+              aria-label="Catalog editor"
+              className="flex flex-wrap items-center gap-1.5 rounded-2xl border border-slate-200/80 bg-white p-1.5 shadow-sm"
             >
-              <option value="">New career</option>
-              {paths.data?.data.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.title}
-                  {p.isActive ? '' : ' (inactive)'}
-                </option>
-              ))}
-            </select>
-          </Field>
+              <button
+                id="paths-tab"
+                type="button"
+                className={`inline-flex min-h-10 items-center gap-2 rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-all ${
+                  editor === 'paths'
+                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                }`}
+                onClick={() => {
+                  setEditor('paths');
+                  setSearchQuery('');
+                }}
+              >
+                <Compass className="h-4 w-4 shrink-0" />
+                <span>Career Paths ({paths.data?.data?.length ?? 0})</span>
+              </button>
+              <button
+                id="resources-tab"
+                type="button"
+                className={`inline-flex min-h-10 items-center gap-2 rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-all ${
+                  editor === 'resources'
+                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                }`}
+                onClick={() => {
+                  setEditor('resources');
+                  setSearchQuery('');
+                }}
+              >
+                <BookOpen className="h-4 w-4 shrink-0" />
+                <span>Learning Resources ({resources.data?.data?.length ?? 0})</span>
+              </button>
+            </nav>
 
-          <Field label="Career title">
-            <input
-              className={input}
-              placeholder="e.g. Frontend Developer"
-              value={path.title}
-              onChange={(e) => {
-                setPath({ ...path, title: e.target.value });
-              }}
-            />
-          </Field>
-        </div>
-
-        <Field label="Career description">
-          <textarea
-            className={`${input} min-h-24`}
-            placeholder="Comprehensive description of the target career role..."
-            value={path.description}
-            onChange={(e) => {
-              setPath({ ...path, description: e.target.value });
-            }}
-          />
-        </Field>
-
-        <label className="flex min-h-11 items-center gap-3 font-semibold text-slate-700 cursor-pointer">
-          <input
-            type="checkbox"
-            className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-            checked={path.isActive}
-            onChange={(e) => {
-              setPath({ ...path, isActive: e.target.checked });
-            }}
-          />
-          <span>Published career</span>
-        </label>
-
-        <p className="text-xs text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-200">
-          Changes apply to new roadmaps. Existing student progress is preserved.
-        </p>
-
-        {/* ── Stages Configuration ── */}
-        <div className="space-y-4 pt-4 border-t border-slate-200">
-          <div className="flex items-center justify-between">
-            <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-              <Layers className="h-5 w-5 text-indigo-600" />
-              <span>Stages Breakdown</span>
-            </h3>
+            {/* Filter Input */}
+            <div className="relative max-w-xs w-full">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+              <input
+                type="text"
+                placeholder={editor === 'paths' ? 'Filter career paths...' : 'Filter resources...'}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full rounded-xl border border-slate-200 bg-white pl-9 pr-3 py-1.5 text-xs text-slate-800 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-xs"
+              />
+            </div>
           </div>
 
-          {path.stages.map((stage, i) => (
-            <fieldset
-              className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50/50 p-5"
-              key={i}
+          {/* ── Table: Career Paths ── */}
+          {editor === 'paths' && (
+            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+              <table className="min-w-full divide-y divide-slate-200">
+                <thead className="bg-slate-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      Career Path
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      Curriculum Stages
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      Status
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {paths.isLoading ? (
+                    <tr>
+                      <td colSpan={4} className="px-6 py-12 text-center text-sm text-slate-500">
+                        Loading career paths...
+                      </td>
+                    </tr>
+                  ) : filteredPaths.length === 0 ? (
+                    <tr>
+                      <td colSpan={4} className="px-6 py-12 text-center text-sm text-slate-500">
+                        No career paths found. Click &quot;+ Create Career Path&quot; to author one.
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredPaths.map((p) => (
+                      <tr key={p.id} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="px-6 py-4">
+                          <div>
+                            <p className="text-sm font-semibold text-slate-900">{p.title}</p>
+                            <p className="text-xs text-slate-500 line-clamp-1 max-w-md mt-0.5">
+                              {p.description || 'No description provided.'}
+                            </p>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-semibold text-indigo-700">
+                            <Layers className="h-3 w-3" />
+                            {p.stages.length} Stages
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span
+                            className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                              p.isActive
+                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                : 'bg-slate-100 text-slate-600'
+                            }`}
+                          >
+                            {p.isActive ? 'Published' : 'Draft'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setPathId(p.id);
+                                setPath({
+                                  title: p.title,
+                                  description: p.description,
+                                  isActive: p.isActive,
+                                  stages: p.stages,
+                                });
+                                setValidation('');
+                                setViewMode('editor');
+                              }}
+                              className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold transition"
+                              title="Edit Career Path"
+                            >
+                              <Pencil className="h-3.5 w-3.5" />
+                              <span>Edit</span>
+                            </button>
+                            <Link
+                              to={`/dashboard/careers/${p.id}`}
+                              className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition"
+                              title="Preview Curriculum"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Link>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* ── Table: Learning Resources ── */}
+          {editor === 'resources' && (
+            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+              <table className="min-w-full divide-y divide-slate-200">
+                <thead className="bg-slate-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      Resource Title
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      Type & Category
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      Difficulty
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      Status
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {resources.isLoading ? (
+                    <tr>
+                      <td colSpan={5} className="px-6 py-12 text-center text-sm text-slate-500">
+                        Loading resources...
+                      </td>
+                    </tr>
+                  ) : filteredResources.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="px-6 py-12 text-center text-sm text-slate-500">
+                        No learning resources found. Click &quot;+ Add Learning Resource&quot; to author one.
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredResources.map((r) => (
+                      <tr key={r.id} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="px-6 py-4">
+                          <div>
+                            <p className="text-sm font-semibold text-slate-900">{r.title}</p>
+                            <a
+                              href={r.url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-xs text-indigo-600 hover:text-indigo-800 line-clamp-1 max-w-sm flex items-center gap-1 mt-0.5"
+                            >
+                              {r.url} <ExternalLink className="h-2.5 w-2.5" />
+                            </a>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="space-y-1">
+                            <span className="inline-flex rounded-full px-2 py-0.5 text-xs font-medium bg-blue-50 text-blue-700 capitalize">
+                              {r.type}
+                            </span>
+                            <p className="text-xs text-slate-500">{r.category}</p>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="text-xs font-medium text-slate-700 capitalize">
+                            {r.difficulty}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span
+                            className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                              r.isActive
+                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                : 'bg-slate-100 text-slate-600'
+                            }`}
+                          >
+                            {r.isActive ? 'Active' : 'Inactive'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                handleSelectResource(r.id);
+                                setViewMode('editor');
+                              }}
+                              className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold transition"
+                              title="Edit Resource"
+                            >
+                              <Pencil className="h-3.5 w-3.5" />
+                              <span>Edit</span>
+                            </button>
+                            <a
+                              href={r.url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition"
+                              title="Open External Resource"
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </a>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ══════════════════════════════════════════════════════════════════════ */}
+      {/* ── 2. EDITOR VIEW (When creating new or editing beside item) ───────── */}
+      {/* ══════════════════════════════════════════════════════════════════════ */}
+      {viewMode === 'editor' && (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+            <div>
+              <h2 className="text-lg font-bold text-slate-900">
+                {editor === 'paths'
+                  ? pathId
+                    ? `Editing Career Path: ${path.title || 'Untitled'}`
+                    : 'Create New Career Path'
+                  : resourceId
+                    ? 'Editing Learning Resource'
+                    : 'Add Learning Resources'}
+              </h2>
+              <p className="text-xs text-slate-500 mt-0.5">
+                {editor === 'paths'
+                  ? 'Configure career path identity, published state, and milestone learning stages.'
+                  : 'Link high-quality learning resources, videos, documentation, and skill associations.'}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setViewMode('list');
+                setValidation('');
+              }}
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition"
             >
-              <legend className="font-bold text-slate-800 text-sm px-2 bg-white rounded-lg border border-slate-200">
-                Stage {i + 1}
-              </legend>
+              <ArrowLeft className="h-4 w-4" /> Back to Table
+            </button>
+          </div>
+
+          {/* ── Career Path Editor Section ── */}
+          {editor === 'paths' && (
+            <section
+              id="paths-editor"
+              className={`${card} space-y-6`}
+            >
+              <div className="border-b border-slate-100 pb-4 flex items-center justify-between">
+                <div>
+                  <h3 className="text-base font-bold tracking-tight text-slate-900">Career Path Details</h3>
+                  <p className="text-xs text-slate-500 mt-0.5">Author and publish curriculum roadmaps</p>
+                </div>
+                <span className="rounded-full bg-indigo-50 text-indigo-700 px-3 py-1 text-xs font-semibold">
+                  {path.stages.length} stages configured
+                </span>
+              </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="Stage title">
+                <Field label="Career title">
                   <input
                     className={input}
-                    placeholder="e.g. Core Foundations"
-                    value={stage.title}
+                    placeholder="e.g. Frontend Developer"
+                    value={path.title}
                     onChange={(e) => {
-                      updateStage(i, { ...stage, title: e.target.value });
+                      setPath({ ...path, title: e.target.value });
                     }}
                   />
                 </Field>
 
-                <div className="flex items-center pt-6">
-                  <label className="flex items-center gap-2.5 font-semibold text-slate-700 cursor-pointer">
+                <div className="flex flex-col justify-end">
+                  <label className="flex min-h-11 items-center gap-3 font-semibold text-slate-700 cursor-pointer">
                     <input
                       type="checkbox"
                       className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                      checked={stage.isActive}
+                      checked={path.isActive}
                       onChange={(e) => {
-                        updateStage(i, { ...stage, isActive: e.target.checked });
+                        setPath({ ...path, isActive: e.target.checked });
                       }}
                     />
-                    <span>Active stage</span>
+                    <span>Publish career path (visible to students)</span>
                   </label>
                 </div>
               </div>
 
-              <Field label="Stage description">
+              <Field label="Career description">
                 <textarea
-                  className={input}
-                  placeholder="Overview of this learning milestone..."
-                  value={stage.description}
+                  className={`${input} min-h-24`}
+                  placeholder="Comprehensive description of the target career role..."
+                  value={path.description}
                   onChange={(e) => {
-                    updateStage(i, { ...stage, description: e.target.value });
+                    setPath({ ...path, description: e.target.value });
                   }}
                 />
               </Field>
 
-              {renderOptions(
-                skills.data?.data,
-                stage.skills.map((s) => s.skillId),
-                (ids) => {
-                  updateStage(i, {
-                    ...stage,
-                    skills: ids.map(
-                      (skillId) =>
-                        stage.skills.find((s) => s.skillId === skillId) ?? {
-                          skillId,
-                          proficiency: 'intermediate',
-                        },
-                    ),
-                  });
-                },
-                'Required skills',
-                {
-                  placeholder: 'Add new custom skill to stage...',
-                  value: customStageSkillName,
-                  onChange: setCustomStageSkillName,
-                  onAdd: () => void handleCreateCustomSkill('stage', i),
-                  buttonText: 'Add to Stage',
-                },
-              )}
+              <p className="text-xs text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                Changes apply to new roadmaps. Existing student progress is preserved.
+              </p>
 
-              {stage.skills.length > 0 && (
-                <div className="grid gap-3 sm:grid-cols-2 pt-2">
-                  {stage.skills.map((s) => (
-                    <Field
-                      key={s.skillId}
-                      label={`Target proficiency: ${skills.data?.data.find((v) => v.id === s.skillId)?.name ?? 'skill'}`}
-                    >
-                      <select
-                        className={input}
-                        value={s.proficiency}
-                        onChange={(e) => {
-                          updateStage(i, {
-                            ...stage,
-                            skills: stage.skills.map((v) =>
-                              v.skillId === s.skillId
-                                ? { ...v, proficiency: e.target.value as typeof s.proficiency }
-                                : v,
-                            ),
-                          });
-                        }}
-                      >
-                        {CAREER_PROFICIENCIES.map((level) => (
-                          <option key={level}>{level}</option>
-                        ))}
-                      </select>
-                    </Field>
-                  ))}
+              {/* ── Stages Configuration ── */}
+              <div className="space-y-4 pt-4 border-t border-slate-200">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                    <Layers className="h-5 w-5 text-indigo-600" />
+                    <span>Stages Breakdown</span>
+                  </h3>
                 </div>
-              )}
 
-              {renderOptions(
-                resources.data?.data,
-                stage.resourceIds,
-                (resourceIds) => {
-                  updateStage(i, { ...stage, resourceIds });
-                },
-                'Stage resources',
-              )}
+                {path.stages.map((stage, i) => (
+                  <fieldset
+                    className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50/50 p-5"
+                    key={i}
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/60 pb-3">
+                      <legend className="text-sm font-bold text-slate-900">
+                        Stage {i + 1}: {stage.title || 'Untitled stage'}
+                      </legend>
+                      <div className="flex flex-wrap items-center gap-1.5 self-end sm:self-auto">
+                        <button
+                          type="button"
+                          className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-200 hover:text-slate-800 disabled:opacity-30"
+                          disabled={i === 0}
+                          onClick={() => {
+                            const stages = [...path.stages];
+                            const current = stages[i];
+                            const prev = stages[i - 1];
+                            if (current && prev) {
+                              stages[i - 1] = current;
+                              stages[i] = prev;
+                              setPath({ ...path, stages });
+                            }
+                          }}
+                          aria-label="Move stage up"
+                        >
+                          <ArrowUp className="h-4 w-4" />
+                        </button>
+                        <button
+                          type="button"
+                          className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-200 hover:text-slate-800 disabled:opacity-30"
+                          disabled={i === path.stages.length - 1}
+                          onClick={() => {
+                            const stages = [...path.stages];
+                            const current = stages[i];
+                            const next = stages[i + 1];
+                            if (current && next) {
+                              stages[i + 1] = current;
+                              stages[i] = next;
+                              setPath({ ...path, stages });
+                            }
+                          }}
+                          aria-label="Move stage down"
+                        >
+                          <ArrowDown className="h-4 w-4" />
+                        </button>
+                        <button
+                          type="button"
+                          className="rounded-lg p-1.5 text-rose-600 hover:bg-rose-50"
+                          onClick={() => {
+                            setPath({ ...path, stages: path.stages.filter((_, idx) => idx !== i) });
+                          }}
+                          aria-label="Delete stage"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
 
-              {/* Stage Activities */}
-              {stage.activities.length > 0 && (
-                <div className="space-y-3 pt-2">
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                    Hands-on Activities
-                  </p>
-                  {stage.activities.map((a, index) => (
-                    <div
-                      key={index}
-                      className="grid gap-3 rounded-xl border border-slate-200 bg-white p-4 sm:grid-cols-2"
-                    >
-                      <Field label="Activity title">
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <Field label="Stage title">
                         <input
                           className={input}
-                          placeholder="e.g. Build an accessible portfolio"
-                          value={a.title}
+                          placeholder="e.g. Core Foundations"
+                          value={stage.title}
                           onChange={(e) => {
-                            updateStage(i, {
-                              ...stage,
-                              activities: stage.activities.map((v, n) =>
-                                n === index ? { ...v, title: e.target.value } : v,
-                              ),
-                            });
+                            updateStage(i, { ...stage, title: e.target.value });
                           }}
                         />
                       </Field>
-
-                      <Field label="Activity type">
-                        <select
-                          className={input}
-                          value={a.type}
-                          onChange={(e) => {
-                            updateStage(i, {
-                              ...stage,
-                              activities: stage.activities.map((v, n) =>
-                                n === index
-                                  ? { ...v, type: e.target.value as 'project' | 'practice' }
-                                  : v,
-                              ),
-                            });
-                          }}
-                        >
-                          <option>project</option>
-                          <option>practice</option>
-                        </select>
-                      </Field>
-
-                      <div className="sm:col-span-2">
-                        <Field label="Activity instructions">
-                          <textarea
-                            className={input}
-                            placeholder="Detailed requirements, user stories, deployment instructions..."
-                            value={a.description}
+                      <div className="flex items-center min-h-11">
+                        <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            className="h-4 w-4 rounded border-slate-300 text-indigo-600"
+                            checked={stage.isActive}
                             onChange={(e) => {
+                              updateStage(i, { ...stage, isActive: e.target.checked });
+                            }}
+                          />
+                          <span>Active stage</span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <Field label="Stage description">
+                      <textarea
+                        className={`${input} min-h-20`}
+                        placeholder="What skills and objectives are covered in this stage?"
+                        value={stage.description}
+                        onChange={(e) => {
+                          updateStage(i, { ...stage, description: e.target.value });
+                        }}
+                      />
+                    </Field>
+
+                    {/* Stage Skills Builder */}
+                    <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-2">
+                        <span className="text-xs font-bold text-slate-800">
+                          Required Skills for Stage {i + 1}
+                        </span>
+                        <div className="flex gap-2">
+                          <input
+                            className={`${input} min-h-8 py-0.5 text-xs w-48`}
+                            placeholder="Add custom skill..."
+                            value={customStageSkillName}
+                            onChange={(e) => setCustomStageSkillName(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                void handleCreateCustomSkill('stage', i);
+                              }
+                            }}
+                          />
+                          <button
+                            type="button"
+                            className="inline-flex items-center gap-1 rounded-lg bg-indigo-50 text-indigo-700 px-2.5 py-1 text-xs font-semibold hover:bg-indigo-100"
+                            onClick={() => void handleCreateCustomSkill('stage', i)}
+                          >
+                            <Plus className="h-3 w-3" /> Add
+                          </button>
+                        </div>
+                      </div>
+
+                      {stage.skills.map((stSkill, sIdx) => (
+                        <div key={sIdx} className="flex flex-wrap items-center gap-2 pt-1">
+                          <select
+                            className={`${input} max-w-xs text-xs py-1.5`}
+                            value={stSkill.skillId}
+                            onChange={(e) => {
+                              const updated = [...stage.skills];
+                              const targetSkill = updated[sIdx];
+                              if (targetSkill) {
+                                targetSkill.skillId = e.target.value;
+                                updateStage(i, { ...stage, skills: updated });
+                              }
+                            }}
+                          >
+                            <option value="">Select skill...</option>
+                            {skills.data?.data.map((sk) => (
+                              <option key={sk.id} value={sk.id}>
+                                {sk.name}
+                              </option>
+                            ))}
+                          </select>
+
+                          <select
+                            className={`${input} max-w-xs text-xs py-1.5 capitalize`}
+                            value={stSkill.proficiency}
+                            onChange={(e) => {
+                              const updated = [...stage.skills];
+                              const targetSkill = updated[sIdx];
+                              if (targetSkill) {
+                                targetSkill.proficiency = e.target.value as CareerStageInput['skills'][number]['proficiency'];
+                                updateStage(i, { ...stage, skills: updated });
+                              }
+                            }}
+                          >
+                            {CAREER_PROFICIENCIES.map((prof) => (
+                              <option key={prof} value={prof}>
+                                {prettyLabel(prof)}
+                              </option>
+                            ))}
+                          </select>
+
+                          <button
+                            type="button"
+                            className="text-rose-500 hover:text-rose-700 p-1.5 rounded-lg hover:bg-rose-50"
+                            onClick={() => {
                               updateStage(i, {
                                 ...stage,
-                                activities: stage.activities.map((v, n) =>
-                                  n === index ? { ...v, description: e.target.value } : v,
-                                ),
+                                skills: stage.skills.filter((_, idx) => idx !== sIdx),
                               });
+                            }}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      ))}
+
+                      <button
+                        type="button"
+                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-800 pt-1"
+                        onClick={() => {
+                          const firstSkill = skills.data?.data[0]?.id || '';
+                          updateStage(i, {
+                            ...stage,
+                            skills: [...stage.skills, { skillId: firstSkill, proficiency: 'beginner' }],
+                          });
+                        }}
+                      >
+                        <Plus className="h-3.5 w-3.5" /> Add Required Skill
+                      </button>
+                    </div>
+
+                    {/* Resources linked to this stage */}
+                    {renderOptions(
+                      resources.data?.data,
+                      stage.resourceIds,
+                      (ids) => {
+                        updateStage(i, { ...stage, resourceIds: ids });
+                      },
+                      `Linked Learning Resources for Stage ${i + 1}`,
+                    )}
+
+                    {/* Activities */}
+                    <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-4">
+                      <span className="text-xs font-bold text-slate-800 block border-b border-slate-100 pb-2">
+                        Stage Activities & Hands-on Deliverables
+                      </span>
+
+                      {stage.activities.map((act, aIdx) => (
+                        <div key={aIdx} className="space-y-2 p-3 rounded-xl bg-slate-50 border border-slate-200">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-bold text-slate-700">Activity {aIdx + 1}</span>
+                            <button
+                              type="button"
+                              className="text-rose-600 hover:bg-rose-100 p-1 rounded-md"
+                              onClick={() => {
+                                updateStage(i, {
+                                  ...stage,
+                                  activities: stage.activities.filter((_, idx) => idx !== aIdx),
+                                });
+                              }}
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                          <input
+                            className={`${input} py-1 text-xs`}
+                            placeholder="Activity title..."
+                            value={act.title}
+                            onChange={(e) => {
+                              const acts = [...stage.activities];
+                              const currentAct = acts[aIdx];
+                              if (currentAct) {
+                                currentAct.title = e.target.value;
+                                updateStage(i, { ...stage, activities: acts });
+                              }
+                            }}
+                          />
+                          <textarea
+                            className={`${input} min-h-16 py-1 text-xs`}
+                            placeholder="Activity instructions or project brief..."
+                            value={act.description}
+                            onChange={(e) => {
+                              const acts = [...stage.activities];
+                              const currentAct = acts[aIdx];
+                              if (currentAct) {
+                                currentAct.description = e.target.value;
+                                updateStage(i, { ...stage, activities: acts });
+                              }
+                            }}
+                          />
+                        </div>
+                      ))}
+
+                      <button
+                        type="button"
+                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-800"
+                        onClick={() => {
+                          updateStage(i, {
+                            ...stage,
+                            activities: [...stage.activities, { title: '', description: '', type: 'project' }],
+                          });
+                        }}
+                      >
+                        <Plus className="h-3.5 w-3.5" /> Add Activity
+                      </button>
+                    </div>
+                  </fieldset>
+                ))}
+
+                <button
+                  type="button"
+                  className={secondaryButton}
+                  onClick={() => {
+                    setPath({ ...path, stages: [...path.stages, emptyStage()] });
+                  }}
+                >
+                  <Plus className="h-4 w-4" />
+                  <span>Add Next Stage</span>
+                </button>
+              </div>
+
+              {/* Actions Footer */}
+              <div className="flex items-center justify-between pt-4 border-t border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setViewMode('list');
+                    setValidation('');
+                  }}
+                  className="text-xs font-semibold text-slate-500 hover:text-slate-800"
+                >
+                  Cancel & Return to List
+                </button>
+
+                <button
+                  type="button"
+                  className={button}
+                  disabled={savePath.isPending}
+                  onClick={() => {
+                    const parsed = careerPathInputSchema.safeParse(path);
+                    setValidation(
+                      parsed.success ? '' : parsed.error.issues.map((issue) => issue.message).join('. '),
+                    );
+                    if (parsed.success) {
+                      savePath.mutate(
+                        {
+                          path: pathId ? `career-paths/${pathId}` : 'career-paths',
+                          method: pathId ? 'put' : 'post',
+                          body: parsed.data,
+                        },
+                        {
+                          onSuccess: (row) => {
+                            setPathId(row.id);
+                            setCustomActionMsg(`Career path "${row.title}" saved successfully.`);
+                            void queryClient.invalidateQueries({ queryKey: ['career', user?.id, 'options', 'career-paths'] });
+                            setViewMode('list');
+                          },
+                        },
+                      );
+                    }
+                  }}
+                >
+                  <Save className="h-4 w-4" />
+                  <span>{savePath.isPending ? 'Saving...' : 'Save Career Path'}</span>
+                </button>
+              </div>
+
+              {savePath.isSuccess && (
+                <div
+                  role="status"
+                  className="rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-xs font-bold text-emerald-800 flex items-center gap-2"
+                >
+                  <CheckCircle className="h-4 w-4 text-emerald-600" />
+                  <span>Career path saved.</span>
+                </div>
+              )}
+            </section>
+          )}
+
+          {/* ── Learning Resources Editor Section ── */}
+          {editor === 'resources' && (
+            <section
+              id="resources-editor"
+              className={`${card} space-y-6`}
+            >
+              <div className="border-b border-slate-100 pb-4 flex items-center justify-between">
+                <div>
+                  <h3 className="text-base font-bold tracking-tight text-slate-900">
+                    {resourceId ? 'Edit Learning Resource' : 'Add Learning Resources'}
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Configure resource metadata, content links, and associated skills.
+                  </p>
+                </div>
+              </div>
+
+              {/* Shared Metadata */}
+              <div className="rounded-2xl border border-indigo-100 bg-indigo-50/30 p-5 space-y-4">
+                <span className="text-xs font-bold uppercase tracking-wider text-indigo-900 block">
+                  Shared Resource Metadata
+                </span>
+
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <Field label="Category / Topic">
+                    <input
+                      className={input}
+                      placeholder="e.g. Frontend Engineering, Databases"
+                      value={sharedCategory}
+                      onChange={(e) => setSharedCategory(e.target.value)}
+                    />
+                  </Field>
+
+                  <Field label="Target Difficulty">
+                    <select
+                      className={input}
+                      value={sharedDifficulty}
+                      onChange={(e) =>
+                        setSharedDifficulty(e.target.value as ResourceInput['difficulty'])
+                      }
+                    >
+                      {['beginner', 'intermediate', 'advanced'].map((d) => (
+                        <option key={d} value={d}>
+                          {prettyLabel(d)}
+                        </option>
+                      ))}
+                    </select>
+                  </Field>
+
+                  <div className="flex items-center min-h-11">
+                    <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="h-4 w-4 rounded border-slate-300 text-indigo-600"
+                        checked={sharedIsActive}
+                        onChange={(e) => setSharedIsActive(e.target.checked)}
+                      />
+                      <span>Active resource (published)</span>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Shared Skills & Career Paths */}
+                <div className="grid gap-4 sm:grid-cols-2 pt-2 border-t border-indigo-100">
+                  {renderOptions(
+                    skills.data?.data,
+                    sharedSkillIds,
+                    setSharedSkillIds,
+                    'Covered Skills',
+                    {
+                      placeholder: 'Add custom skill...',
+                      value: customSkillName,
+                      onChange: setCustomSkillName,
+                      onAdd: () => void handleCreateCustomSkill('resource'),
+                      buttonText: 'Add Custom Skill',
+                    },
+                  )}
+
+                  {renderOptions(
+                    paths.data?.data,
+                    sharedCareerPathIds,
+                    setSharedCareerPathIds,
+                    'Associated Career Paths',
+                    {
+                      placeholder: 'Add custom career...',
+                      value: customCareerTitle,
+                      onChange: setCustomCareerTitle,
+                      onAdd: () => void handleCreateCustomCareer(),
+                      buttonText: 'Add Custom Career',
+                    },
+                  )}
+                </div>
+              </div>
+
+              {/* Resource Items */}
+              <div className="space-y-4 pt-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-bold text-slate-800">Resource Links & Content</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setResourceItems((prev) => [...prev, emptyResourceItem('video')]);
+                    }}
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-800"
+                  >
+                    <Plus className="h-3.5 w-3.5" /> Add Another Link
+                  </button>
+                </div>
+
+                {resourceItems.map((item, idx) => (
+                  <div key={item.id} className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-slate-700">Link #{idx + 1}</span>
+                      {resourceItems.length > 1 && (
+                        <button
+                          type="button"
+                          className="text-rose-500 hover:text-rose-700 p-1"
+                          onClick={() => {
+                            setResourceItems((prev) => prev.filter((_, i) => i !== idx));
+                          }}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="grid gap-3 sm:grid-cols-3">
+                      <div className="sm:col-span-2">
+                        <Field label="Title">
+                          <input
+                            className={input}
+                            placeholder="Resource title..."
+                            value={item.title}
+                            onChange={(e) => {
+                              const updated = [...resourceItems];
+                              const cur = updated[idx];
+                              if (cur) {
+                                cur.title = e.target.value;
+                                setResourceItems(updated);
+                              }
                             }}
                           />
                         </Field>
                       </div>
 
-                      <div className="sm:col-span-2 flex justify-end">
-                        <button
-                          type="button"
-                          className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-600 hover:text-rose-800 transition p-1"
-                          onClick={() => {
-                            updateStage(i, {
-                              ...stage,
-                              activities: stage.activities.filter((_, n) => n !== index),
-                            });
+                      <Field label="Format / Type">
+                        <select
+                          className={input}
+                          value={item.type}
+                          onChange={(e) => {
+                            const updated = [...resourceItems];
+                            const cur = updated[idx];
+                            if (cur) {
+                              cur.type = e.target.value as ResourceInput['type'];
+                              setResourceItems(updated);
+                            }
                           }}
                         >
-                          <Trash2 className="h-3.5 w-3.5" />
-                          <span>Remove activity</span>
-                        </button>
-                      </div>
+                          {RESOURCE_TYPES.map((t) => (
+                            <option key={t} value={t}>
+                              {prettyLabel(t)}
+                            </option>
+                          ))}
+                        </select>
+                      </Field>
                     </div>
-                  ))}
-                </div>
-              )}
 
-              {/* Stage Controls */}
-              <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-200">
-                <button
-                  type="button"
-                  className={secondaryButton}
-                  onClick={() => {
-                    updateStage(i, {
-                      ...stage,
-                      activities: [
-                        ...stage.activities,
-                        { title: '', description: '', type: 'project' },
-                      ],
-                    });
-                  }}
-                >
-                  <Plus className="h-4 w-4" />
-                  <span>Add activity</span>
-                </button>
-
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    className={secondaryButton}
-                    disabled={i === 0}
-                    onClick={() => {
-                      const stages = [...path.stages];
-                      stages.splice(i - 1, 0, ...stages.splice(i, 1));
-                      setPath({ ...path, stages });
-                    }}
-                  >
-                    <ArrowUp className="h-4 w-4" />
-                    <span>Move up</span>
-                  </button>
-                  <button
-                    type="button"
-                    className={secondaryButton}
-                    disabled={i === path.stages.length - 1}
-                    onClick={() => {
-                      const stages = [...path.stages];
-                      stages.splice(i + 1, 0, ...stages.splice(i, 1));
-                      setPath({ ...path, stages });
-                    }}
-                  >
-                    <ArrowDown className="h-4 w-4" />
-                    <span>Move down</span>
-                  </button>
-                  <button
-                    type="button"
-                    className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm font-semibold text-rose-700 hover:bg-rose-100 transition"
-                    onClick={() => {
-                      setPath({ ...path, stages: path.stages.filter((_, n) => n !== i) });
-                    }}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    <span>Remove stage</span>
-                  </button>
-                </div>
-              </div>
-            </fieldset>
-          ))}
-
-          <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-slate-200">
-            <button
-              type="button"
-              className={secondaryButton}
-              onClick={() => {
-                setPath({ ...path, stages: [...path.stages, emptyStage()] });
-              }}
-            >
-              <Plus className="h-4 w-4" />
-              <span>Add stage</span>
-            </button>
-            <button
-              type="button"
-              className={button}
-              disabled={savePath.isPending}
-              onClick={() => {
-                const parsed = careerPathInputSchema.safeParse(path);
-                setValidation(
-                  parsed.success ? '' : parsed.error.issues.map((issue) => issue.message).join('. '),
-                );
-                if (parsed.success)
-                  savePath.mutate(
-                    {
-                      path: pathId ? `career-paths/${pathId}` : 'career-paths',
-                      method: pathId ? 'put' : 'post',
-                      body: parsed.data,
-                    },
-                    {
-                      onSuccess: (row) => {
-                        setPathId(row.id);
-                      },
-                    },
-                  );
-              }}
-            >
-              <Save className="h-4 w-4" />
-              <span>Save career</span>
-            </button>
-          </div>
-        </div>
-
-        {savePath.isSuccess && (
-          <div
-            role="status"
-            className="rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-xs font-bold text-emerald-800 flex items-center gap-2"
-          >
-            <CheckCircle className="h-4 w-4 text-emerald-600" />
-            <span>Career saved.</span>
-          </div>
-        )}
-      </section>
-
-      {/* ══════════════════════════════════════════════════════════════════════ */}
-      {/* ── Learning Resources Editor ────────────────────────────────────── */}
-      {/* ══════════════════════════════════════════════════════════════════════ */}
-      <section
-        id="resources-editor"
-        role="tabpanel"
-        aria-labelledby="resources-tab"
-        hidden={editor !== 'resources'}
-        className={`${card} space-y-6`}
-      >
-        <div className="border-b border-slate-100 pb-4">
-          <h2 className="text-xl font-bold tracking-tight text-slate-900">Resource editor</h2>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Curate and edit learning resources & tag competencies
-          </p>
-        </div>
-
-        {/* Existing Resource Selector */}
-        <Field label="Edit resource">
-          <select
-            className={input}
-            value={resourceId}
-            onChange={(e) => {
-              handleSelectResource(e.target.value);
-            }}
-          >
-            <option value="">New resource</option>
-            {resources.data?.data.map((r) => (
-              <option key={r.id} value={r.id}>
-                {r.title} ({prettyLabel(r.type)})
-              </option>
-            ))}
-          </select>
-        </Field>
-
-        <div className="space-y-6">
-          {/* Format Selection Bar */}
-          <div className="rounded-2xl border border-slate-200 bg-slate-50/50 p-5 space-y-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-700">
-              Resource format
-            </span>
-            <div className="flex flex-wrap gap-2">
-              {RESOURCE_TYPES.map((fmt) => {
-                const isSelected = selectedFormats.includes(fmt);
-                return (
-                  <button
-                    type="button"
-                    key={fmt}
-                    onClick={() => {
-                      toggleFormat(fmt);
-                    }}
-                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition border ${
-                      isSelected
-                        ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
-                        : 'bg-white text-slate-700 border-slate-200 hover:border-indigo-300'
-                    }`}
-                  >
-                    {fmt === 'video' ? (
-                      <Video className="h-3.5 w-3.5" />
-                    ) : fmt === 'documentation' || fmt === 'article' ? (
-                      <Globe className="h-3.5 w-3.5" />
-                    ) : (
-                      <FileText className="h-3.5 w-3.5" />
-                    )}
-                    <span>{prettyLabel(fmt)}</span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Accessible select to ensure automated form queries find Resource format */}
-            <div className="sr-only">
-              <Field label="Resource format">
-                <select
-                  multiple
-                  className={input}
-                  value={selectedFormats}
-                  onChange={(e) => {
-                    setSelectedFormats(
-                      Array.from(
-                        e.target.selectedOptions,
-                        (o) => o.value as ResourceInput['type'],
-                      ),
-                    );
-                  }}
-                >
-                  {RESOURCE_TYPES.map((v) => (
-                    <option key={v} value={v}>
-                      {prettyLabel(v)}
-                    </option>
-                  ))}
-                </select>
-              </Field>
-            </div>
-          </div>
-
-          {/* Resource Links Section */}
-          <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-              <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">
-                Resource Links
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 text-indigo-700 px-3 py-1.5 text-xs font-semibold transition"
-                  onClick={() => {
-                    addResourceItem('video');
-                  }}
-                >
-                  <Plus className="h-3.5 w-3.5" />
-                  <span>+ Add Video URL</span>
-                </button>
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 text-indigo-700 px-3 py-1.5 text-xs font-semibold transition"
-                  onClick={() => {
-                    addResourceItem('documentation');
-                  }}
-                >
-                  <Plus className="h-3.5 w-3.5" />
-                  <span>+ Add Website/Docs URL</span>
-                </button>
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 text-indigo-700 px-3 py-1.5 text-xs font-semibold transition"
-                  onClick={() => {
-                    addResourceItem('article');
-                  }}
-                >
-                  <Plus className="h-3.5 w-3.5" />
-                  <span>+ Add Article URL</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Quick include another existing catalog resource */}
-            {availableOtherResources.length > 0 && (
-              <div className="flex flex-wrap items-center gap-2 p-3 bg-slate-50 rounded-xl border border-slate-200/80">
-                <span className="text-xs font-medium text-slate-600">
-                  Include another existing catalog resource to edit together:
-                </span>
-                <select
-                  className={`${input} text-xs py-1 h-8 max-w-sm`}
-                  value=""
-                  onChange={(e) => {
-                    handleAddExistingResourceToEditor(e.target.value);
-                  }}
-                >
-                  <option value="">+ Select another listed resource...</option>
-                  {availableOtherResources.map((r) => (
-                    <option key={r.id} value={r.id}>
-                      {r.title} ({prettyLabel(r.type)})
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-
-            {/* Category match helper */}
-            {matchingCategoryResources.length > 0 && (
-              <div className="rounded-xl bg-amber-50 border border-amber-200 p-3 text-xs text-amber-900 flex flex-wrap items-center justify-between gap-2">
-                <span>
-                  Found <strong>{matchingCategoryResources.length}</strong> other catalog
-                  resource(s) in category &ldquo;{sharedCategory}&rdquo;.
-                </span>
-                <button
-                  type="button"
-                  onClick={handleLoadCategoryResources}
-                  className="inline-flex items-center gap-1 font-bold text-indigo-700 hover:text-indigo-900 underline"
-                >
-                  <span>Load into editor</span>
-                </button>
-              </div>
-            )}
-
-            {resourceItems.map((item, idx) => (
-              <div
-                key={item.id}
-                className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm space-y-3"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-lg border border-indigo-100">
-                    Link #{idx + 1}
-                  </span>
-                  {resourceItems.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        removeResourceItem(idx);
-                      }}
-                      className="text-xs font-semibold text-rose-600 hover:text-rose-800 flex items-center gap-1 p-1"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                      <span>Remove link</span>
-                    </button>
-                  )}
-                </div>
-
-                <div className="grid gap-3 sm:grid-cols-12">
-                  <div className="sm:col-span-3">
-                    <Field label="Format">
-                      <select
-                        className={input}
-                        aria-label={idx === 0 ? 'Resource format' : undefined}
-                        value={item.type}
-                        onChange={(e) => {
-                          updateResourceItem(idx, {
-                            type: e.target.value as ResourceInput['type'],
-                          });
-                        }}
-                      >
-                        {RESOURCE_TYPES.map((v) => (
-                          <option key={v} value={v}>
-                            {prettyLabel(v)}
-                          </option>
-                        ))}
-                      </select>
-                    </Field>
-                  </div>
-
-                  <div className="sm:col-span-4">
-                    <Field label="Resource title">
-                      <input
-                        className={input}
-                        placeholder="e.g. Official Docs or YouTube Lecture"
-                        value={item.title}
-                        onChange={(e) => {
-                          updateResourceItem(idx, { title: e.target.value });
-                        }}
-                      />
-                    </Field>
-                  </div>
-
-                  <div className="sm:col-span-5">
-                    <Field label="Resource url">
+                    <Field label="URL (https://...)">
                       <input
                         className={input}
                         placeholder="https://..."
                         value={item.url}
                         onChange={(e) => {
-                          updateResourceItem(idx, { url: e.target.value });
+                          const updated = [...resourceItems];
+                          const cur = updated[idx];
+                          if (cur) {
+                            cur.url = e.target.value;
+                            setResourceItems(updated);
+                          }
+                        }}
+                      />
+                    </Field>
+
+                    <Field label="Description (optional)">
+                      <textarea
+                        className={`${input} min-h-16`}
+                        placeholder="Brief overview of content..."
+                        value={item.description}
+                        onChange={(e) => {
+                          const updated = [...resourceItems];
+                          const cur = updated[idx];
+                          if (cur) {
+                            cur.description = e.target.value;
+                            setResourceItems(updated);
+                          }
                         }}
                       />
                     </Field>
                   </div>
-                </div>
-
-                <Field label="Resource description">
-                  <input
-                    className={input}
-                    placeholder="Brief summary or topic covered..."
-                    value={item.description}
-                    onChange={(e) => {
-                      updateResourceItem(idx, { description: e.target.value });
-                    }}
-                  />
-                </Field>
+                ))}
               </div>
-            ))}
 
-            <button
-              type="button"
-              className={secondaryButton}
-              onClick={() => {
-                addResourceItem();
-              }}
-            >
-              <Plus className="h-4 w-4" />
-              <span>+ Add another resource link</span>
-            </button>
-          </div>
-
-          {/* Shared Metadata (Category, Difficulty, Skills, Careers) */}
-          <div className="rounded-2xl border border-slate-200 bg-slate-50/50 p-5 space-y-4">
-            <h3 className="font-bold text-slate-800 text-sm">
-              Shared Categorization &amp; Competencies
-            </h3>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Resource category">
-                <input
-                  className={input}
-                  placeholder="e.g. Frontend Development, Databases, Cloud"
-                  value={sharedCategory}
-                  onChange={(e) => {
-                    setSharedCategory(e.target.value);
+              {/* Actions Footer */}
+              <div className="flex items-center justify-between pt-4 border-t border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setViewMode('list');
+                    setValidation('');
                   }}
-                />
-              </Field>
+                  className="text-xs font-semibold text-slate-500 hover:text-slate-800"
+                >
+                  Cancel & Return to List
+                </button>
 
-              <Field label="Resource difficulty">
-                <select
-                  className={input}
-                  value={sharedDifficulty}
-                  onChange={(e) => {
-                    setSharedDifficulty(e.target.value as ResourceInput['difficulty']);
+                <button
+                  type="button"
+                  className={button}
+                  disabled={isSavingResources}
+                  onClick={async () => {
+                    await handleSaveResources();
+                    setViewMode('list');
                   }}
                 >
-                  {['beginner', 'intermediate', 'advanced'].map((v) => (
-                    <option key={v} value={v}>
-                      {prettyLabel(v)}
-                    </option>
-                  ))}
-                </select>
-              </Field>
-            </div>
+                  <Save className="h-4 w-4" />
+                  <span>
+                    {isSavingResources
+                      ? 'Saving...'
+                      : resourceItems.length > 1
+                        ? `Save ${resourceItems.length} resources`
+                        : 'Save resource'}
+                  </span>
+                </button>
+              </div>
 
-            <label className="flex min-h-11 items-center gap-3 font-semibold text-slate-700 cursor-pointer">
-              <input
-                type="checkbox"
-                className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                checked={sharedIsActive}
-                onChange={(e) => {
-                  setSharedIsActive(e.target.checked);
-                }}
-              />
-              <span>Active resource</span>
-            </label>
-
-            {renderOptions(
-              skills.data?.data,
-              sharedSkillIds,
-              setSharedSkillIds,
-              'Resource skills',
-              {
-                placeholder: 'Add custom skill (e.g. GraphQL, Tailwind, Redis)...',
-                value: customSkillName,
-                onChange: setCustomSkillName,
-                onAdd: () => void handleCreateCustomSkill('resource'),
-                buttonText: 'Add Custom Skill',
-              },
-            )}
-
-            {renderOptions(
-              paths.data?.data,
-              sharedCareerPathIds,
-              setSharedCareerPathIds,
-              'Resource careers',
-              {
-                placeholder: 'Add custom career (e.g. AI Engineer, SRE)...',
-                value: customCareerTitle,
-                onChange: setCustomCareerTitle,
-                onAdd: () => void handleCreateCustomCareer(),
-                buttonText: 'Add Custom Career',
-              },
-            )}
-          </div>
+              {savedCount > 0 && (
+                <div
+                  role="status"
+                  className="rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-xs font-bold text-emerald-800 flex items-center gap-2"
+                >
+                  <CheckCircle className="h-4 w-4 text-emerald-600" />
+                  <span>{savedCount > 1 ? `${savedCount} resources saved.` : 'Resource saved.'}</span>
+                </div>
+              )}
+            </section>
+          )}
         </div>
-
-        <div className="pt-4 border-t border-slate-200">
-          <button
-            type="button"
-            className={button}
-            disabled={isSavingResources}
-            onClick={() => void handleSaveResources()}
-          >
-            <Save className="h-4 w-4" />
-            <span>
-              {isSavingResources
-                ? 'Saving...'
-                : resourceItems.length > 1
-                  ? `Save ${resourceItems.length} resources`
-                  : 'Save resource'}
-            </span>
-          </button>
-        </div>
-
-        {savedCount > 0 && (
-          <div
-            role="status"
-            className="rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-xs font-bold text-emerald-800 flex items-center gap-2"
-          >
-            <CheckCircle className="h-4 w-4 text-emerald-600" />
-            <span>{savedCount > 1 ? `${savedCount} resources saved.` : 'Resource saved.'}</span>
-          </div>
-        )}
-      </section>
-    </Frame>
+      )}
+    </div>
   );
 }

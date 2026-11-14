@@ -24,12 +24,13 @@ import {
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useQuery } from '@tanstack/react-query';
+import { getAcademicPrograms } from '@/features/academic/services/academic-api';
 
 import {
   useBatches,
   useDepartments,
   useProfileCompletion,
-  usePrograms,
   useStudentProfile,
   useUpdateProfile,
 } from '../api/student-api';
@@ -44,8 +45,17 @@ export function ProfilePage(): React.JSX.Element {
   const updateProfileMutation = useUpdateProfile();
 
   const [activeTab, setActiveTab] = useState<'academic' | 'about' | 'skills' | 'projects' | 'certifications'>('academic');
-  const [selectedDeptId, setSelectedDeptId] = useState<string>('');
-  const { data: programs } = usePrograms(selectedDeptId || profile?.departmentId);
+
+  // Academic Master Data: Institutional Department statically locked to CSE
+  const cseDept = departments?.find((d) => d.code === 'CSE') || departments?.[0];
+  const { data: academicPrograms } = useQuery({
+    queryKey: ['academic', 'programs-all'],
+    queryFn: getAcademicPrograms,
+  });
+
+  const availablePrograms = (academicPrograms ?? []).filter(
+    (p) => !cseDept || p.departmentId === cseDept.id || p.isActive,
+  );
 
   // Projects, Certs, Achievements state
   const [projects, setProjects] = useState<ProjectEntry[]>([]);
@@ -53,22 +63,34 @@ export function ProfilePage(): React.JSX.Element {
   const [achievements, setAchievements] = useState<AchievementEntry[]>([]);
   const [careerInterestsInput, setCareerInterestsInput] = useState('');
   const [careerInterests, setCareerInterests] = useState<string[]>([]);
+  const [selectedStreamCode, setSelectedStreamCode] = useState<string>('');
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   const {
     register,
     handleSubmit,
     reset,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<UpdateStudentProfileDto>({
     resolver: zodResolver(updateStudentProfileSchema),
   });
 
+  const watchedProgramId = watch('programId');
+  const selectedProgram = availablePrograms.find((p) => p.id === watchedProgramId);
+
+  useEffect(() => {
+    if (cseDept) {
+      setValue('departmentId', cseDept.id);
+    }
+  }, [cseDept, setValue]);
+
   useEffect(() => {
     if (profile) {
       reset({
         rollNumber: profile.rollNumber,
-        departmentId: profile.departmentId,
+        departmentId: cseDept?.id || profile.departmentId,
         programId: profile.programId,
         batchId: profile.batchId,
         cgpa: profile.cgpa ?? undefined,
@@ -77,17 +99,36 @@ export function ProfilePage(): React.JSX.Element {
         githubUrl: profile.githubUrl ?? '',
         portfolioUrl: profile.portfolioUrl ?? '',
       });
-      setSelectedDeptId(profile.departmentId);
       setProjects(profile.projects);
       setCertifications(profile.certifications);
       setAchievements(profile.achievements);
       setCareerInterests(profile.careerInterests);
+
+      // Check if profile has saved stream in careerInterests
+      const foundStreamTag = (profile.careerInterests || []).find((ci) => ci.startsWith('Stream: '));
+      if (foundStreamTag) {
+        const streamMatch = foundStreamTag.match(/\(([^)]+)\)$/);
+        setSelectedStreamCode(streamMatch?.[1] ? streamMatch[1] : foundStreamTag.replace('Stream: ', '').trim());
+      }
     }
-  }, [profile, reset]);
+  }, [profile, reset, cseDept]);
+
+  const handleStreamChange = (streamCode: string) => {
+    setSelectedStreamCode(streamCode);
+    setCareerInterests((prev) => {
+      const filtered = prev.filter((item) => !item.startsWith('Stream: '));
+      if (!streamCode) return filtered;
+      const streamObj = selectedProgram?.streams?.find((s) => s.code === streamCode);
+      const tag = streamObj ? `Stream: ${streamObj.name} (${streamObj.code})` : `Stream: ${streamCode}`;
+      return [...filtered, tag];
+    });
+  };
 
   const onSubmit = async (data: UpdateStudentProfileDto) => {
+    const finalDeptId = cseDept?.id || data.departmentId || profile?.departmentId;
     await updateProfileMutation.mutateAsync({
       ...data,
+      departmentId: finalDeptId,
       projects,
       certifications,
       achievements,
@@ -264,8 +305,30 @@ export function ProfilePage(): React.JSX.Element {
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Fixed CSE Department Institutional Banner */}
+                <div className="sm:col-span-2 rounded-xl border border-blue-200 bg-blue-50/60 p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <GraduationCap className="h-4 w-4 text-blue-700" />
+                      <span className="text-xs font-semibold text-blue-900">Academic Department</span>
+                    </div>
+                    <span className="text-[11px] font-semibold text-blue-700 bg-blue-100 px-2.5 py-0.5 rounded-full border border-blue-200">
+                      Static Institutional Scope
+                    </span>
+                  </div>
+                  <p className="mt-1.5 text-sm font-bold text-slate-900">
+                    {cseDept?.name || 'Computer Science and Engineering'} ({cseDept?.code || 'CSE'})
+                  </p>
+                  <p className="mt-0.5 text-xs text-slate-500">
+                    Portal enrollment and career tracks are dedicated to the Computer Science & Engineering department.
+                  </p>
+                  <input type="hidden" {...register('departmentId')} value={cseDept?.id || profile?.departmentId || ''} />
+                </div>
+
                 <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1">Roll Number / Student ID</label>
+                  <label className="block text-xs font-medium text-slate-700 mb-1">
+                    Roll Number / Student ID <span className="text-red-500">*</span>
+                  </label>
                   <input
                     {...register('rollNumber')}
                     placeholder="e.g. 2022CSE045"
@@ -291,41 +354,47 @@ export function ProfilePage(): React.JSX.Element {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1">Department</label>
-                  <select
-                    {...register('departmentId')}
-                    onChange={(e) => {
-                      void register('departmentId').onChange(e);
-                      setSelectedDeptId(e.target.value);
-                    }}
-                    className="w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none"
-                  >
-                    <option value="">-- Select Department --</option>
-                    {departments?.map((d) => (
-                      <option key={d.id} value={d.id}>
-                        {d.name} ({d.code})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1">Academic Program</label>
+                  <label className="block text-xs font-medium text-slate-700 mb-1">
+                    Academic Degree Course <span className="text-red-500">*</span>
+                  </label>
                   <select
                     {...register('programId')}
                     className="w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none"
                   >
-                    <option value="">-- Select Program --</option>
-                    {programs?.map((p) => (
+                    <option value="">-- Select Degree Course --</option>
+                    {availablePrograms.map((p) => (
                       <option key={p.id} value={p.id}>
                         {p.name} ({p.degreeLevel})
                       </option>
                     ))}
                   </select>
+                  {errors.programId && <p className="mt-1 text-xs text-red-600">{errors.programId.message}</p>}
                 </div>
 
+                {selectedProgram && selectedProgram.streams && selectedProgram.streams.length > 0 && (
+                  <div>
+                    <label className="block text-xs font-medium text-slate-700 mb-1">
+                      Stream / Specialization
+                    </label>
+                    <select
+                      value={selectedStreamCode}
+                      onChange={(e) => { handleStreamChange(e.target.value); }}
+                      className="w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none"
+                    >
+                      <option value="">-- Select Stream / Specialization --</option>
+                      {selectedProgram.streams.filter((s) => s.isActive).map((s) => (
+                        <option key={s.id} value={s.code}>
+                          {s.name} ({s.code})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
                 <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1">Graduation Batch</label>
+                  <label className="block text-xs font-medium text-slate-700 mb-1">
+                    Graduation Batch <span className="text-red-500">*</span>
+                  </label>
                   <select
                     {...register('batchId')}
                     className="w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none"
@@ -337,6 +406,7 @@ export function ProfilePage(): React.JSX.Element {
                       </option>
                     ))}
                   </select>
+                  {errors.batchId && <p className="mt-1 text-xs text-red-600">{errors.batchId.message}</p>}
                 </div>
               </div>
             </motion.div>

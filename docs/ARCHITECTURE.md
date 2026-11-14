@@ -259,3 +259,112 @@ Mock interviews simulate realistic technical and behavioral placement rounds:
    - Communication Clarity & Structure (0–100)
 4. **Actionable Constructive Feedback**: In addition to quantitative scores, the engine generates concrete improvement suggestions, highlighting strong points and missing technical keywords.
 
+## 22. Notice board targeting, scheduling state machine & attachments (added Phase 7)
+
+Institutional communications require audience-targeted visibility and automated lifecycle management:
+
+1. **Targeting Matrix (`target_audience: jsonb`)**: Notices filter visibility across three optional dimensions:
+   - `roles`: Target specific portal roles (`STUDENT`, `PLACEMENT_FACULTY`, `DEPARTMENT_COORDINATOR`, `ADMIN`).
+   - `departments`: Target specific academic departments (e.g. `CSE`, `ECE`, `MECH`).
+   - `batches`: Target specific graduation years (e.g. `2025`, `2026`).
+   An empty or unspecified dimension matches all students/users within that dimension.
+2. **Notice Lifecycle State Machine**:
+   - `DRAFT` → Staff staging without student visibility.
+   - `SCHEDULED` → Automated publishing by background cron when `scheduled_at <= now()`.
+   - `PUBLISHED` → Active and visible to target audience; pinned notices sort to the top.
+   - `EXPIRED` → Automated expiration by background cron when `expires_at <= now()`, or manual retraction.
+   - `ARCHIVED` → Historical record retained for audit purposes.
+3. **Structured Attachments**: File attachments (`name`, `url`, `size`, `mimeType`) are stored as JSONB arrays, eliminating complex join overhead while preserving rich metadata for client download and preview.
+
+## 23. Persistent notifications, real-time Socket.io & user preferences (added Phase 7)
+
+Student engagement relies on reliable, multi-channel notifications with complete user preference control:
+
+1. **Persistent In-App Storage**: Every triggered notification (`new_opportunity`, `application_update`, `opportunity_deadline`, `test_assigned`, `test_result_ready`, `notice_published`, `roadmap_reminder`) is written to `notifications` table, ensuring an unread counter and persistent inbox history.
+2. **Authenticated Real-Time Socket.io**:
+   - Socket connection validates Supabase JWT token during handshake.
+   - Sockets join private rooms keyed by `user:${userId}`.
+   - Real-time events (`notification:new`) push immediately to connected clients to update the notification bell and trigger toasts.
+3. **User Preference & Muting Matrix**:
+   - Users configure global toggles (`push_enabled`, `email_enabled`) and granular `muted_types` array.
+   - Muted notification types are suppressed from real-time push and email while still recording in audit history if desired.
+4. **Email Transporter with Mock Fallback**:
+   - Nodemailer is configured via environment variables (`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`).
+   - In development/testing environments without external SMTP credentials, the service automatically falls back to an in-memory/console mock logger, guaranteeing zero crashes or blocked queues.
+
+## 24. Role-based analytics, snapshot engine & transactional source-of-truth (added Phase 7)
+
+Institutional placement decision-making requires cross-cutting analytics across students, faculty, and administrative leadership:
+
+1. **Transactional Live Analytics**: Real-time queries run against primary transactional tables (`student_profiles`, `opportunity_applications`, `mock_test_attempts`, `roadmaps`) with indexed aggregations, ensuring instant visibility of new applications and test completions without stale replication lag.
+2. **Role-Specific Metric Views**:
+   - **Student Dashboard**: Tracks Profile Completion %, ATS Resume Score, Tests Attempted, Average Test Score, Roadmap Progress %, Applications Submitted, and Interview/Selection milestones.
+   - **Faculty Dashboard**: Tracks Active Opportunities Published, Applications Funnel (Submitted → Shortlisted → Selected), Test Participation & Pass Rates, and Student Readiness by Department.
+   - **Admin Dashboard**: Institutional-level metrics including Total Users by Role, Placement Rate %, Opportunities by Type, Preparation Adoption, and Notification Delivery Volume.
+3. **Analytics Snapshot Engine**:
+   - A background daily cron task snapshots system-wide metrics into `analytics_snapshots` (`snapshot_type: 'daily' | 'weekly' | 'monthly'`).
+   - Enables longitudinal trend visualization over semesters and academic years without costly table scans over millions of historical rows.
+
+## 25. Institutional governance, write-once audit logging & correlation tracking (added Phase 8)
+
+Institutional compliance requires an indelible, immutable audit trail for security, configuration, and critical operational actions:
+
+1. **Write-Once Audit Storage**: The `audit_logs` table records actor identity, action name, resource target, diff/metadata, client IP, user agent, and timestamp. Audit logs are strictly append-only; update/delete operations are denied.
+2. **End-to-End Correlation Tracking**: Every request carries or generates an `x-request-id` header (RFC 4122 UUID v4) propagated across Express middleware into controller, service, repository, and audit log entries (`request_id` column).
+3. **Explicit Centralized Service Ingestion**: Rather than unpredictable automatic interceptors or decorators, security-sensitive services (`UserManagementService`, `OpportunityService`, `OpportunityDraftService`, `ApplicationService`, `AcademicService`) explicitly invoke `AuditService.log(...)` inside or immediately surrounding their domain transactions, ensuring exact operational context and failure resilience.
+4. **Read-Only Audit Log Viewer**: Administrative users can query, inspect, and filter historical audit events by action, date range, actor, or resource type with paginated server-side queries.
+
+## 26. Administrator self-protection & lockout prevention (added Phase 8)
+
+Privilege abuse or accidental administrative lockouts pose a critical risk to institutional operations:
+
+1. **Self-Deactivation Guard**: An administrator cannot deactivate their own user account (`actorId === targetUserId`), returning an explicit `400 Bad Request`.
+2. **Self-Role Demotion Guard**: An administrator cannot revoke their own `ADMIN` role.
+3. **Sole Administrator Immunity**: When only one active user possesses the `ADMIN` role across the institution, operations that would deactivate that user or revoke their `ADMIN` role are strictly rejected to guarantee the institution is never left orphaned without governance.
+
+## 27. Security hardening: SSRF defense, file validation & AI guardrails (added Phase 8)
+
+AI ingestion and file processing open dangerous attack surfaces that require strict defense-in-depth:
+
+1. **SSRF Protection (`SsrfGuard`)**:
+   - URL-based opportunity ingestion validates all target URLs before network dispatch.
+   - Enforces strict HTTP/HTTPS protocol whitelisting and standard ports (80, 443).
+   - Rejects loopback addresses (`127.0.0.1`, `::1`, `localhost`), RFC 1918 private subnets (`10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`), IPv6 unique-local/link-local addresses, and cloud provider metadata IPs (`169.254.169.254`, `metadata.google.internal`).
+2. **Strict File Upload Validation (`FileValidator`)**:
+   - Enforces maximum file size limits (5 MB default for resumes and job specs).
+   - Validates MIME types against allowed whitelists (`application/pdf`, `application/vnd.openxmlformats-officedocument.wordprocessingml.document`, `text/plain`).
+   - Verifies file extensions match declared MIME types to prevent extension spoofing.
+   - Sanitizes file paths to prevent directory traversal (`..`, null bytes, slashes).
+3. **AI Input Guardrails (`AiInputGuard`)**:
+   - Truncates oversized input texts (e.g., max 50,000 characters) before sending to LLMs to prevent denial-of-wallet and context exhaustion.
+   - Strips dangerous control characters and null bytes (`\x00`).
+   - Applies heuristics to detect and flag prompt injection attempts (e.g., "ignore previous instructions", "system prompt override").
+4. **Tiered AI Endpoint Rate Limiting**:
+   - Specialized Redis-backed rate limiting (20 requests per 15 minutes) applied to expensive AI routes (opportunity draft extraction, AI resume analysis, AI resume tailoring/enhancement).
+
+## 28. AsyncLocalStorage request context & provenance tracking (added Phase 8)
+
+Tracking request provenance (Client Origin, Request ID, IP, User Agent) across distributed operations without polluting domain service method signatures:
+
+1. **AsyncLocalStorage (`requestContextStorage`)**: The Express `requestIdMiddleware` executes all subsequent middleware and route handlers inside Node's native `AsyncLocalStorage.run(...)`.
+2. **Transparent Log Enrichment**: `AuditService.log` automatically retrieves the active context from `requestContextStorage.getStore()`. When present, it automatically persists `request_id`, `origin`, `ip_address`, and `user_agent` alongside the domain event without requiring caller services to pass HTTP request objects.
+3. **Cross-Origin Security Verification**: Captures `req.headers['origin']` and standardizes internal/direct calls as `direct-api` vs `web-app` or external domains, giving administrators full forensic visibility into where sensitive mutations originated.
+
+## 29. Single-department academic taxonomy (added Phase 8)
+
+The portal is designed for single-department deployments (e.g., Department of Computer Science & Engineering):
+
+1. **Hierarchy Pivot**: Replaced multi-department administrative routing with direct **Degree Courses / Academic Programs** (e.g., B.Tech CSE, MCA, M.Tech Data Science, Ph.D), **Specialization Streams** (e.g., AI/ML, Cybersecurity, Cloud, Full Stack), and **Graduation Batches** (e.g., Class of 2026).
+2. **Automated Department Defaulting**: When creating programs without explicit department assignment, `AcademicService` automatically resolves to the canonical Computer Science & Engineering department entity.
+
+## 30. Unified AI microservice observability & failure telemetry (added Phase 8)
+
+AI reliability requires comprehensive observability across both internal processing workers and external microservices:
+
+1. **Unified AI Job Logs (`ai_job_logs`)**: Persists failures across all AI operations—opportunity extraction (Docling/OCR/Gemini), resume ATS scoring, text enhancements, match recommendations, and mock interview evaluations.
+2. **External Microservice Telemetry**: The administrative console continuously monitors the external FastAPI microservice (`apps/ai-service`) with latency tracking and online/offline status reporting.
+3. **Sandboxed Graceful Degradation**: When the external AI microservice fails (network outage, token exhaustion, or timeout), user-facing features degrade safely to rule-based deterministic heuristics while the incident is recorded in the admin telemetry dashboard.
+
+
+
+

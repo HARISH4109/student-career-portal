@@ -77,6 +77,24 @@ export class ApplicationController {
     }
   };
 
+  updateStudentSelfStatus = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const parsed = updateApplicationStatusSchema.safeParse(req.body);
+      if (!parsed.success) {
+        throw new ValidationError('Invalid status data', this.formatZodErrors(parsed.error));
+      }
+      const id = String(req.params.id);
+      const application = await this.applicationService.updateStudentSelfStatus(
+        id,
+        parsed.data,
+        requestUser(req),
+      );
+      sendSuccess(res, application);
+    } catch (error) {
+      next(error);
+    }
+  };
+
   listByOpportunity = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const pagination = applicationListQuerySchema.parse(req.query);
