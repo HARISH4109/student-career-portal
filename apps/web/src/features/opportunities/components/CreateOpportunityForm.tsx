@@ -284,6 +284,14 @@ export function CreateOpportunityForm({
 
   const handleSaveOnly = async () => {
     setFormError(null);
+    if (!title.trim()) {
+      setFormError('Title is required');
+      return;
+    }
+    if (applicationDeadline && new Date(applicationDeadline).getTime() <= Date.now()) {
+      setFormError('Application deadline must be in the future');
+      return;
+    }
     const payload = buildPayload();
     try {
       if (isEditing && opportunity) {

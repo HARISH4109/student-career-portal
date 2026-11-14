@@ -4,6 +4,8 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   resolve: { alias: { '@': path.resolve(__dirname, './src') } },
   test: {
+    environment: 'jsdom',
+    setupFiles: ['./src/test/setup.ts'],
     include: ['src/**/*.test.{ts,tsx}'],
     env: {
       VITE_SUPABASE_URL: 'https://unit-test.supabase.co',
