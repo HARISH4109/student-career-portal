@@ -63,16 +63,16 @@ export async function mockSession(
     (role === 'STUDENT'
       ? 'Alex Student'
       : role === 'PLACEMENT_FACULTY'
-      ? 'Dr. Sarah Faculty'
-      : 'Chief Admin');
+        ? 'Dr. Sarah Faculty'
+        : 'Chief Admin');
 
   const permissions =
     overrides.permissions ??
     (role === 'STUDENT'
       ? STUDENT_PERMISSIONS
       : role === 'PLACEMENT_FACULTY'
-      ? FACULTY_PERMISSIONS
-      : ADMIN_PERMISSIONS);
+        ? FACULTY_PERMISSIONS
+        : ADMIN_PERMISSIONS);
 
   const user: MockUser = {
     id,
