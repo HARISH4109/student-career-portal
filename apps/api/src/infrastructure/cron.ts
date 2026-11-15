@@ -50,7 +50,7 @@ export class CronManager {
 
   stopAll(): void {
     for (const job of this.jobs) {
-      job.stop();
+      void job.stop();
     }
     this.jobs = [];
     logger.info('Background cron scheduler stopped');

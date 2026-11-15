@@ -438,7 +438,7 @@ export function parseResumeText(
       let issueDate = '';
 
       if (cleanLine.includes('—') || cleanLine.includes(' - ')) {
-        const parts = cleanLine.split(/[—\-]/).map((p) => p.trim());
+        const parts = cleanLine.split(/[—-]/).map((p) => p.trim());
         name = parts[0] || cleanLine;
         if (parts[1]) issuer = parts[1];
       }

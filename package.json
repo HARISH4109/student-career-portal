@@ -24,9 +24,10 @@
     "lint": "eslint apps/api/src apps/web/src packages/db/src packages/shared-types/src",
     "format": "prettier --write .",
     "test": "npm run test -w apps/api && npm run test -w apps/web",
-    "prepare": "husky install",
+    "test:benchmark": "node scripts/performance-benchmark.cjs",
+    "test:e2e": "playwright test apps/web/e2e/journeys-student.spec.ts apps/web/e2e/journeys-faculty-admin.spec.ts -c apps/web/playwright.config.ts",
     "test:smoke": "node scripts/production-smoke.cjs",
-    "test:e2e": "node scripts/verify-portal.cjs",
+    "prepare": "husky install",
     "verify": "node scripts/verify-portal.cjs"
   },
   "devDependencies": {

@@ -1,4 +1,4 @@
-import type { AuthenticatedUser, RoleName } from '@career-portal/shared-types';
+import type { AuthenticatedUser } from '@career-portal/shared-types';
 import { configureStore } from '@reduxjs/toolkit';
 import { renderHook } from '@testing-library/react';
 import React from 'react';

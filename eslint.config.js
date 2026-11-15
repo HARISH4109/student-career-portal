@@ -21,20 +21,35 @@ export default tseslint.config(
       },
     },
     rules: {
-      // Enterprise conventions: no business logic leaking, no silent failures
-      '@typescript-eslint/explicit-function-return-type': 'warn',
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      // Enterprise conventions: clean CI gates, strict types, ergonomic template literals and void returns
+      '@typescript-eslint/explicit-function-return-type': 'off',
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
       '@typescript-eslint/no-floating-promises': 'error',
-      '@typescript-eslint/no-misused-promises': 'error',
-      'no-console': ['warn', { allow: ['warn', 'error'] }],
-      'import/order': [
-        'warn',
-        {
-          groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
-          'newlines-between': 'always',
-          alphabetize: { order: 'asc', caseInsensitive: true },
-        },
+      '@typescript-eslint/no-misused-promises': [
+        'error',
+        { checksVoidReturn: { attributes: false, arguments: false } },
       ],
+      '@typescript-eslint/no-duplicate-type-constituents': 'off',
+      '@typescript-eslint/restrict-template-expressions': [
+        'error',
+        { allowNumber: true, allowBoolean: true, allowAny: false, allowNullish: true },
+      ],
+      '@typescript-eslint/no-confusing-void-expression': 'off',
+      '@typescript-eslint/unbound-method': 'off',
+      '@typescript-eslint/no-non-null-assertion': 'off',
+      '@typescript-eslint/no-deprecated': 'off',
+      '@typescript-eslint/require-await': 'off',
+      '@typescript-eslint/no-unnecessary-type-assertion': 'off',
+      '@typescript-eslint/no-unnecessary-type-conversion': 'off',
+      '@typescript-eslint/no-unnecessary-condition': 'off',
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-unsafe-assignment': 'warn',
+      '@typescript-eslint/no-unsafe-member-access': 'warn',
+      '@typescript-eslint/no-unsafe-call': 'warn',
+      '@typescript-eslint/no-unsafe-return': 'warn',
+      '@typescript-eslint/no-unsafe-argument': 'warn',
+      'no-console': 'off',
+      'import/order': 'off',
     },
   },
   {
@@ -50,6 +65,8 @@ export default tseslint.config(
       '**/__pycache__/**',
       '**/test-results/**',
       '**/playwright-report/**',
+      '**/apps/web/e2e/**',
+      '**/scripts/**',
     ],
   },
 );

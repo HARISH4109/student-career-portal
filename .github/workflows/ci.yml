@@ -53,7 +53,6 @@ jobs:
 
       - name: Lint
         run: npm run lint
-        continue-on-error: true
 
       - name: Typecheck API
         run: npx tsc --noEmit -p apps/api/tsconfig.json
@@ -86,6 +85,15 @@ jobs:
 
       - name: Compiled API startup
         run: node scripts/production-smoke.cjs
+
+      - name: Performance Benchmarks & SLA Verification
+        run: npm run test:benchmark
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run E2E Journeys (Playwright)
+        run: npm run test:e2e
 
   python-quality:
     name: Lint, Typecheck & Test (AI Service)

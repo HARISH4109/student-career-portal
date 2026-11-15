@@ -6,7 +6,6 @@ import type {
 } from '@career-portal/shared-types';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import React from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ProfilePage } from './ProfilePage';
@@ -54,6 +53,8 @@ const mockProfile: StudentProfileResponseDto = {
   certifications: [],
   achievements: [],
   skills: [],
+  createdAt: '2026-01-01T00:00:00.000Z',
+  updatedAt: '2026-01-01T00:00:00.000Z',
 };
 
 const mockDepartments: DepartmentDto[] = [
