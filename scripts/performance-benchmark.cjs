@@ -146,24 +146,30 @@ async function benchmarkApiLatency() {
       NODE_ENV: 'production',
       LOG_LEVEL: 'fatal',
       API_PORT: String(port),
-      DATABASE_URL: 'postgresql://postgres:postgres@127.0.0.1:5432/career_portal_test',
-      SUPABASE_URL: 'http://127.0.0.1:54321',
-      SUPABASE_SERVICE_ROLE_KEY: 'bench-key',
-      SUPABASE_ANON_KEY: 'bench-key',
-      JWT_SECRET: 'benchmark-jwt-secret-at-least-16-chars',
-      REDIS_URL: 'redis://127.0.0.1:6379',
-      AI_SERVICE_BASE_URL: 'http://127.0.0.1:8000',
+      DATABASE_URL: process.env.DATABASE_URL || 'postgresql://postgres:postgres@127.0.0.1:5432/career_portal_test',
+      SUPABASE_URL: process.env.SUPABASE_URL || 'http://127.0.0.1:54321',
+      SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY || 'bench-key',
+      SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY || 'bench-key',
+      JWT_SECRET: process.env.JWT_SECRET || 'benchmark-jwt-secret-at-least-16-chars',
+      REDIS_URL: process.env.REDIS_URL || 'redis://127.0.0.1:6379',
+      AI_SERVICE_BASE_URL: process.env.AI_SERVICE_BASE_URL || 'http://127.0.0.1:8000',
+      AI_SERVICE_INTERNAL_TOKEN: process.env.AI_SERVICE_INTERNAL_TOKEN || 'bench-token',
       RATE_LIMIT_MAX_REQUESTS: '10000',
       RATE_LIMIT_WINDOW_MS: '60000',
     },
     stdio: ['ignore', 'pipe', 'pipe'],
   });
 
+  let stderr = '';
+  child.stderr.on('data', (chunk) => {
+    stderr += chunk;
+  });
+
   try {
     // Wait for server to accept connections
     let ready = false;
     for (let attempt = 0; attempt < 30; attempt++) {
-      if (child.exitCode !== null) throw new Error(`API server exited unexpectedly with code ${child.exitCode}`);
+      if (child.exitCode !== null) throw new Error(`API server exited unexpectedly with code ${child.exitCode}: ${stderr}`);
       try {
         const res = await fetch(`http://127.0.0.1:${port}/api/v1/opportunities`, { signal: AbortSignal.timeout(1000) });
         if (res.status === 401) {

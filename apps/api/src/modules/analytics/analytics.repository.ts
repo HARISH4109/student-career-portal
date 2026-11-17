@@ -409,7 +409,7 @@ export class AnalyticsRepository {
       });
     }
 
-    // 2b. Department Breakdown (retained for backward compatibility)
+    // 2b. Cross-Department Placement & Readiness Benchmarks
     const depts = await this.database.select().from(schema.departments);
     const departmentBreakdown = [];
     for (const dept of depts) {
@@ -418,11 +418,57 @@ export class AnalyticsRepository {
         .from(schema.studentProfiles)
         .where(eq(schema.studentProfiles.departmentId, dept.id));
 
+      const [placedRes] = await this.database
+        .select({ count: countDistinct(schema.opportunityApplications.studentId) })
+        .from(schema.opportunityApplications)
+        .innerJoin(schema.studentProfiles, eq(schema.opportunityApplications.studentId, schema.studentProfiles.id))
+        .where(
+          and(
+            eq(schema.studentProfiles.departmentId, dept.id),
+            eq(schema.opportunityApplications.status, 'selected'),
+          ),
+        );
+
+      const [deptScoreRes] = await this.database
+        .select({
+          avgScore: avg(schema.mockTestAttempts.score),
+        })
+        .from(schema.mockTestAttempts)
+        .innerJoin(schema.studentProfiles, eq(schema.mockTestAttempts.studentId, schema.studentProfiles.id))
+        .where(
+          and(
+            eq(schema.studentProfiles.departmentId, dept.id),
+            eq(schema.mockTestAttempts.status, 'submitted'),
+          ),
+        );
+
+      const [readyStudentsRes] = await this.database
+        .select({ count: countDistinct(schema.mockTestAttempts.studentId) })
+        .from(schema.mockTestAttempts)
+        .innerJoin(schema.studentProfiles, eq(schema.mockTestAttempts.studentId, schema.studentProfiles.id))
+        .where(
+          and(
+            eq(schema.studentProfiles.departmentId, dept.id),
+            eq(schema.mockTestAttempts.status, 'submitted'),
+            gte(schema.mockTestAttempts.score, '70'),
+          ),
+        );
+
+      const studentCount = deptCount?.count ?? 0;
+      const placedCount = Number(placedRes?.count ?? 0);
+      const placementRate = studentCount > 0 ? Math.round((placedCount / studentCount) * 100) : 0;
+      const averageScore = deptScoreRes?.avgScore ? Math.round(Number(deptScoreRes.avgScore) * 10) / 10 : 0;
+      const readyStudentCount = Number(readyStudentsRes?.count ?? 0);
+
       departmentBreakdown.push({
         departmentId: dept.id,
         departmentName: dept.name,
         departmentCode: dept.code,
-        studentCount: deptCount?.count ?? 0,
+        studentCount,
+        placedCount,
+        placementRate,
+        averageScore,
+        readyStudentCount,
       });
     }
 
@@ -526,6 +572,41 @@ export class AnalyticsRepository {
       readRate,
     };
 
+    // 8. System Operations & Audit Telemetry
+    const [activeUsersRes] = await this.database
+      .select({ count: count() })
+      .from(schema.users)
+      .where(eq(schema.users.isActive, true));
+
+    const [totalAuditLogsRes] = await this.database
+      .select({ count: count() })
+      .from(schema.auditLogs);
+
+    const rawRecentAuditLogs = await this.database
+      .select({
+        id: schema.auditLogs.id,
+        action: schema.auditLogs.action,
+        entityType: schema.auditLogs.entityType,
+        createdAt: schema.auditLogs.createdAt,
+        actorName: schema.users.fullName,
+      })
+      .from(schema.auditLogs)
+      .leftJoin(schema.users, eq(schema.auditLogs.userId, schema.users.id))
+      .orderBy(desc(schema.auditLogs.createdAt))
+      .limit(6);
+
+    const systemOperations = {
+      activeUsersCount: activeUsersRes?.count ?? 0,
+      totalAuditLogs: totalAuditLogsRes?.count ?? 0,
+      recentAuditLogs: rawRecentAuditLogs.map((log) => ({
+        id: log.id,
+        action: log.action,
+        entityType: log.entityType,
+        actorName: log.actorName,
+        createdAt: log.createdAt instanceof Date ? log.createdAt.toISOString() : String(log.createdAt),
+      })),
+    };
+
     return {
       users,
       departmentBreakdown,
@@ -535,6 +616,7 @@ export class AnalyticsRepository {
       applications,
       preparation,
       notificationDelivery,
+      systemOperations,
     };
   }
 

@@ -5,15 +5,18 @@ import type {
 } from '@career-portal/shared-types';
 import { useQuery } from '@tanstack/react-query';
 import {
+  Activity,
   ArrowRight,
   Award,
   BarChart3,
   Bell,
   BookOpen,
   Briefcase,
+  Building2,
   CheckCircle2,
   GraduationCap,
   Route,
+  Shield,
   Sparkles,
   TrendingUp,
   Users,
@@ -807,19 +810,24 @@ function FacultyAnalyticsView({ data }: { data: FacultyAnalyticsResponse }) {
   );
 }
 
-// ── Admin Analytics View ──────────────────────────────────────────────────
+// ── Admin Analytics View (Institutional Governance & Telemetry) ───────────
 
 function AdminAnalyticsView({ data }: { data: AdminAnalyticsResponse }) {
-  const totalStudents = data.users.students || 1;
+  const activeUsersCount = data.systemOperations?.activeUsersCount ?? data.users.total;
+  const activePercentage = Math.round((activeUsersCount / (data.users.total || 1)) * 100);
+  const recentLogs = data.systemOperations?.recentAuditLogs ?? [];
 
-  // Use real programs from programBreakdown if present, or fallback
-  const programsList = data.programBreakdown && data.programBreakdown.length > 0
-    ? data.programBreakdown
-    : [
-        { programId: '1', programName: 'B.Tech Computer Science & Engineering', degreeLevel: 'Bachelors', studentCount: Math.round(data.users.students * 0.65) },
-        { programId: '2', programName: 'Master of Computer Applications (MCA)', degreeLevel: 'Masters', studentCount: Math.round(data.users.students * 0.20) },
-        { programId: '3', programName: 'M.Tech Computer Science & Engineering', degreeLevel: 'Masters', studentCount: Math.round(data.users.students * 0.15) },
-      ];
+  const deptBenchmarkData = (data.departmentBreakdown ?? []).map((d) => ({
+    name: d.departmentCode,
+    fullName: d.departmentName,
+    placementRate:
+      d.placementRate ??
+      (d.studentCount > 0 && d.placedCount ? Math.round((d.placedCount / d.studentCount) * 100) : 0),
+    averageScore: d.averageScore ?? 0,
+    studentCount: d.studentCount,
+    placedCount: d.placedCount ?? 0,
+    readyCount: d.readyStudentCount ?? 0,
+  }));
 
   return (
     <div className="space-y-6">
@@ -844,7 +852,7 @@ function AdminAnalyticsView({ data }: { data: AdminAnalyticsResponse }) {
         {/* Placement Success Rate */}
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm space-y-1">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500">Placement Success Rate</span>
+            <span className="text-xs font-semibold text-slate-500">Institutional Placement Rate</span>
             <div className="p-2 bg-emerald-50 text-emerald-600 rounded-xl">
               <Award className="h-5 w-5" />
             </div>
@@ -854,16 +862,16 @@ function AdminAnalyticsView({ data }: { data: AdminAnalyticsResponse }) {
               {data.applications.placementRate}%
             </span>
             <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
-              {data.applications.selectedCount} Offers
+              {data.applications.selectedCount} Placed
             </span>
           </div>
-          <p className="text-xs text-slate-400">Verified student selections across all drives</p>
+          <p className="text-xs text-slate-400">College-wide verified student selections</p>
         </div>
 
-        {/* Campus Opportunities */}
+        {/* Campus Opportunities Managed */}
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm space-y-1">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500">Campus Drives Managed</span>
+            <span className="text-xs font-semibold text-slate-500">Campus Opportunities</span>
             <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl">
               <Briefcase className="h-5 w-5" />
             </div>
@@ -875,7 +883,7 @@ function AdminAnalyticsView({ data }: { data: AdminAnalyticsResponse }) {
             </span>
           </div>
           <p className="text-xs text-slate-400">
-            {data.opportunities.jobs} Full-Time Jobs • {data.opportunities.internships} Internships
+            {data.opportunities.jobs} Jobs • {data.opportunities.internships} Internships
           </p>
         </div>
 
@@ -899,58 +907,263 @@ function AdminAnalyticsView({ data }: { data: AdminAnalyticsResponse }) {
         </div>
       </div>
 
-      {/* Program Enrollment & Cohort Breakdown */}
+      {/* Cross-Department Placement & Readiness Benchmark */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Degree Programs Breakdown */}
+        {/* Department Comparative Bar Chart */}
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <GraduationCap className="h-5 w-5 text-indigo-600" /> Computer Science Academic Programs
+                <Building2 className="h-5 w-5 text-indigo-600" /> Department Benchmark Comparison
               </h3>
               <p className="text-xs text-slate-500 mt-0.5">
-                Active student enrollment distribution across degree programs
+                Side-by-side placement rate vs. technical readiness score (%)
               </p>
             </div>
             <Link
-              to="/dashboard/programs"
+              to="/dashboard/admin"
               className="text-xs font-semibold text-blue-600 hover:text-blue-800"
             >
-              Manage Programs →
+              Academic Config →
             </Link>
           </div>
 
-          <div className="space-y-4 pt-1">
-            {programsList.map((prog) => {
-              const share = Math.round((prog.studentCount / totalStudents) * 100);
+          {deptBenchmarkData.length === 0 ? (
+            <p className="text-xs text-slate-400 py-12 text-center">No academic departments registered.</p>
+          ) : (
+            <div className="h-64 w-full pt-2">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={deptBenchmarkData} margin={{ top: 15, right: 20, left: 0, bottom: 25 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis
+                    dataKey="name"
+                    stroke="#94a3b8"
+                    tick={{ fontSize: 11, fill: '#64748b' }}
+                    tickLine={false}
+                    axisLine={{ stroke: '#e2e8f0' }}
+                  />
+                  <YAxis
+                    domain={[0, 100]}
+                    stroke="#94a3b8"
+                    tick={{ fontSize: 11, fill: '#64748b' }}
+                    tickLine={false}
+                    axisLine={false}
+                    unit="%"
+                  />
+                  <Tooltip content={<CustomChartTooltip />} cursor={{ fill: 'rgba(241, 245, 249, 0.6)' }} />
+                  <Bar dataKey="placementRate" name="Placement Rate (%)" fill="#059669" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="averageScore" name="Avg Test Score (%)" fill="#6366f1" radius={[6, 6, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+        </div>
 
-              return (
-                <div key={prog.programId} className="rounded-xl bg-slate-50/70 p-3.5 border border-slate-100 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="text-sm font-bold text-slate-900">{prog.programName}</h4>
-                      <span className="inline-flex rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-semibold text-blue-800 mt-0.5">
-                        {prog.degreeLevel}
-                      </span>
+        {/* Department Detailed Breakdown List */}
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                <GraduationCap className="h-5 w-5 text-emerald-600" /> Department Performance Matrix
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Headcounts, placed student conversion, and readiness metrics
+              </p>
+            </div>
+            <span className="text-xs font-medium text-slate-400">
+              {data.departmentBreakdown.length} Department{data.departmentBreakdown.length === 1 ? '' : 's'}
+            </span>
+          </div>
+
+          <div className="divide-y divide-slate-100">
+            {data.departmentBreakdown.length === 0 ? (
+              <p className="text-xs text-slate-400 py-6 text-center">No academic departments registered.</p>
+            ) : (
+              data.departmentBreakdown.map((dept) => {
+                const placementRate =
+                  dept.placementRate ??
+                  (dept.studentCount > 0 && dept.placedCount
+                    ? Math.round((dept.placedCount / dept.studentCount) * 100)
+                    : 0);
+                const avgScore = dept.averageScore ?? 0;
+
+                return (
+                  <div key={dept.departmentId} className="py-3.5 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="flex h-7 w-10 items-center justify-center rounded-lg bg-indigo-50 text-[11px] font-bold text-indigo-700">
+                          {dept.departmentCode}
+                        </span>
+                        <div>
+                          <h4 className="text-sm font-bold text-slate-900">{dept.departmentName}</h4>
+                          <span className="text-xs text-slate-400">
+                            {dept.studentCount} student{dept.studentCount === 1 ? '' : 's'} enrolled
+                          </span>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-sm font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+                          {dept.placedCount ?? 0} Placed ({placementRate}%)
+                        </span>
+                        <span className="text-[11px] text-slate-400 block mt-0.5">
+                          Avg Score: {avgScore}% • {dept.readyStudentCount ?? 0} Ready
+                        </span>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <span className="text-sm font-bold text-slate-900">{prog.studentCount} Students</span>
-                      <span className="text-xs text-slate-400 block">{share}% of department</span>
+
+                    {/* Mini visual conversion bar */}
+                    <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden flex">
+                      <div
+                        className="bg-emerald-500 h-full rounded-full transition-all duration-300"
+                        style={{ width: `${Math.min(100, Math.max(0, placementRate))}%` }}
+                      />
                     </div>
                   </div>
+                );
+              })
+            )}
+          </div>
+        </div>
+      </div>
 
-                  <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
-                    <div
-                      className="bg-indigo-600 h-2 rounded-full transition-all duration-500"
-                      style={{ width: `${Math.max(5, share)}%` }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
+      {/* System Operations & User Activity Telemetry */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Operations Telemetry Card */}
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                <Activity className="h-5 w-5 text-indigo-600" /> System Operations & Account Activity
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Active account telemetry, communication reach, and platform metrics
+              </p>
+            </div>
+            <Link
+              to="/dashboard/admin"
+              className="text-xs font-semibold text-blue-600 hover:text-blue-800"
+            >
+              User Registry →
+            </Link>
+          </div>
+
+          <div className="space-y-4">
+            <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                  Active User Accounts
+                </span>
+                <span className="inline-flex rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-bold text-emerald-700 border border-emerald-100">
+                  {activePercentage}% Active
+                </span>
+              </div>
+              <div className="mt-2 flex items-baseline gap-2">
+                <span className="text-2xl font-bold text-slate-900">{activeUsersCount}</span>
+                <span className="text-xs text-slate-500">of {data.users.total} total registered accounts</span>
+              </div>
+              <div className="mt-3 flex items-center gap-2 text-xs text-slate-600">
+                <span className="rounded-md bg-white px-2 py-1 border border-slate-200">
+                  {data.users.students} Students
+                </span>
+                <span className="rounded-md bg-white px-2 py-1 border border-slate-200">
+                  {data.users.faculty} Faculty
+                </span>
+                <span className="rounded-md bg-white px-2 py-1 border border-slate-200">
+                  {data.users.admins} Admins
+                </span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-xl border border-slate-100 bg-slate-50 p-3.5">
+                <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
+                  Communication Reach
+                </span>
+                <span className="text-xl font-bold text-purple-700 mt-1 block">
+                  {data.notificationDelivery.totalNotifications}
+                </span>
+                <span className="text-[11px] text-slate-400 mt-0.5 block">
+                  {data.notificationDelivery.readRate}% read confirmation rate
+                </span>
+              </div>
+
+              <div className="rounded-xl border border-slate-100 bg-slate-50 p-3.5">
+                <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
+                  Recorded Audit Logs
+                </span>
+                <span className="text-xl font-bold text-blue-700 mt-1 block">
+                  {data.systemOperations?.totalAuditLogs ?? 0}
+                </span>
+                <span className="text-[11px] text-slate-400 mt-0.5 block">
+                  Immutable administrative actions
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 
+        {/* Administrative Audit Trail Card */}
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                <Shield className="h-5 w-5 text-blue-600" /> Administrative Audit Trail
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Real-time log of security events and administrative actions
+              </p>
+            </div>
+            <Link
+              to="/dashboard/admin"
+              className="text-xs font-semibold text-blue-600 hover:text-blue-800"
+            >
+              Open Audit Viewer →
+            </Link>
+          </div>
+
+          <div className="divide-y divide-slate-100">
+            {recentLogs.length === 0 ? (
+              <p className="text-xs text-slate-400 py-10 text-center">
+                No administrative audit events recorded yet.
+              </p>
+            ) : (
+              recentLogs.map((log) => {
+                const formattedAction = log.action.replace(/\./g, ' › ').replace(/_/g, ' ');
+                const formattedDate = new Date(log.createdAt).toLocaleDateString(undefined, {
+                  month: 'short',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                });
+
+                return (
+                  <div key={log.id} className="py-2.5 flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-700 border border-slate-200">
+                          {formattedAction}
+                        </span>
+                        <span className="text-[11px] text-slate-400 capitalize">
+                          {log.entityType.replace(/_/g, ' ')}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-500 mt-0.5 truncate">
+                        By <span className="font-medium text-slate-700">{log.actorName || 'System Admin'}</span>
+                      </p>
+                    </div>
+                    <span className="text-[11px] font-mono text-slate-400 shrink-0">
+                      {formattedDate}
+                    </span>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Graduation Cohorts & Opportunities Portfolio */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Graduation Batches */}
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
@@ -963,7 +1176,7 @@ function AdminAnalyticsView({ data }: { data: AdminAnalyticsResponse }) {
               </p>
             </div>
             <Link
-              to="/dashboard/admin#academic"
+              to="/dashboard/admin"
               className="text-xs font-semibold text-blue-600 hover:text-blue-800"
             >
               Academic Config →
@@ -995,17 +1208,79 @@ function AdminAnalyticsView({ data }: { data: AdminAnalyticsResponse }) {
             )}
           </div>
         </div>
+
+        {/* Opportunities Portfolio Breakdown */}
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                <Briefcase className="h-5 w-5 text-indigo-600" /> Campus Drives Portfolio Lifecycle
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Institutional distribution of opportunities across stages and types
+              </p>
+            </div>
+            <Link
+              to="/dashboard/opportunities"
+              className="text-xs font-semibold text-blue-600 hover:text-blue-800"
+            >
+              View Drives →
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 pt-1">
+            <div className="rounded-xl border border-slate-100 bg-slate-50 p-3.5">
+              <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
+                Published & Active
+              </span>
+              <span className="text-2xl font-bold text-emerald-700 mt-1 block">
+                {data.opportunities.published}
+              </span>
+              <span className="text-[11px] text-slate-400 mt-0.5 block">Accepting student applications</span>
+            </div>
+
+            <div className="rounded-xl border border-slate-100 bg-slate-50 p-3.5">
+              <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
+                In-Draft Pipeline
+              </span>
+              <span className="text-2xl font-bold text-amber-700 mt-1 block">
+                {data.opportunities.draft}
+              </span>
+              <span className="text-[11px] text-slate-400 mt-0.5 block">Pending faculty publication</span>
+            </div>
+
+            <div className="rounded-xl border border-slate-100 bg-slate-50 p-3.5">
+              <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
+                Full-Time Jobs
+              </span>
+              <span className="text-2xl font-bold text-indigo-700 mt-1 block">
+                {data.opportunities.jobs}
+              </span>
+              <span className="text-[11px] text-slate-400 mt-0.5 block">Graduating career placements</span>
+            </div>
+
+            <div className="rounded-xl border border-slate-100 bg-slate-50 p-3.5">
+              <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
+                Internships
+              </span>
+              <span className="text-2xl font-bold text-purple-700 mt-1 block">
+                {data.opportunities.internships}
+              </span>
+              <span className="text-[11px] text-slate-400 mt-0.5 block">Pre-graduation industry training</span>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Technical Preparation & Platform Adoption */}
+      {/* Technical Preparation & Platform Telemetry */}
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <h3 className="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-purple-600" /> Technical Assessment & Readiness Telemetry
+          <Sparkles className="h-5 w-5 text-purple-600" /> Platform Infrastructure & Telemetry
         </h3>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
-            <span className="text-xs font-semibold text-slate-500 block">Mock Practice Tests</span>
+            <span className="text-xs font-semibold text-slate-500 block">Assessment Question Banks</span>
             <span className="text-2xl font-bold text-purple-700 mt-1 block">{data.preparation.totalTests}</span>
             <span className="text-[11px] text-slate-400 mt-0.5 block">Configured assessment modules</span>
           </div>
@@ -1069,7 +1344,7 @@ export function AnalyticsPage(): React.JSX.Element {
               ? 'Track your career preparation metrics, application pipeline, and test performance'
               : isFaculty
               ? 'Department of Computer Science & Engineering • Campus recruitment pipeline, student readiness, and skill gap telemetry'
-              : 'Department of Computer Science & Engineering • Institutional placement outcomes, academic programs, and platform governance'}
+              : 'Institutional Governance • Academic programs distribution, graduation cohorts, and platform telemetry'}
           </p>
         </div>
       </div>

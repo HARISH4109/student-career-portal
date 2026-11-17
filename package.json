@@ -25,7 +25,7 @@
     "format": "prettier --write .",
     "test": "npm run test -w apps/api && npm run test -w apps/web",
     "test:benchmark": "node scripts/performance-benchmark.cjs",
-    "test:e2e": "playwright test apps/web/e2e/journeys-student.spec.ts apps/web/e2e/journeys-faculty-admin.spec.ts -c apps/web/playwright.config.ts",
+    "test:e2e": "npx playwright test apps/web/e2e/journeys-student.spec.ts apps/web/e2e/journeys-faculty-admin.spec.ts -c apps/web/playwright.config.ts",
     "test:smoke": "node scripts/production-smoke.cjs",
     "prepare": "husky install",
     "verify": "node scripts/verify-portal.cjs"

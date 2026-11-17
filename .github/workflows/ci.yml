@@ -85,9 +85,27 @@ jobs:
 
       - name: Compiled API startup
         run: node scripts/production-smoke.cjs
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/career_portal_test
+          REDIS_URL: redis://localhost:6379
+          SUPABASE_URL: http://localhost:54321
+          SUPABASE_SERVICE_ROLE_KEY: test-service-role-key
+          SUPABASE_ANON_KEY: test-anon-key
+          JWT_SECRET: test-secret-at-least-16-chars
+          AI_SERVICE_BASE_URL: http://localhost:8000
+          AI_SERVICE_INTERNAL_TOKEN: test-internal-token
 
       - name: Performance Benchmarks & SLA Verification
         run: npm run test:benchmark
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/career_portal_test
+          REDIS_URL: redis://localhost:6379
+          SUPABASE_URL: http://localhost:54321
+          SUPABASE_SERVICE_ROLE_KEY: test-service-role-key
+          SUPABASE_ANON_KEY: test-anon-key
+          JWT_SECRET: test-secret-at-least-16-chars
+          AI_SERVICE_BASE_URL: http://localhost:8000
+          AI_SERVICE_INTERNAL_TOKEN: test-internal-token
 
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps chromium

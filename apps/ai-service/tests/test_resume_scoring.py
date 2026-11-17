@@ -1,6 +1,5 @@
 """Tests for deterministic rule-engine scoring functions in ResumeAnalyzerService."""
 
-import pytest
 
 from app.schemas.resume import (
     ExperienceItem,

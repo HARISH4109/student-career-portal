@@ -75,6 +75,10 @@ export const AdminAnalyticsResponseSchema = z.object({
       departmentName: z.string(),
       departmentCode: z.string(),
       studentCount: z.number().int().nonnegative(),
+      placedCount: z.number().int().nonnegative().optional(),
+      placementRate: z.number().min(0).max(100).optional(),
+      averageScore: z.number().min(0).max(100).optional(),
+      readyStudentCount: z.number().int().nonnegative().optional(),
     }),
   ),
   programBreakdown: z.array(
@@ -116,6 +120,21 @@ export const AdminAnalyticsResponseSchema = z.object({
     unreadCount: z.number().int().nonnegative(),
     readRate: z.number().min(0).max(100),
   }),
+  systemOperations: z
+    .object({
+      activeUsersCount: z.number().int().nonnegative(),
+      totalAuditLogs: z.number().int().nonnegative(),
+      recentAuditLogs: z.array(
+        z.object({
+          id: z.string(),
+          action: z.string(),
+          entityType: z.string(),
+          actorName: z.string().nullable().optional(),
+          createdAt: z.string(),
+        }),
+      ),
+    })
+    .optional(),
 });
 export type AdminAnalyticsResponse = z.infer<typeof AdminAnalyticsResponseSchema>;
 

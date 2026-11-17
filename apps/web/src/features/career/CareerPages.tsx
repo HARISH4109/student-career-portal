@@ -25,7 +25,6 @@ import {
   type RoadmapDto,
   type SkillGapDto,
 } from '@career-portal/shared-types';
-import { useHasPermission } from '@/features/auth/use-permission';
 import { useCareerAction, useCareerData, useCareerOptions, useDebouncedValue } from './career-api';
 import {
   Frame,
@@ -536,6 +535,10 @@ export function RoadmapPage() {
 }
 
 export function ResourcesPage() {
+  const { user } = useAuth();
+  const isStudent = user?.roles?.includes('STUDENT');
+  const own = isStudent && user?.permissions?.includes('roadmaps.manage_own');
+
   const [filters, setFilters] = useState({
     search: '',
     type: '',
@@ -551,7 +554,6 @@ export function ResourcesPage() {
   const skills = useCareerData<Array<{ id: string; name: string }>>('skills');
   const paths = useCareerOptions<CareerPathDto>('career-paths');
   const action = useCareerAction<unknown>();
-  const own = useHasPermission('roadmaps.manage_own');
 
   const update = (key: keyof typeof filters, value: string) => {
     setFilters({ ...filters, [key]: value });

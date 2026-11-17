@@ -1,9 +1,7 @@
 """Tests for authentication middleware, validation, health endpoint, and idempotency."""
 
-import pytest
 from fastapi.testclient import TestClient
 
-from app.core.config import get_settings
 from app.main import app
 
 # Authenticated client for endpoints that require internal token

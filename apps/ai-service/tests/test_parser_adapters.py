@@ -1,6 +1,5 @@
 """Tests for text normalization and parsing functions in resume_analyzer.py."""
 
-import pytest
 
 from app.services.resume_analyzer import (
     _clean_unicode_text,
