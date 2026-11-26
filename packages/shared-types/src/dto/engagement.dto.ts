@@ -1,10 +1,11 @@
 import { z } from 'zod';
+import { httpUrlSchema, optionalHttpUrlSchema, safePosterUrlSchema } from './url-validation';
 import { NOTICE_CATEGORIES, NOTICE_STATUSES, NOTIFICATION_TYPES } from '../enums';
 
 export const NoticeAttachmentSchema = z.object({
   id: z.string().optional(),
   name: z.string().min(1).max(255),
-  url: z.string().url(),
+  url: httpUrlSchema('Invalid attachment URL'),
   size: z.number().int().nonnegative().optional(),
   mimeType: z.string().optional(),
 });
@@ -19,9 +20,9 @@ export const CreateNoticeSchema = z.object({
   targetDepartmentId: z.string().uuid().nullable().optional(),
   targetBatchId: z.string().uuid().nullable().optional(),
   attachments: z.array(NoticeAttachmentSchema).optional().default([]),
-  posterUrl: z.string().max(2048).nullable().optional().or(z.literal('')),
-  actionUrl: z.string().max(2048).nullable().optional().or(z.literal('')),
-  linkUrl: z.string().max(2048).nullable().optional().or(z.literal('')),
+  posterUrl: safePosterUrlSchema,
+  actionUrl: optionalHttpUrlSchema('Invalid action URL'),
+  linkUrl: optionalHttpUrlSchema('Invalid link URL'),
   isPinned: z.boolean().optional().default(false),
   publishedAt: z.string().datetime().optional(),
   expiresAt: z.string().datetime().nullable().optional(),

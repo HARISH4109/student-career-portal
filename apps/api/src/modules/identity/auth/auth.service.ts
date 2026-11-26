@@ -34,7 +34,7 @@ export class AuthService {
     const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email: dto.email,
       password: dto.password,
-      email_confirm: true, // Auto-confirm for now; toggle for production
+      email_confirm: env.NODE_ENV !== 'production',
       user_metadata: { full_name: dto.fullName },
     });
 
@@ -140,6 +140,17 @@ export class AuthService {
 
     if (error || !data.session) {
       throw new UnauthorizedError('Invalid or expired refresh token');
+    }
+
+    const userId = data.user?.id ?? data.session.user?.id;
+    if (userId) {
+      const appUser = await db.query.users.findFirst({
+        where: eq(schema.users.id, userId),
+        columns: { isActive: true },
+      });
+      if (!appUser || !appUser.isActive) {
+        throw new UnauthorizedError('User account is deactivated');
+      }
     }
 
     return this.extractTokens(data.session);

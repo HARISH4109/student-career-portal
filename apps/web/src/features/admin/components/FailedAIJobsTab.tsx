@@ -74,7 +74,7 @@ export function FailedAIJobsTab(): React.JSX.Element {
       </div>
 
       {/* Date Range & Task Filter Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-xl border border-border bg-card p-4 shadow-sm">
         <div className="flex flex-wrap items-center gap-2">
           <select
             value={taskType}
@@ -82,7 +82,7 @@ export function FailedAIJobsTab(): React.JSX.Element {
               setTaskType(e.target.value);
               setPage(1);
             }}
-            className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-700 focus:border-blue-500 focus:outline-none"
+            className="rounded-lg border border-border bg-background px-3 py-1.5 text-xs text-foreground focus:border-primary focus:outline-none"
           >
             <option value="">All AI Tasks & Workloads</option>
             <option value="opportunity_extraction">Opportunity Extraction (n8n)</option>
@@ -93,7 +93,7 @@ export function FailedAIJobsTab(): React.JSX.Element {
             <option value="service_health_probe">AI Service Health Probes</option>
           </select>
 
-          <span className="text-xs font-semibold text-slate-500 ml-2">Date:</span>
+          <span className="text-xs font-semibold text-muted-foreground ml-2">Date:</span>
           <input
             type="date"
             title="Date From"
@@ -102,9 +102,9 @@ export function FailedAIJobsTab(): React.JSX.Element {
               setDateFrom(e.target.value);
               setPage(1);
             }}
-            className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-700 focus:border-blue-500 focus:outline-none"
+            className="rounded-lg border border-border bg-background px-3 py-1.5 text-xs text-foreground focus:border-primary focus:outline-none"
           />
-          <span className="text-xs text-slate-400">to</span>
+          <span className="text-xs text-muted-foreground font-mono">to</span>
           <input
             type="date"
             title="Date To"
@@ -113,12 +113,12 @@ export function FailedAIJobsTab(): React.JSX.Element {
               setDateTo(e.target.value);
               setPage(1);
             }}
-            className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-700 focus:border-blue-500 focus:outline-none"
+            className="rounded-lg border border-border bg-background px-3 py-1.5 text-xs text-foreground focus:border-primary focus:outline-none"
           />
           {(dateFrom || dateTo || taskType) && (
             <button
               onClick={handleResetFilters}
-              className="flex items-center gap-1 rounded-xl border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-600 hover:bg-slate-50"
+              className="flex items-center gap-1 rounded-lg border border-border bg-muted/20 px-2.5 py-1 text-xs text-foreground hover:bg-muted/40 cursor-pointer"
             >
               <RotateCcw className="h-3 w-3" /> Reset
             </button>
@@ -128,7 +128,7 @@ export function FailedAIJobsTab(): React.JSX.Element {
         <button
           onClick={() => refetch()}
           disabled={isFetching}
-          className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-muted/20 px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-muted/40 disabled:opacity-50 cursor-pointer"
         >
           {isFetching ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RotateCcw className="h-3.5 w-3.5" />}
           Refresh Log
@@ -136,88 +136,88 @@ export function FailedAIJobsTab(): React.JSX.Element {
       </div>
 
       {/* Failed Jobs Table */}
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-slate-200">
-            <thead className="bg-slate-50">
+          <table className="min-w-full divide-y divide-border">
+            <thead className="bg-muted/30">
               <tr>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                <th className="px-6 py-3.5 text-left text-xs font-medium text-muted-foreground">
                   Execution Time
                 </th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                <th className="px-6 py-3.5 text-left text-xs font-medium text-muted-foreground">
                   Source Channel
                 </th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                <th className="px-6 py-3.5 text-left text-xs font-medium text-muted-foreground">
                   Model / Duration
                 </th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                <th className="px-6 py-3.5 text-left text-xs font-medium text-muted-foreground">
                   Error Details
                 </th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                <th className="px-6 py-3.5 text-left text-xs font-medium text-muted-foreground">
                   Submitter
                 </th>
-                <th className="px-6 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
+                <th className="px-6 py-3.5 text-right text-xs font-medium text-muted-foreground">
                   Inspect
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200 bg-white">
+            <tbody className="divide-y divide-border bg-card">
               {isLoading ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-slate-500">
-                    <Loader2 className="mx-auto h-6 w-6 animate-spin text-blue-600" />
+                  <td colSpan={6} className="py-12 text-center text-muted-foreground">
+                    <Loader2 className="mx-auto h-6 w-6 animate-spin text-primary" />
                     <span className="text-sm mt-2 block">Loading failed AI execution runs...</span>
                   </td>
                 </tr>
               ) : jobs.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-sm text-slate-500">
+                  <td colSpan={6} className="py-12 text-center text-sm text-muted-foreground">
                     <div className="flex flex-col items-center justify-center gap-1">
-                      <Sparkles className="h-6 w-6 text-emerald-500" />
-                      <span className="font-semibold text-slate-700">All clear</span>
-                      <span className="text-xs text-slate-400">No failed AI execution jobs recorded.</span>
+                      <Sparkles className="h-6 w-6 text-emerald-700 dark:text-emerald-400" />
+                      <span className="font-semibold text-foreground">All clear</span>
+                      <span className="text-xs text-muted-foreground">No failed AI execution jobs recorded.</span>
                     </div>
                   </td>
                 </tr>
               ) : (
                 jobs.map((job) => (
-                  <tr key={job.id} className="transition-colors hover:bg-slate-50/70">
-                    <td className="px-6 py-4 whitespace-nowrap text-xs text-slate-500">
-                      <div className="flex flex-col">
-                        <span className="font-semibold text-slate-800">
+                  <tr key={job.id} className="transition-colors hover:bg-muted/20">
+                    <td className="px-6 py-4 whitespace-nowrap text-xs text-muted-foreground">
+                      <div className="flex flex-col font-mono">
+                        <span className="font-semibold text-foreground">
                           {new Date(job.createdAt).toLocaleDateString()}
                         </span>
-                        <span className="text-[11px] text-slate-400">
+                        <span className="text-[11px] text-muted-foreground/70">
                           {new Date(job.createdAt).toLocaleTimeString()}
                         </span>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-xs">
                       <div className="flex flex-col gap-1">
-                        <span className="font-semibold text-slate-900">{job.serviceName}</span>
+                        <span className="font-semibold text-foreground">{job.serviceName}</span>
                         <div className="flex items-center gap-1.5">
-                          <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 font-mono text-[10px] text-slate-700 border border-slate-200">
+                          <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 font-mono text-[10px] text-foreground border border-border">
                             {job.taskType}
                           </span>
                           {job.fileName && (
-                            <span className="text-[10px] text-slate-400 truncate max-w-[120px]" title={job.fileName}>
+                            <span className="text-[10px] text-muted-foreground font-mono truncate max-w-[120px]" title={job.fileName}>
                               {job.fileName}
                             </span>
                           )}
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-xs text-slate-600">
-                      <div className="flex flex-col">
-                        <span className="font-medium text-slate-800">{job.modelUsed || 'default-agent'}</span>
-                        <span className="text-[11px] text-slate-400 flex items-center gap-1">
+                    <td className="px-6 py-4 whitespace-nowrap text-xs text-muted-foreground">
+                      <div className="flex flex-col font-mono">
+                        <span className="font-medium text-foreground">{job.modelUsed || 'default-agent'}</span>
+                        <span className="text-[11px] text-muted-foreground/70 flex items-center gap-1">
                           <Clock className="h-3 w-3" /> {job.durationMs != null ? `${job.durationMs}ms` : '—'}
                         </span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-xs text-rose-700 max-w-xs">
+                    <td className="px-6 py-4 text-xs text-rose-700 dark:text-rose-400 max-w-xs">
                       <div className="flex items-start gap-1.5">
-                        <AlertTriangle className="h-4 w-4 shrink-0 text-rose-500 mt-0.5" />
+                        <AlertTriangle className="h-4 w-4 shrink-0 text-rose-700 dark:text-rose-400 mt-0.5" />
                         <span className="line-clamp-2" title={job.errorMessage || 'No error message recorded'}>
                           {job.errorMessage || 'Unknown extraction failure'}
                         </span>
@@ -225,16 +225,16 @@ export function FailedAIJobsTab(): React.JSX.Element {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-xs">
                       <div className="flex flex-col">
-                        <span className="text-slate-800 font-medium">{job.submitterName || 'Faculty / System'}</span>
-                        {job.submitterEmail && <span className="text-[11px] text-slate-400">{job.submitterEmail}</span>}
+                        <span className="text-foreground font-medium">{job.submitterName || 'Faculty / System'}</span>
+                        {job.submitterEmail && <span className="text-[11px] text-muted-foreground font-mono">{job.submitterEmail}</span>}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
                       <button
                         onClick={() => setInspectJob(job)}
-                        className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
+                        className="inline-flex items-center gap-1 rounded-lg border border-border bg-muted/20 px-2.5 py-1 text-xs font-semibold text-foreground hover:bg-muted/40 transition-colors cursor-pointer"
                       >
-                        <Eye className="h-3.5 w-3.5 text-blue-600" /> Details
+                        <Eye className="h-3.5 w-3.5 text-primary" /> Details
                       </button>
                     </td>
                   </tr>
@@ -246,7 +246,7 @@ export function FailedAIJobsTab(): React.JSX.Element {
 
         {/* Pagination Bar */}
         {meta && meta.totalPages > 1 && (
-          <div className="flex items-center justify-between border-t border-slate-200 bg-slate-50 px-6 py-3.5 text-xs text-slate-500">
+          <div className="flex items-center justify-between border-t border-border bg-muted/20 px-6 py-3.5 text-xs text-muted-foreground">
             <span>
               Showing Page {meta.page} of {meta.totalPages} ({meta.totalItems} total failed jobs)
             </span>
@@ -254,14 +254,14 @@ export function FailedAIJobsTab(): React.JSX.Element {
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page <= 1}
-                className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-slate-600 hover:bg-slate-100 disabled:opacity-50"
+                className="flex items-center gap-1 rounded-lg border border-border bg-card px-2.5 py-1 text-foreground hover:bg-muted/40 disabled:opacity-50 cursor-pointer"
               >
                 <ChevronLeft className="h-4 w-4" /> Previous
               </button>
               <button
                 onClick={() => setPage((p) => Math.min(meta.totalPages, p + 1))}
                 disabled={page >= meta.totalPages}
-                className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-slate-600 hover:bg-slate-100 disabled:opacity-50"
+                className="flex items-center gap-1 rounded-lg border border-border bg-card px-2.5 py-1 text-foreground hover:bg-muted/40 disabled:opacity-50 cursor-pointer"
               >
                 Next <ChevronRight className="h-4 w-4" />
               </button>
@@ -272,57 +272,57 @@ export function FailedAIJobsTab(): React.JSX.Element {
 
       {/* Inspect Detail Modal */}
       {inspectJob && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
-          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl border border-slate-200">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
+          <div className="w-full max-w-lg rounded-xl bg-card p-6 shadow-xl border border-border">
+            <div className="flex items-center justify-between border-b border-border pb-3">
               <div className="flex items-center gap-2">
-                <Bot className="h-5 w-5 text-blue-600" />
-                <h3 className="font-bold text-slate-900">Failed AI Job Diagnosis</h3>
+                <Bot className="h-5 w-5 text-primary" />
+                <h3 className="font-bold text-foreground">Failed AI Job Diagnosis</h3>
               </div>
               <button
                 onClick={() => setInspectJob(null)}
-                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100"
+                className="rounded-lg p-1 text-muted-foreground hover:bg-muted/40 cursor-pointer"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             <div className="mt-4 space-y-3 text-xs">
-              <div className="rounded-xl border border-rose-200 bg-rose-50 p-3">
-                <span className="font-bold text-rose-900 block mb-1">Error Diagnostic</span>
-                <p className="font-mono text-rose-800 break-words">{inspectJob.errorMessage || 'No message logged'}</p>
+              <div className="rounded-lg border border-rose-500/20 bg-rose-500/10 p-3">
+                <span className="font-bold text-rose-700 dark:text-rose-300 block mb-1">Error Diagnostic</span>
+                <p className="font-mono text-rose-700 dark:text-rose-400 break-words">{inspectJob.errorMessage || 'No message logged'}</p>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 rounded-xl bg-slate-50 p-3">
+              <div className="grid grid-cols-2 gap-2 rounded-lg bg-muted/20 p-3 border border-border">
                 <div>
-                  <span className="text-slate-400 block">Source Channel</span>
-                  <span className="font-semibold text-slate-800">{inspectJob.sourceType}</span>
+                  <span className="text-muted-foreground block text-[11px]">Source Channel</span>
+                  <span className="font-semibold text-foreground">{inspectJob.sourceType}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block">Model Used</span>
-                  <span className="font-semibold text-slate-800">{inspectJob.modelUsed || 'default'}</span>
+                  <span className="text-muted-foreground block text-[11px]">Model Used</span>
+                  <span className="font-semibold text-foreground font-mono">{inspectJob.modelUsed || 'default'}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block">Execution Duration</span>
-                  <span className="text-slate-800">{inspectJob.durationMs != null ? `${inspectJob.durationMs}ms` : '—'}</span>
+                  <span className="text-muted-foreground block text-[11px]">Execution Duration</span>
+                  <span className="text-foreground font-mono">{inspectJob.durationMs != null ? `${inspectJob.durationMs}ms` : '—'}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block">Submitted By</span>
-                  <span className="text-slate-800">{inspectJob.submitterName || 'System'}</span>
+                  <span className="text-muted-foreground block text-[11px]">Submitted By</span>
+                  <span className="text-foreground">{inspectJob.submitterName || 'System'}</span>
                 </div>
                 {inspectJob.requestId && (
-                  <div className="col-span-2 flex items-center justify-between bg-white rounded-lg p-2 border border-slate-200">
+                  <div className="col-span-2 flex items-center justify-between bg-card rounded-lg p-2 border border-border">
                     <div>
-                      <span className="text-slate-400 block text-[10px] uppercase font-semibold">Correlation Request ID</span>
-                      <span className="font-mono text-slate-900 font-semibold">{inspectJob.requestId}</span>
+                      <span className="text-muted-foreground block text-[10px] uppercase font-semibold">Correlation Request ID</span>
+                      <span className="font-mono text-foreground font-semibold">{inspectJob.requestId}</span>
                     </div>
                     <button
                       onClick={() => handleCopyRequestId(inspectJob.requestId!)}
-                      className="inline-flex items-center gap-1 rounded px-2 py-1 text-[11px] font-medium text-slate-600 bg-slate-50 border border-slate-200 hover:bg-slate-100"
+                      className="inline-flex items-center gap-1 rounded px-2 py-1 text-[11px] font-medium text-muted-foreground bg-muted/30 border border-border hover:bg-muted/50 cursor-pointer"
                     >
                       {copiedRequestId === inspectJob.requestId ? (
                         <>
-                          <Check className="h-3 w-3 text-emerald-600" /> Copied
+                          <Check className="h-3 w-3 text-emerald-700 dark:text-emerald-400" /> Copied
                         </>
                       ) : (
                         <>
@@ -334,24 +334,24 @@ export function FailedAIJobsTab(): React.JSX.Element {
                 )}
                 {inspectJob.origin && (
                   <div className="col-span-2">
-                    <span className="text-slate-400 block">Provenance Origin</span>
-                    <span className="font-mono text-slate-700">{inspectJob.origin}</span>
+                    <span className="text-muted-foreground block text-[11px]">Provenance Origin</span>
+                    <span className="font-mono text-muted-foreground">{inspectJob.origin}</span>
                   </div>
                 )}
               </div>
 
               <div>
-                <span className="text-slate-500 font-semibold block mb-1">Source Content Preview</span>
-                <pre className="max-h-40 overflow-y-auto rounded-xl bg-slate-900 p-3 font-mono text-[11px] text-slate-200 break-words whitespace-pre-wrap">
+                <span className="text-foreground font-semibold block mb-1">Source Content Preview</span>
+                <pre className="max-h-40 overflow-y-auto rounded-lg bg-background p-3 font-mono text-[11px] text-foreground/80 break-words whitespace-pre-wrap border border-border">
                   {inspectJob.rawContentPreview || 'No raw content preview available'}
                 </pre>
               </div>
             </div>
 
-            <div className="mt-6 flex justify-end border-t border-slate-100 pt-3">
+            <div className="mt-6 flex justify-end border-t border-border pt-3">
               <button
                 onClick={() => setInspectJob(null)}
-                className="rounded-xl bg-slate-100 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-200 transition-colors"
+                className="rounded-lg bg-muted/30 px-4 py-2 text-xs font-semibold text-foreground hover:bg-muted/50 transition-colors cursor-pointer"
               >
                 Close
               </button>

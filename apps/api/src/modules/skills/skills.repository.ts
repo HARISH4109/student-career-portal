@@ -1,6 +1,8 @@
 import { db, schema } from '@career-portal/db';
 import { and, eq, ilike } from 'drizzle-orm';
 
+import { escapeLikePattern } from '@/shared/db/escape-like';
+
 export class SkillsRepository {
   async listSkills(search?: string, category?: string) {
     const conditions = [];
@@ -8,7 +10,7 @@ export class SkillsRepository {
       conditions.push(eq(schema.skills.category, category));
     }
     if (search) {
-      conditions.push(ilike(schema.skills.name, `%${search}%`));
+      conditions.push(ilike(schema.skills.name, `%${escapeLikePattern(search)}%`));
     }
 
     return db.query.skills.findMany({

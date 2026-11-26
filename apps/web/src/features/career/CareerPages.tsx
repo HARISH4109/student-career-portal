@@ -51,7 +51,7 @@ export function CareerPathsPage() {
   return (
     <Frame title="Find your career direction">
       {/* ── Intro Strip ── */}
-      <p className="text-slate-600 text-sm max-w-xl leading-relaxed">
+      <p className="text-muted-foreground text-sm max-w-xl leading-relaxed">
         Choose a goal and turn it into skills, projects, and practical next steps.
       </p>
 
@@ -59,7 +59,7 @@ export function CareerPathsPage() {
       <div className="relative max-w-xl">
         <Field label="Search careers">
           <div className="relative">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
               className={`${input} pl-10`}
               placeholder="Filter by role (e.g. Frontend Developer, Data Scientist)..."
@@ -80,33 +80,33 @@ export function CareerPathsPage() {
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
         {query.data?.data.map((path) => (
           <article
-            className={`${card} group flex flex-col justify-between transition-all duration-200 hover:border-indigo-300 hover:shadow-lg`}
+            className={`${card} group flex flex-col justify-between transition-colors duration-150 hover:border-primary/40`}
             key={path.id}
           >
             <div>
               <div className="mb-4 flex items-center justify-between">
-                <span className="rounded-2xl bg-indigo-50 border border-indigo-100/60 p-3 text-indigo-600 group-hover:scale-105 transition-transform">
+                <span className="rounded-xl bg-primary/10 border border-primary/20 p-3 text-primary group-hover:scale-105 transition-transform">
                   <Code2 className="h-6 w-6" aria-hidden="true" />
                 </span>
-                <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+                <span className="rounded-full bg-muted/60 px-3 py-1 text-xs font-semibold text-muted-foreground border border-border font-mono">
                   Career path
                 </span>
               </div>
-              <h2 className="text-xl font-bold tracking-tight text-slate-900 group-hover:text-indigo-600 transition-colors">
+              <h2 className="text-xl font-bold tracking-tight text-foreground group-hover:text-primary transition-colors">
                 {path.title}
               </h2>
-              <p className="my-3 flex-1 text-sm leading-relaxed text-slate-500 line-clamp-3">
+              <p className="my-3 flex-1 text-sm leading-relaxed text-muted-foreground line-clamp-3">
                 {path.description}
               </p>
             </div>
 
-            <div className="pt-4 border-t border-slate-100 mt-4 space-y-4">
-              <p className="flex items-center gap-2 text-xs font-semibold text-slate-500">
-                <Layers3 className="h-4 w-4 text-indigo-500" />
-                {path.stages.filter((stage) => stage.isActive).length} learning stages
+            <div className="pt-4 border-t border-border mt-4 space-y-4">
+              <p className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+                <Layers3 className="h-4 w-4 text-primary" />
+                <span className="font-mono tabular-nums">{path.stages.filter((stage) => stage.isActive).length}</span> learning stages
               </p>
               <Link
-                className="inline-flex min-h-11 w-full items-center justify-between rounded-xl bg-indigo-50 px-4 text-sm font-semibold text-indigo-700 transition-colors group-hover:bg-indigo-600 group-hover:text-white"
+                className="inline-flex min-h-11 w-full items-center justify-between rounded-xl bg-primary/10 border border-primary/20 px-4 text-sm font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
                 to={`/dashboard/careers/${path.id}`}
               >
                 <span>Explore path</span>
@@ -144,7 +144,7 @@ export function CareerDetailPage() {
     <Frame title={query.data?.data.title ?? 'Career path'}>
       <Link
         to="/dashboard/careers"
-        className="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-slate-900 transition"
+        className="inline-flex items-center gap-2 text-xs font-semibold text-muted-foreground hover:text-foreground transition"
       >
         <ArrowLeft className="h-4 w-4" />
         <span>Back to Career Paths</span>
@@ -156,14 +156,14 @@ export function CareerDetailPage() {
       {query.data && (
         <>
           {/* ── Path Overview Card ── */}
-          <div className={`${card} space-y-4 bg-gradient-to-br from-white to-slate-50/50`}>
-            <p className="text-base text-slate-700 leading-relaxed max-w-3xl">
+          <div className={`${card} space-y-4 bg-card border-border`}>
+            <p className="text-base text-foreground/90 leading-relaxed max-w-3xl">
               {query.data.data.description}
             </p>
 
             {own && (
-              <div className="pt-4 border-t border-slate-200/80 space-y-3">
-                <p className="text-sm text-slate-600">
+              <div className="pt-4 border-t border-border space-y-3">
+                <p className="text-sm text-muted-foreground">
                   Starting this goal archives your previous active roadmap and keeps its progress.
                 </p>
                 <div className="flex flex-wrap items-center gap-3">
@@ -185,7 +185,7 @@ export function CareerDetailPage() {
                     <span>{start.isPending ? 'Starting…' : 'Start this roadmap'}</span>
                   </button>
                   <Link
-                    className="inline-flex items-center gap-1.5 ml-4 font-semibold text-indigo-600 hover:text-indigo-800 transition text-sm"
+                    className="inline-flex items-center gap-1.5 ml-4 font-semibold text-primary hover:underline transition text-sm"
                     to={`/dashboard/skill-gap?careerPathId=${id}`}
                   >
                     <Sparkles className="h-4 w-4" />
@@ -196,12 +196,12 @@ export function CareerDetailPage() {
             )}
 
             {isStaff && (
-              <div className="pt-4 border-t border-slate-200/80 flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-500">Curriculum Preview</span>
+              <div className="pt-4 border-t border-border flex items-center justify-between">
+                <span className="text-xs font-medium text-muted-foreground font-mono">Curriculum Preview</span>
                 {canManage && (
                   <Link
                     to="/dashboard/careers/manage"
-                    className="inline-flex items-center gap-2 rounded-xl bg-indigo-50 border border-indigo-200 px-4 py-2 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 transition"
+                    className="inline-flex items-center gap-2 rounded-xl bg-primary/10 border border-primary/20 px-4 py-2 text-xs font-semibold text-primary hover:bg-primary/20 transition"
                   >
                     <Settings2 className="h-4 w-4" />
                     <span>Manage in Career Catalog</span>
@@ -213,8 +213,8 @@ export function CareerDetailPage() {
 
           {/* ── Stages Curriculum Timeline ── */}
           <div className="space-y-3">
-            <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-              <Layers3 className="h-5 w-5 text-indigo-600" />
+            <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+              <Layers3 className="h-5 w-5 text-primary" />
               <span>Curriculum & Milestones</span>
             </h3>
 
@@ -222,22 +222,22 @@ export function CareerDetailPage() {
               {query.data.data.stages
                 .filter((s) => s.isActive)
                 .map((stage, i) => (
-                  <li key={i} className={`${card} border-l-4 border-l-indigo-600 space-y-3`}>
+                  <li key={i} className={`${card} border-l-4 border-l-primary space-y-3`}>
                     <div className="flex items-center justify-between">
-                      <h2 className="text-base font-bold text-slate-900">
+                      <h2 className="text-base font-bold text-foreground">
                         {i + 1}. {stage.title}
                       </h2>
-                      <span className="rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-semibold text-indigo-700 border border-indigo-100">
+                      <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary border border-primary/20 font-mono">
                         Stage {i + 1}
                       </span>
                     </div>
 
-                    <p className="my-2 text-slate-600 leading-relaxed text-sm">
+                    <p className="my-2 text-muted-foreground leading-relaxed text-sm">
                       {stage.description}
                     </p>
 
-                    <div className="pt-2 border-t border-slate-100 space-y-2">
-                      <p className="text-xs font-semibold text-slate-700">
+                    <div className="pt-2 border-t border-border space-y-2">
+                      <p className="text-xs font-semibold text-foreground/80">
                         Skills:{' '}
                         {stage.skills
                           .map(
@@ -250,8 +250,8 @@ export function CareerDetailPage() {
                       {stage.activities.length > 0 && (
                         <div className="space-y-1.5 pt-1">
                           {stage.activities.map((a, index) => (
-                            <p key={index} className="text-xs text-slate-600 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                              <strong className="text-slate-900">{a.title}</strong> — {a.description}
+                            <p key={index} className="text-xs text-muted-foreground bg-muted/30 p-2.5 rounded-xl border border-border">
+                              <strong className="text-foreground">{a.title}</strong> — {a.description}
                             </p>
                           ))}
                         </div>
@@ -283,9 +283,9 @@ export function RoadmapPage() {
     return (
       <Frame title="Roadmap Management">
         <div className={`${card} py-12 text-center space-y-3`}>
-          <Compass className="mx-auto h-12 w-12 text-indigo-400" />
-          <h3 className="text-lg font-bold text-slate-800">Student Roadmap Tracker</h3>
-          <p className="text-slate-600 text-sm max-w-md mx-auto">
+          <Compass className="mx-auto h-12 w-12 text-primary" />
+          <h3 className="text-lg font-bold text-foreground">Student Roadmap Tracker</h3>
+          <p className="text-muted-foreground text-sm max-w-md mx-auto">
             Interactive roadmap milestone tracking is student-specific. To author or review curriculum roadmaps for your academic programs, please visit Career Catalog Management.
           </p>
           <div className="pt-4">
@@ -305,11 +305,11 @@ export function RoadmapPage() {
 
       {!query.isLoading && !maps.length && (
         <div className={`${card} py-12 text-center space-y-3`}>
-          <Compass className="mx-auto h-12 w-12 text-indigo-400" />
-          <h3 className="text-lg font-bold text-slate-800">No active roadmap found</h3>
-          <p className="text-slate-600 text-sm max-w-md mx-auto">
+          <Compass className="mx-auto h-12 w-12 text-primary" />
+          <h3 className="text-lg font-bold text-foreground">No active roadmap found</h3>
+          <p className="text-muted-foreground text-sm max-w-md mx-auto">
             Choose a{' '}
-            <Link className="text-indigo-600 font-semibold underline" to="/dashboard/careers">
+            <Link className="text-primary font-semibold underline" to="/dashboard/careers">
               career path
             </Link>{' '}
             to start your roadmap.
@@ -339,18 +339,18 @@ export function RoadmapPage() {
           </div>
 
           {/* ── Summary Progress Gauge ── */}
-          <section className={`${card} bg-gradient-to-br from-white to-indigo-50/20 space-y-4`}>
+          <section className={`${card} bg-card border-border space-y-4`}>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div>
-                <span className="rounded-full bg-indigo-100 px-3 py-1 text-xs font-bold text-indigo-700 uppercase tracking-wider">
+                <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary font-mono border border-primary/20">
                   {map.status} track
                 </span>
-                <h2 className="text-2xl font-bold tracking-tight text-slate-900 mt-2">
+                <h2 className="text-2xl font-bold tracking-tight text-foreground mt-2">
                   {map.targetRole}
                 </h2>
               </div>
               <div className="text-right">
-                <p className="text-xl font-extrabold text-indigo-600">
+                <p className="text-xl font-bold font-mono text-primary">
                   {map.progressPercent}% complete · {map.status}
                 </p>
               </div>
@@ -362,16 +362,16 @@ export function RoadmapPage() {
               aria-valuemax={100}
               aria-valuenow={map.progressPercent}
               aria-label="Roadmap completion"
-              className="h-3 overflow-hidden rounded-full bg-slate-100 border border-slate-200/60"
+              className="h-3 overflow-hidden rounded-full bg-muted/50 border border-border"
             >
               <div
-                className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-indigo-600 transition-all duration-500 shadow-sm"
+                className="h-full rounded-full bg-primary transition-[width] duration-500 shadow-sm"
                 style={{ width: `${String(map.progressPercent)}%` }}
               />
             </div>
 
-            <p className="text-xs text-slate-500 flex items-center gap-2">
-              <Clock className="h-3.5 w-3.5" />
+            <p className="text-xs text-muted-foreground flex items-center gap-2 font-mono">
+              <Clock className="h-3.5 w-3.5 text-muted-foreground" />
               Started {map.startedAt ? new Date(map.startedAt).toLocaleDateString() : 'previously'}
               {map.completedAt
                 ? ` · Completed ${new Date(map.completedAt).toLocaleDateString()}`
@@ -379,7 +379,7 @@ export function RoadmapPage() {
             </p>
           </section>
 
-          <p className="text-slate-600 text-sm leading-relaxed">
+          <p className="text-muted-foreground text-sm leading-relaxed">
             Confirm completion when you feel ready. Learning and assessments support your progress;
             you control your profile skills.
           </p>
@@ -391,20 +391,20 @@ export function RoadmapPage() {
               return (
                 <section
                   key={stage.id}
-                  className={`${card} transition-all duration-200 ${
+                  className={`${card} transition-colors duration-150 ${
                     isCurrent
-                      ? 'border-indigo-400 bg-indigo-50/15 ring-2 ring-indigo-500/20 shadow-md'
+                      ? 'border-primary bg-primary/5 ring-1 ring-primary/30 shadow-sm'
                       : stage.isCompleted
-                        ? 'border-emerald-200 bg-emerald-50/10'
+                        ? 'border-emerald-500/30 bg-emerald-500/5'
                         : ''
                   }`}
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
-                    <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                    <h2 className="text-base font-bold text-foreground flex items-center gap-2">
                       {stage.isCompleted ? (
-                        <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
+                        <CheckCircle2 className="h-5 w-5 text-emerald-700 dark:text-emerald-400 shrink-0" />
                       ) : (
-                        <span className="h-5 w-5 rounded-full border-2 border-indigo-400 text-xs flex items-center justify-center font-bold text-indigo-600">
+                        <span className="h-5 w-5 rounded-full border-2 border-primary text-xs flex items-center justify-center font-bold text-primary">
                           •
                         </span>
                       )}
@@ -414,19 +414,19 @@ export function RoadmapPage() {
                       </span>
                     </h2>
                     {stage.isCompleted && (
-                      <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 border border-emerald-200">
+                      <span className="rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 font-mono">
                         Stage Complete
                       </span>
                     )}
                   </div>
 
-                  <p className="my-2 text-sm text-slate-600 leading-relaxed">{stage.description}</p>
+                  <p className="my-2 text-sm text-muted-foreground leading-relaxed">{stage.description}</p>
 
-                  <div className="rounded-xl bg-slate-50 p-3 border border-slate-100 my-3">
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+                  <div className="rounded-xl bg-muted/30 p-3 border border-border my-3">
+                    <p className="text-[11px] font-medium text-muted-foreground mb-1 font-mono">
                       Target Competencies
                     </p>
-                    <p className="text-xs text-slate-700 font-medium">
+                    <p className="text-xs text-foreground/90 font-medium">
                       {stage.skills
                         .map((s) => `${stage.skillNames[s.skillId] ?? 'Skill'}: ${s.proficiency}`)
                         .join(' · ')}
@@ -436,8 +436,8 @@ export function RoadmapPage() {
                   {stage.activities.length > 0 && (
                     <div className="my-3 space-y-2">
                       {stage.activities.map((a, i) => (
-                        <div key={i} className="text-xs text-slate-700 bg-white p-3 rounded-xl border border-slate-200">
-                          <strong className="text-indigo-900">{a.title}</strong> — {a.description}
+                        <div key={i} className="text-xs text-muted-foreground bg-muted/40 p-3 rounded-xl border border-border">
+                          <strong className="text-foreground">{a.title}</strong> — {a.description}
                         </div>
                       ))}
                     </div>
@@ -449,16 +449,17 @@ export function RoadmapPage() {
                       {stage.resources.map((r) => (
                         <div
                           key={r.id}
-                          className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl border border-slate-200/80 bg-white"
+                          className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl border border-border bg-card"
                         >
                           <a
                             href={r.url}
                             target="_blank"
                             rel="noreferrer"
-                            className="text-indigo-600 hover:text-indigo-800 font-semibold underline text-sm flex items-center gap-1.5"
+                            className="text-primary hover:underline font-semibold text-sm flex items-center gap-1.5"
                           >
-                            <BookOpen className="h-4 w-4 text-indigo-500" />
-                            <span>{r.title} ↗</span>
+                            <BookOpen className="h-4 w-4 text-primary" />
+                            <span>{r.title}</span>
+                            <ArrowUpRight className="h-3.5 w-3.5 shrink-0" />
                           </a>
                           {map.status !== 'archived' && (
                             <button
@@ -499,7 +500,7 @@ export function RoadmapPage() {
                   )}
 
                   {map.status === 'archived' && (
-                    <p className="text-xs font-semibold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg inline-block">
+                    <p className="text-xs font-semibold text-muted-foreground bg-muted/40 px-3 py-1.5 rounded-lg inline-block border border-border font-mono">
                       Archived · {stage.isCompleted ? 'Completed' : 'Incomplete'}
                     </p>
                   )}
@@ -509,19 +510,19 @@ export function RoadmapPage() {
           </div>
 
           {progress.isSuccess && (
-            <div role="status" className="rounded-xl bg-emerald-50 border border-emerald-200 p-3 text-xs font-semibold text-emerald-800 flex items-center gap-2">
-              <CheckCircle className="h-4 w-4 text-emerald-600" />
+            <div role="status" className="rounded-xl bg-emerald-500/10 border border-emerald-500/20 p-3 text-xs font-semibold text-emerald-700 dark:text-emerald-400 flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-emerald-700 dark:text-emerald-400" />
               <span>Resource progress saved.</span>
             </div>
           )}
 
-          <div className="flex flex-wrap items-center gap-4 pt-4 border-t border-slate-200">
+          <div className="flex flex-wrap items-center gap-4 pt-4 border-t border-border">
             <Link className={button} to="/dashboard/profile">
               Review my skills
             </Link>
             {map.careerPathId && (
               <Link
-                className="font-semibold text-indigo-600 hover:text-indigo-800 transition text-sm ml-4"
+                className="font-semibold text-primary hover:underline transition text-sm ml-4"
                 to={`/dashboard/skill-gap?careerPathId=${map.careerPathId}`}
               >
                 Reanalyze skills
@@ -567,7 +568,7 @@ export function ResourcesPage() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <Field label="Search resources">
             <div className="relative">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input
                 className={`${input} pl-10`}
                 placeholder="Search resources by title..."
@@ -651,30 +652,30 @@ export function ResourcesPage() {
       {/* ── Resources Grid ── */}
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
         {query.data?.data.map((r) => (
-          <article key={r.id} className={`${card} flex flex-col justify-between hover:border-indigo-300 hover:shadow-md transition-all`}>
+          <article key={r.id} className={`${card} flex flex-col justify-between hover:border-primary/40 transition-colors duration-150`}>
             <div>
               <div className="flex items-center justify-between mb-4">
-                <span className="p-3 bg-indigo-50 border border-indigo-100 rounded-2xl text-indigo-600">
+                <span className="p-3 bg-primary/10 border border-primary/20 rounded-xl text-primary">
                   <BookOpen className="h-6 w-6" aria-hidden="true" />
                 </span>
-                <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+                <span className="rounded-full bg-muted/60 px-3 py-1 text-xs font-semibold text-muted-foreground border border-border font-mono">
                   {prettyLabel(r.type)} · {prettyLabel(r.difficulty)}
                 </span>
               </div>
-              <h2 className="my-2 text-lg font-bold tracking-tight text-slate-900">{r.title}</h2>
-              <p className="text-sm leading-relaxed text-slate-500 mb-3">{r.description}</p>
+              <h2 className="my-2 text-lg font-bold tracking-tight text-foreground">{r.title}</h2>
+              <p className="text-sm leading-relaxed text-muted-foreground mb-3">{r.description}</p>
               <a
-                className="my-3 inline-flex items-center gap-1.5 text-sm font-semibold text-indigo-600 hover:text-indigo-800 underline"
+                className="my-3 inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
                 href={r.url}
                 target="_blank"
                 rel="noreferrer"
               >
-                <span>Open resource ↗</span>
+                <span className="inline-flex items-center gap-1">Open resource <ArrowUpRight className="h-3.5 w-3.5" /></span>
               </a>
             </div>
 
             {own && (
-              <div className="pt-3 border-t border-slate-100 mt-2">
+              <div className="pt-3 border-t border-border mt-2">
                 <Field label={`Progress for ${r.title}`}>
                   <select
                     className={input}
@@ -731,9 +732,9 @@ export function SkillGapPage() {
     return (
       <Frame title="Skill Gap Intelligence">
         <div className={`${card} py-12 text-center space-y-3`}>
-          <Target className="mx-auto h-12 w-12 text-indigo-400" />
-          <h3 className="text-lg font-bold text-slate-800">Institutional Skill Analysis</h3>
-          <p className="text-slate-600 text-sm max-w-md mx-auto">
+          <Target className="mx-auto h-12 w-12 text-primary" />
+          <h3 className="text-lg font-bold text-foreground">Institutional Skill Analysis</h3>
+          <p className="text-muted-foreground text-sm max-w-md mx-auto">
             Individual skill gap analysis evaluates enrolled student self-assessments. To inspect department-wide skill proficiencies and batch readiness, view the Analytics portal.
           </p>
           <div className="pt-4">
@@ -749,7 +750,7 @@ export function SkillGapPage() {
   return (
     <Frame title="Understand your skill gaps">
       <div className={`${card} space-y-4`}>
-        <p className="text-sm text-slate-600 leading-relaxed max-w-2xl">
+        <p className="text-sm text-muted-foreground leading-relaxed max-w-2xl">
           Compare your profile skills with your goal. Assessments provide supporting evidence and
           never change your skills automatically.
         </p>
@@ -778,7 +779,7 @@ export function SkillGapPage() {
         )}
 
         {opportunityId && (
-          <p className="text-xs font-semibold text-indigo-700 bg-indigo-50 p-3 rounded-xl border border-indigo-100 inline-block">
+          <p className="text-xs font-semibold text-primary bg-primary/10 p-3 rounded-xl border border-primary/20 inline-block font-mono">
             Analyzing requirements for the selected opportunity.
           </p>
         )}
@@ -828,25 +829,25 @@ export function SkillGapPage() {
       {/* ── Intelligence Evaluation Report ── */}
       {result && (
         <div className="space-y-6">
-          <div className="overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 p-8 text-white shadow-xl border border-indigo-900/40">
+          <div className="overflow-hidden rounded-2xl bg-card p-6 sm:p-8 text-foreground shadow-xs border border-border">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div className="space-y-2">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-500/20 px-3 py-1 text-xs font-semibold text-indigo-300 border border-indigo-500/30">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary border border-primary/20 font-mono">
                   <Target className="h-3.5 w-3.5" />
                   <span>Readiness Intelligence</span>
                 </span>
-                <h2 className="text-2xl md:text-3xl font-bold text-white">
+                <h2 className="text-2xl md:text-3xl font-bold text-foreground">
                   {result.targetRole}
                 </h2>
-                <p className="text-xs md:text-sm text-slate-300">
+                <p className="text-xs md:text-sm text-muted-foreground font-mono">
                   Snapshot from {new Date(result.createdAt).toLocaleString()} ·{' '}
                   {result.skills.filter((s) => s.status === 'matched').length} matched /{' '}
                   {result.skills.length} required skills
                 </p>
               </div>
 
-              <div className="bg-white/10 backdrop-blur-md px-6 py-4 rounded-2xl border border-white/10 text-center">
-                <span className="text-3xl font-extrabold text-white">
+              <div className="bg-muted/30 px-6 py-4 rounded-xl border border-border text-center">
+                <span className="text-3xl font-bold font-mono text-primary">
                   {result.skills.length
                     ? Math.round(
                         (100 * result.skills.filter((s) => s.status === 'matched').length) /
@@ -855,14 +856,14 @@ export function SkillGapPage() {
                     : 100}
                   %
                 </span>
-                <p className="text-xs font-semibold text-indigo-300 mt-0.5">Competency Match</p>
+                <p className="text-xs font-semibold text-muted-foreground mt-0.5">Competency Match</p>
               </div>
             </div>
           </div>
 
           {result.skills.length === 0 && (
             <div className={`${card} py-10 text-center`}>
-              <p className="text-slate-600 text-sm">No required skills are linked to this goal yet.</p>
+              <p className="text-muted-foreground text-sm">No required skills are linked to this goal yet.</p>
             </div>
           )}
 
@@ -870,33 +871,33 @@ export function SkillGapPage() {
           <div className="grid gap-4">
             {result.skills.map((s) => {
               const statusStyles = {
-                missing: 'bg-rose-50 text-rose-700 border-rose-200',
-                below_target: 'bg-amber-50 text-amber-700 border-amber-200',
-                needs_practice: 'bg-indigo-50 text-indigo-700 border-indigo-200',
-                matched: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                missing: 'bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20',
+                below_target: 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20',
+                needs_practice: 'bg-primary/10 text-primary border-primary/20',
+                matched: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20',
               };
               return (
                 <article className={`${card} space-y-3`} key={s.skillId}>
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                    <h3 className="text-base font-bold text-slate-900">
+                    <h3 className="text-base font-bold text-foreground">
                       {s.name} · {prettyLabel(s.status)}
                     </h3>
                     <span
-                      className={`inline-block rounded-full px-3 py-1 text-xs font-bold border ${statusStyles[s.status] || 'bg-slate-100 text-slate-700'}`}
+                      className={`inline-block rounded-full px-3 py-1 text-xs font-bold border font-mono ${statusStyles[s.status] || 'bg-muted/60 text-muted-foreground border-border'}`}
                     >
                       {prettyLabel(s.status)}
                     </span>
                   </div>
 
-                  <p className="text-xs text-slate-600 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                    Profile: <strong className="text-slate-800">{s.currentProficiency ?? 'not listed'}</strong> · Target:{' '}
-                    <strong className="text-slate-800">{s.requiredProficiency ?? 'skill present'}</strong>
+                  <p className="text-xs text-muted-foreground bg-muted/30 p-2.5 rounded-xl border border-border font-mono">
+                    Profile: <strong className="text-foreground">{s.currentProficiency ?? 'not listed'}</strong> · Target:{' '}
+                    <strong className="text-foreground">{s.requiredProficiency ?? 'skill present'}</strong>
                   </p>
 
                   {s.assessment && (
-                    <div className="my-2 rounded-xl bg-indigo-50/50 p-3 border border-indigo-100 text-xs text-indigo-900">
+                    <div className="my-2 rounded-xl bg-primary/10 p-3 border border-primary/20 text-xs text-primary font-mono">
                       <p className="font-semibold flex items-center gap-1.5">
-                        <TrendingUp className="h-4 w-4 text-indigo-600" />
+                        <TrendingUp className="h-4 w-4 text-primary" />
                         <span>Evaluated mock tests: {s.assessment.accuracy}% accuracy across {s.assessment.questionCount} questions{s.needsPractice ? ' · Practice recommended' : ''}</span>
                       </p>
                     </div>
@@ -905,11 +906,11 @@ export function SkillGapPage() {
                   {/* Recommendations */}
                   <ul className="mt-3 space-y-2.5">
                     {s.actions.map((a, i) => (
-                      <li key={i} className="rounded-xl border border-slate-200 p-3 bg-white text-xs space-y-1">
+                      <li key={i} className="rounded-xl border border-border p-3 bg-muted/20 text-xs space-y-1">
                         <div>
                           {a.url ? (
                             <a
-                              className="font-bold text-indigo-600 hover:text-indigo-800 underline text-sm"
+                              className="font-bold text-primary hover:underline text-sm"
                               href={a.url}
                               rel="noreferrer"
                               target={a.url.startsWith('http') ? '_blank' : undefined}
@@ -917,16 +918,16 @@ export function SkillGapPage() {
                               {a.title}
                             </a>
                           ) : (
-                            <strong className="font-bold text-slate-900 text-sm">{a.title}</strong>
+                            <strong className="font-bold text-foreground text-sm">{a.title}</strong>
                           )}
                         </div>
-                        <p className="text-xs text-slate-600 leading-relaxed">{a.reason}</p>
+                        <p className="text-xs text-muted-foreground leading-relaxed">{a.reason}</p>
                       </li>
                     ))}
                   </ul>
 
                   {s.actions.length === 0 && s.priority < 4 && (
-                    <p className="mt-3 text-xs text-slate-500 italic">
+                    <p className="mt-3 text-xs text-muted-foreground italic">
                       No activity is linked yet. Ask your faculty for a resource or explore the learning
                       library.
                     </p>
@@ -937,22 +938,22 @@ export function SkillGapPage() {
           </div>
 
           {result.optionalSkills.length > 0 && (
-            <p className="text-xs text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-200">
+            <p className="text-xs text-muted-foreground bg-muted/30 p-3 rounded-xl border border-border font-mono">
               Optional skills: {result.optionalSkills.map((s) => s.name).join(', ')}
             </p>
           )}
 
           {result.unclassifiedTopics.length > 0 && (
-            <p className="text-xs text-slate-500 bg-amber-50/60 p-3 rounded-xl border border-amber-200 text-amber-800">
+            <p className="text-xs text-amber-700 dark:text-amber-400 bg-amber-500/10 p-3 rounded-xl border border-amber-500/20 font-mono">
               Assessment topics without an exact skill match: {result.unclassifiedTopics.join(', ')}
             </p>
           )}
 
-          <div className="pt-4 border-t border-slate-200 space-y-2">
+          <div className="pt-4 border-t border-border space-y-2">
             <Link className={button} to="/dashboard/profile">
               Update my profile skills
             </Link>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-muted-foreground">
               Return here and analyze again after updating your skills or finishing a test.
             </p>
           </div>

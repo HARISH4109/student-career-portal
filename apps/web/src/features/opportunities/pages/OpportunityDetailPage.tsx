@@ -5,6 +5,7 @@ import {
   Calendar,
   CheckCircle,
   CheckCircle2,
+  Clock,
   ExternalLink,
   IndianRupee,
   Loader2,
@@ -29,6 +30,7 @@ import {
 } from '@/features/opportunities/api/opportunities-api';
 import { CreateOpportunityForm } from '@/features/opportunities/components/CreateOpportunityForm';
 import { EligibilityTag } from '@/features/opportunities/components/EligibilityTag';
+import { ErrorState, Skeleton } from '@/shared/components/ui';
 
 export function OpportunityDetailPage(): React.JSX.Element {
   const { id } = useParams<{ id: string }>();
@@ -47,23 +49,23 @@ export function OpportunityDetailPage(): React.JSX.Element {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+      <div className="w-full max-w-[1536px] mx-auto space-y-6 animate-fade-in">
+        <Skeleton className="h-8 w-36" />
+        <div className="space-y-4">
+          <Skeleton className="h-48 rounded-xl" />
+          <Skeleton className="h-64 rounded-xl" />
+        </div>
       </div>
     );
   }
 
   if (error || !opp) {
     return (
-      <div className="rounded-xl border border-red-200 bg-red-50 p-8 text-center">
-        <p className="text-red-700">Opportunity not found or you don't have permission to view it.</p>
-        <button
-          onClick={() => { void (navigate('/dashboard/opportunities')); }}
-          className="mt-4 text-sm font-medium text-blue-600 hover:underline"
-        >
-          Back to Opportunities
-        </button>
-      </div>
+      <ErrorState
+        title="Opportunity not found"
+        message="This posting may have expired or you don't have permission to view it."
+        onRetry={() => { void refetch(); }}
+      />
     );
   }
 
@@ -94,13 +96,20 @@ export function OpportunityDetailPage(): React.JSX.Element {
   const canApply = isStudent && opp.isEligible && !opp.hasApplied && !isExpired && opp.status === 'published';
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
-      {isStudent && <button className="min-h-11 rounded-lg bg-blue-700 px-4 py-2 font-medium text-white" onClick={() => { void navigate(`/dashboard/skill-gap?opportunityId=${id ?? ''}`); }}>Analyze my skill gaps for this opportunity</button>}
+    <div className="mx-auto w-full max-w-[1536px] space-y-6">
+      {isStudent && (
+        <button
+          className="min-h-11 rounded-lg bg-primary px-4 py-2 font-medium text-primary-foreground hover:bg-primary/90 transition-colors shadow-sm"
+          onClick={() => { void navigate(`/dashboard/skill-gap?opportunityId=${id ?? ''}`); }}
+        >
+          Analyze my skill gaps for this opportunity
+        </button>
+      )}
       {/* Back button & Action buttons */}
       <div className="flex items-center justify-between">
         <button
           onClick={() => { void (navigate('/dashboard/opportunities')); }}
-          className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Opportunities
@@ -109,7 +118,7 @@ export function OpportunityDetailPage(): React.JSX.Element {
         {canManage && (
           <button
             onClick={() => { setShowEditForm(true); }}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-blue-600 transition shadow-xs"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3.5 py-1.5 text-xs font-semibold text-foreground hover:bg-accent hover:text-primary transition shadow-xs cursor-pointer"
           >
             <Pencil className="h-3.5 w-3.5" />
             Edit Opportunity
@@ -118,68 +127,68 @@ export function OpportunityDetailPage(): React.JSX.Element {
       </div>
 
       {/* Header card */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+      <div className="rounded-xl border border-border bg-card p-6 sm:p-8 shadow-sm">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1">
             {/* Type + Status badges */}
             <div className="flex flex-wrap items-center gap-2">
               <span
-                className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
-                  opp.type === 'job' ? 'bg-blue-100 text-blue-700' : 'bg-violet-100 text-violet-700'
-                }`}
+                className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${opp.type === 'job'
+                  ? 'bg-primary/10 text-primary border border-primary/20'
+                  : 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/50'
+                  }`}
               >
-                {opp.type === 'job' ? '💼 Job' : '🎓 Internship'}
+                {opp.type === 'job' ? 'Job' : 'Internship'}
               </span>
               {opp.status === 'closed' && (
-                <span className="inline-flex items-center rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700 ring-1 ring-amber-200">
+                <span className="inline-flex items-center rounded-full bg-muted/40 px-3 py-1 text-xs font-semibold text-muted-foreground border border-border">
                   Closed
                 </span>
               )}
               {isClosingSoon && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700 ring-1 ring-amber-200">
-                  ⏰ Closing Soon
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-700 dark:text-amber-400 border border-amber-500/20">
+                  <Clock className="h-3.5 w-3.5" /> Closing Soon
                 </span>
               )}
               {isExpired && (
-                <span className="inline-flex items-center rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-600">
+                <span className="inline-flex items-center rounded-full bg-rose-500/10 px-3 py-1 text-xs font-semibold text-rose-700 dark:text-rose-400 border border-rose-500/20">
                   Expired
                 </span>
               )}
             </div>
 
-            <h1 className="mt-4 text-2xl font-bold text-slate-900">{opp.title}</h1>
-            <p className="mt-2 text-lg font-medium text-slate-600">
+            <h1 className="mt-4 text-2xl font-bold text-foreground">{opp.title}</h1>
+            <p className="mt-2 text-lg font-medium text-muted-foreground">
               {opp.company?.name ?? 'Company'}
             </p>
 
             {/* Meta */}
-            <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-slate-500">
+            <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-muted-foreground font-mono tabular-nums">
               {opp.location && (
-                <span className="inline-flex items-center gap-1.5">
+                <span className="inline-flex items-center gap-1.5 font-sans">
                   <MapPin className="h-4 w-4" />
                   {opp.location}
                 </span>
               )}
-              <span className="inline-flex items-center gap-1.5">
+              <span className="inline-flex items-center gap-1.5 font-sans">
                 <Monitor className="h-4 w-4" />
                 {opp.workMode.charAt(0).toUpperCase() + opp.workMode.slice(1)}
               </span>
               {salary && (
                 <span
-                  className={`inline-flex items-center gap-1.5 font-semibold ${
-                    salary === 'Unpaid'
-                      ? 'text-amber-700'
-                      : salary === 'Not Provided'
-                        ? 'text-slate-400'
-                        : 'text-slate-700'
-                  }`}
+                  className={`inline-flex items-center gap-1.5 font-semibold ${salary === 'Unpaid'
+                    ? 'text-amber-700 dark:text-amber-400 font-sans'
+                    : salary === 'Not Provided'
+                      ? 'text-muted-foreground font-sans'
+                      : 'text-foreground font-mono'
+                    }`}
                 >
                   {salary !== 'Unpaid' && salary !== 'Not Provided' && <IndianRupee className="h-4 w-4" />}
                   {salary}
                 </span>
               )}
               {deadline && (
-                <span className="inline-flex items-center gap-1.5">
+                <span className="inline-flex items-center gap-1.5 font-sans">
                   <Calendar className="h-4 w-4" />
                   Deadline: {deadline.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
                 </span>
@@ -189,7 +198,7 @@ export function OpportunityDetailPage(): React.JSX.Element {
                   href={opp.applyUrl.startsWith('http') ? opp.applyUrl : `https://${opp.applyUrl}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-blue-600 hover:text-blue-800 hover:underline font-medium"
+                  className="inline-flex items-center gap-1.5 text-primary hover:underline font-medium font-sans"
                 >
                   <ExternalLink className="h-4 w-4" />
                   Apply Link
@@ -198,13 +207,13 @@ export function OpportunityDetailPage(): React.JSX.Element {
               {opp.applicationEmail && (
                 <a
                   href={`mailto:${opp.applicationEmail}`}
-                  className="inline-flex items-center gap-1.5 text-slate-600 hover:text-slate-800 hover:underline font-medium"
+                  className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground hover:underline font-medium font-sans"
                 >
                   <Mail className="h-4 w-4" />
                   {opp.applicationEmail}
                 </a>
               )}
-              <span className="inline-flex items-center gap-1.5">
+              <span className="inline-flex items-center gap-1.5 font-sans">
                 <Users className="h-4 w-4" />
                 {opp.applicationCount} applications
               </span>
@@ -215,17 +224,18 @@ export function OpportunityDetailPage(): React.JSX.Element {
           {isStudent && (
             <div className="flex shrink-0 flex-col items-end gap-2">
               <button
-                onClick={() =>
-                  { if (opp.isSaved) {
+                onClick={() => {
+                  if (opp.isSaved) {
                     unsaveMutation.mutate(opp.id, { onSuccess: () => { void refetch(); } });
                   } else {
                     saveMutation.mutate(opp.id, { onSuccess: () => { void refetch(); } });
-                  } }
+                  }
                 }
-                className="rounded-lg border border-slate-200 p-2.5 text-slate-400 transition-colors hover:bg-slate-50 hover:text-blue-600"
+                }
+                className="rounded-lg border border-border p-2.5 text-muted-foreground transition-colors hover:bg-accent hover:text-primary cursor-pointer"
               >
                 {opp.isSaved ? (
-                  <BookmarkCheck className="h-5 w-5 text-blue-600" />
+                  <BookmarkCheck className="h-5 w-5 text-primary" />
                 ) : (
                   <Bookmark className="h-5 w-5" />
                 )}
@@ -236,11 +246,11 @@ export function OpportunityDetailPage(): React.JSX.Element {
 
         {/* Eligibility + Direct Student Actions */}
         {isStudent && (
-          <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-slate-100 pt-6">
+          <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-border/60 pt-6">
             <div className="flex flex-wrap items-center gap-3">
               {opp.isEligible !== undefined && <EligibilityTag isEligible={opp.isEligible} />}
               {!opp.isEligible && (
-                <span className="inline-flex items-center gap-1.5 text-xs font-medium text-red-500">
+                <span className="inline-flex items-center gap-1.5 text-xs font-medium text-destructive">
                   <XCircle className="h-4 w-4" />
                   You don't meet college criteria for this opportunity
                 </span>
@@ -254,7 +264,7 @@ export function OpportunityDetailPage(): React.JSX.Element {
                   href={opp.applyUrl.startsWith('http') ? opp.applyUrl : `https://${opp.applyUrl}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-700 hover:shadow-md"
+                  className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
                 >
                   <ExternalLink className="h-4 w-4" />
                   Apply on Company Site
@@ -265,7 +275,7 @@ export function OpportunityDetailPage(): React.JSX.Element {
               {!opp.applyUrl && opp.applicationEmail && (
                 <a
                   href={`mailto:${opp.applicationEmail}?subject=${encodeURIComponent(`Application for ${opp.title}`)}`}
-                  className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-700 hover:shadow-md"
+                  className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
                 >
                   <Mail className="h-4 w-4" />
                   Send Application Email
@@ -274,8 +284,8 @@ export function OpportunityDetailPage(): React.JSX.Element {
 
               {/* 1-Click Application Tracker */}
               {hasApplied ? (
-                <div className="inline-flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-800">
-                  <CheckCircle className="h-4 w-4 text-emerald-600" />
+                <div className="inline-flex items-center gap-2 rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-4 py-2 text-sm font-medium text-emerald-700 dark:text-emerald-400">
+                  <CheckCircle className="h-4 w-4 text-emerald-700 dark:text-emerald-400" />
                   <span>Applied & Tracked</span>
                   {myApp && (
                     <button
@@ -289,7 +299,7 @@ export function OpportunityDetailPage(): React.JSX.Element {
                         }
                       }}
                       disabled={withdrawMutation.isPending}
-                      className="ml-2 text-xs text-slate-400 hover:text-red-600 underline font-normal transition-colors"
+                      className="ml-2 text-xs text-muted-foreground hover:text-destructive underline font-normal transition-colors cursor-pointer"
                       title="Remove from your applications tracker"
                     >
                       {withdrawMutation.isPending ? 'Removing...' : 'Untrack'}
@@ -309,13 +319,13 @@ export function OpportunityDetailPage(): React.JSX.Element {
                     );
                   }}
                   disabled={applyMutation.isPending || !canApply}
-                  className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-all hover:bg-slate-50 hover:border-slate-400 disabled:opacity-50"
+                  className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-5 py-2.5 text-sm font-semibold text-foreground shadow-sm transition-colors hover:bg-accent disabled:opacity-50 cursor-pointer"
                   title="Mark that you applied so you can track it in your dashboard"
                 >
                   {applyMutation.isPending ? (
-                    <Loader2 className="h-4 w-4 animate-spin text-slate-500" />
+                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                   ) : (
-                    <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                    <CheckCircle2 className="h-4 w-4 text-emerald-700 dark:text-emerald-400" />
                   )}
                   <span>{applyMutation.isPending ? 'Tracking...' : 'Mark as Applied'}</span>
                 </button>
@@ -326,9 +336,9 @@ export function OpportunityDetailPage(): React.JSX.Element {
       </div>
 
       {/* Description */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-        <h2 className="text-lg font-semibold text-slate-900">Description</h2>
-        <div className="mt-4 prose prose-slate prose-sm max-w-none">
+      <div className="rounded-xl border border-border bg-card p-6 sm:p-8 shadow-sm">
+        <h2 className="text-lg font-semibold text-foreground">Description</h2>
+        <div className="mt-4 text-sm text-muted-foreground space-y-2 leading-relaxed">
           {opp.description.split('\n').map((para, i) => (
             <p key={i}>{para}</p>
           ))}
@@ -337,21 +347,20 @@ export function OpportunityDetailPage(): React.JSX.Element {
 
       {/* Skills */}
       {opp.skills.length > 0 && (
-        <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-          <h2 className="text-lg font-semibold text-slate-900">Required Skills</h2>
+        <div className="rounded-xl border border-border bg-card p-6 sm:p-8 shadow-sm">
+          <h2 className="text-lg font-semibold text-foreground">Required Skills</h2>
           <div className="mt-4 flex flex-wrap gap-2">
             {opp.skills.map((s) => (
               <span
                 key={s.skillId}
-                className={`inline-flex items-center rounded-lg px-3 py-1.5 text-sm font-medium ${
-                  s.isRequired
-                    ? 'bg-blue-50 text-blue-700 ring-1 ring-blue-200/60'
-                    : 'bg-slate-100 text-slate-600'
-                }`}
+                className={`inline-flex items-center rounded-lg px-3 py-1.5 text-sm font-medium ${s.isRequired
+                  ? 'bg-primary/10 text-primary border border-primary/20'
+                  : 'bg-muted/50 border border-border/60 text-muted-foreground'
+                  }`}
               >
                 {s.name}
                 {!s.isRequired && (
-                  <span className="ml-1 text-xs text-slate-400">(nice-to-have)</span>
+                  <span className="ml-1 text-xs text-muted-foreground/60">(nice-to-have)</span>
                 )}
               </span>
             ))}
@@ -361,32 +370,32 @@ export function OpportunityDetailPage(): React.JSX.Element {
 
       {/* Eligibility criteria */}
       {opp.eligibility.length > 0 && (
-        <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-          <h2 className="text-lg font-semibold text-slate-900">Eligibility Criteria</h2>
+        <div className="rounded-xl border border-border bg-card p-6 sm:p-8 shadow-sm">
+          <h2 className="text-lg font-semibold text-foreground">Eligibility Criteria</h2>
           <div className="mt-4 space-y-2">
             {opp.eligibility.map((e) => (
               <div
                 key={e.id}
-                className="flex flex-wrap items-center gap-2 rounded-lg bg-slate-50 px-4 py-2.5 text-sm text-slate-700"
+                className="flex flex-wrap items-center gap-2 rounded-lg bg-muted/30 border border-border/50 px-4 py-2.5 text-sm text-foreground"
               >
                 {e.departmentName && (
                   <span className="font-medium">{e.departmentName}</span>
                 )}
                 {e.programName && (
                   <>
-                    <span className="text-slate-300">•</span>
+                    <span className="text-muted-foreground/40">•</span>
                     <span>{e.programName}</span>
                   </>
                 )}
                 {e.graduationYear && (
                   <>
-                    <span className="text-slate-300">•</span>
+                    <span className="text-muted-foreground/40">•</span>
                     <span>Batch {e.graduationYear}</span>
                   </>
                 )}
                 {e.minCgpa && (
                   <>
-                    <span className="text-slate-300">•</span>
+                    <span className="text-muted-foreground/40">•</span>
                     <span>Min CGPA: {e.minCgpa}</span>
                   </>
                 )}

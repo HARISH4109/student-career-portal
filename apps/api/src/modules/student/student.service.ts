@@ -66,12 +66,22 @@ export class StudentService {
         achievements: dto.achievements,
       });
     } else {
+      const existingCgpa = profile.cgpa !== null && profile.cgpa !== undefined ? Number(profile.cgpa) : null;
+      const incomingCgpa = dto.cgpa !== undefined ? (dto.cgpa !== null ? Number(dto.cgpa) : null) : undefined;
+      const modifiesVerifiedAcademicField =
+        (dto.rollNumber !== undefined && dto.rollNumber !== profile.rollNumber) ||
+        (dto.departmentId !== undefined && dto.departmentId !== profile.departmentId) ||
+        (dto.programId !== undefined && dto.programId !== profile.programId) ||
+        (dto.batchId !== undefined && dto.batchId !== profile.batchId) ||
+        (incomingCgpa !== undefined && incomingCgpa !== existingCgpa);
+
+      if (modifiesVerifiedAcademicField) {
+        throw new ForbiddenError(
+          'Verified academic details (roll number, department, program, batch, CGPA) cannot be modified after profile creation. Contact placement faculty.',
+        );
+      }
+
       profile = await this.studentRepo.updateProfile(profile.id, {
-        rollNumber: dto.rollNumber,
-        departmentId: dto.departmentId,
-        programId: dto.programId,
-        batchId: dto.batchId,
-        cgpa: dto.cgpa,
         bio: dto.bio,
         linkedinUrl: dto.linkedinUrl,
         githubUrl: dto.githubUrl,

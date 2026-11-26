@@ -2,6 +2,7 @@ import { Router } from 'express';
 
 import { PreparationController } from './preparation.controller';
 
+import { aiRateLimiter } from '@/middlewares/ai-rate-limit.middleware';
 import { requireAuth } from '@/middlewares/require-auth.middleware';
 import { requirePermission } from '@/middlewares/require-permission.middleware';
 
@@ -64,8 +65,8 @@ mockInterviewsRouter.delete('/templates/:id', requirePermission('mock_tests.mana
 
 // ── Mock Interview Routes ────────────────────────────────────────────────
 
-mockInterviewsRouter.post('/', requirePermission('mock_interviews.schedule_own'), controller.scheduleMockInterview);
+mockInterviewsRouter.post('/', requirePermission('mock_interviews.schedule_own'), aiRateLimiter, controller.scheduleMockInterview);
 mockInterviewsRouter.get('/me', requirePermission('mock_interviews.view_own'), controller.getMyInterviews);
 mockInterviewsRouter.get('/:id', controller.getInterviewById);
-mockInterviewsRouter.post('/:id/submit', requirePermission('mock_interviews.schedule_own'), controller.submitAIInterviewAnswers);
+mockInterviewsRouter.post('/:id/submit', requirePermission('mock_interviews.schedule_own'), aiRateLimiter, controller.submitAIInterviewAnswers);
 mockInterviewsRouter.delete('/:id', controller.deleteInterview);

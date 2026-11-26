@@ -8,6 +8,8 @@ import type {
 } from '@career-portal/shared-types';
 import { and, count, desc, eq, gt, ilike, isNull, lte, or } from 'drizzle-orm';
 
+import { escapeLikePattern } from '@/shared/db/escape-like';
+
 export interface StudentTargetingCriteria {
   role?: string;
   departmentId?: string | null;
@@ -38,10 +40,11 @@ export class NoticesRepository {
       conditions.push(eq(schema.notices.isPinned, query.isPinned));
     }
     if (query.search) {
+      const escapedSearch = escapeLikePattern(query.search);
       conditions.push(
         or(
-          ilike(schema.notices.title, `%${query.search}%`),
-          ilike(schema.notices.content, `%${query.search}%`),
+          ilike(schema.notices.title, `%${escapedSearch}%`),
+          ilike(schema.notices.content, `%${escapedSearch}%`),
         )!,
       );
     }
@@ -98,10 +101,11 @@ export class NoticesRepository {
       conditions.push(eq(schema.notices.isPinned, query.isPinned));
     }
     if (query.search) {
+      const escapedSearch = escapeLikePattern(query.search);
       conditions.push(
         or(
-          ilike(schema.notices.title, `%${query.search}%`),
-          ilike(schema.notices.content, `%${query.search}%`),
+          ilike(schema.notices.title, `%${escapedSearch}%`),
+          ilike(schema.notices.content, `%${escapedSearch}%`),
         )!,
       );
     }

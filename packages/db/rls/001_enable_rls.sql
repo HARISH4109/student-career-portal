@@ -116,7 +116,13 @@ ALTER TABLE companies ENABLE ROW LEVEL SECURITY;
 CREATE POLICY companies_read_all ON companies FOR SELECT USING (true);
 
 ALTER TABLE notices ENABLE ROW LEVEL SECURITY;
-CREATE POLICY notices_read_all ON notices FOR SELECT USING (true);
+CREATE POLICY notices_read_published ON notices
+  FOR SELECT
+  USING (
+    status = 'published'
+    AND published_at <= now()
+    AND (expires_at IS NULL OR expires_at > now())
+  );
 
 ALTER TABLE learning_resources ENABLE ROW LEVEL SECURITY;
 CREATE POLICY learning_resources_read_all ON learning_resources FOR SELECT USING (true);

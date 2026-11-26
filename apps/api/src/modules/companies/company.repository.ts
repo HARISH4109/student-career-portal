@@ -1,6 +1,8 @@
 import { db, schema } from '@career-portal/db';
 import { count, eq, ilike } from 'drizzle-orm';
 
+import { escapeLikePattern } from '@/shared/db/escape-like';
+
 export class CompanyRepository {
   async findById(id: string) {
     return db.query.companies.findFirst({
@@ -40,7 +42,7 @@ export class CompanyRepository {
     const offset = (page - 1) * pageSize;
 
     const whereClause = search
-      ? ilike(schema.companies.name, `%${search}%`)
+      ? ilike(schema.companies.name, `%${escapeLikePattern(search)}%`)
       : undefined;
 
     const countResult = await db

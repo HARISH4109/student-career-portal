@@ -10,10 +10,22 @@
  * - AI Text Extraction & Normalization P95: < 100ms
  */
 
+const net = require('node:net');
 const { spawn } = require('node:child_process');
 const { setTimeout: delay } = require('node:timers/promises');
 const { performance } = require('node:perf_hooks');
 const { PGlite } = require('@electric-sql/pglite');
+
+function getAvailablePort() {
+  return new Promise((resolve, reject) => {
+    const s = net.createServer();
+    s.listen(0, '127.0.0.1', () => {
+      const { port } = s.address();
+      s.close(() => resolve(port));
+    });
+    s.on('error', reject);
+  });
+}
 
 function calculateStats(samples) {
   const sorted = [...samples].sort((a, b) => a - b);
@@ -138,7 +150,7 @@ async function benchmarkDatabase() {
 
 async function benchmarkApiLatency() {
   console.log('\n--- 2. API Endpoint Latency Benchmarking (Compiled Production Server) ---');
-  const port = 43289;
+  const port = await getAvailablePort();
   const child = spawn(process.execPath, ['apps/api/dist/server.js'], {
     windowsHide: true,
     env: {

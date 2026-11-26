@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import express from 'express';
 
 import { ResumeController } from './resume.controller';
 
@@ -15,7 +16,7 @@ resumeRouter.use(requireAuth);
 
 resumeRouter.get('/', requirePermission('resumes.manage_own'), controller.getResumes);
 resumeRouter.post('/', requirePermission('resumes.manage_own'), controller.createResume);
-resumeRouter.post('/upload', requirePermission('resumes.manage_own'), controller.uploadResume);
+resumeRouter.post('/upload', express.json({ limit: '20mb' }), requirePermission('resumes.manage_own'), controller.uploadResume);
 resumeRouter.get('/:id', controller.getResumeById);
 resumeRouter.put('/:id', requirePermission('resumes.manage_own'), controller.updateResume);
 resumeRouter.post('/:id/duplicate', requirePermission('resumes.manage_own'), controller.duplicateResume);

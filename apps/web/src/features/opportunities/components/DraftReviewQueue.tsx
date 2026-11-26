@@ -72,7 +72,7 @@ export function DraftReviewQueue(): React.JSX.Element {
   const renderConfidenceBadge = (confidence: number | null | undefined) => {
     if (confidence == null) {
       return (
-        <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
+        <span className="inline-flex items-center gap-1 rounded-full bg-muted/40 px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
           N/A
         </span>
       );
@@ -80,7 +80,7 @@ export function DraftReviewQueue(): React.JSX.Element {
     const score = Math.round(confidence);
     if (score >= 80) {
       return (
-        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">
+        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
           <Sparkles className="h-3 w-3" />
           {score}% High
         </span>
@@ -88,14 +88,14 @@ export function DraftReviewQueue(): React.JSX.Element {
     }
     if (score >= 50) {
       return (
-        <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 border border-amber-200 px-2.5 py-0.5 text-xs font-semibold text-amber-700">
+        <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/50 px-2.5 py-0.5 text-xs font-semibold text-amber-700 dark:text-amber-300">
           <Clock className="h-3 w-3" />
           {score}% Med
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-red-50 border border-red-200 px-2.5 py-0.5 text-xs font-semibold text-red-700">
+      <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/50 px-2.5 py-0.5 text-xs font-semibold text-rose-700 dark:text-rose-300">
         <AlertTriangle className="h-3 w-3" />
         {score}% Low
       </span>
@@ -106,19 +106,19 @@ export function DraftReviewQueue(): React.JSX.Element {
     switch (type) {
       case 'image':
         return (
-          <span className="inline-flex items-center gap-1 text-xs text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200">
+          <span className="inline-flex items-center gap-1 text-xs text-primary bg-primary/10 px-2 py-0.5 rounded border border-primary/20">
             <FileImage className="h-3 w-3" /> Image
           </span>
         );
       case 'pdf':
         return (
-          <span className="inline-flex items-center gap-1 text-xs text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">
+          <span className="inline-flex items-center gap-1 text-xs text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 px-2 py-0.5 rounded border border-rose-200 dark:border-rose-800/50">
             <FileText className="h-3 w-3" /> PDF
           </span>
         );
       case 'url':
         return (
-          <span className="inline-flex items-center gap-1 text-xs text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+          <span className="inline-flex items-center gap-1 text-xs text-primary bg-primary/10 px-2 py-0.5 rounded border border-primary/20">
             <Globe className="h-3 w-3" /> Web Link
           </span>
         );
@@ -130,7 +130,7 @@ export function DraftReviewQueue(): React.JSX.Element {
         );
       default:
         return (
-          <span className="inline-flex items-center gap-1 text-xs text-slate-700 bg-slate-50 px-2 py-0.5 rounded border border-slate-200">
+          <span className="inline-flex items-center gap-1 text-xs text-muted-foreground bg-muted/20 px-2 py-0.5 rounded border border-border">
             <FileText className="h-3 w-3" /> Text
           </span>
         );
@@ -166,7 +166,7 @@ export function DraftReviewQueue(): React.JSX.Element {
         );
       default:
         return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
+          <span className="inline-flex items-center gap-1 rounded-full bg-muted/40 px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
             {status}
           </span>
         );
@@ -176,15 +176,15 @@ export function DraftReviewQueue(): React.JSX.Element {
   return (
     <div className="space-y-6">
       {/* Top Banner & Ingest Action */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-indigo-100 bg-gradient-to-r from-indigo-50/60 via-purple-50/40 to-white p-5 shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-border bg-card p-5 shadow-xs">
         <div className="flex items-start gap-3">
-          <div className="rounded-lg bg-indigo-600 p-2.5 text-white shadow-sm">
+          <div className="rounded-lg bg-primary/10 border border-primary/20 p-2.5 text-primary shadow-xs">
             <Sparkles className="h-5 w-5" />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-slate-900">AI Agent Extraction & Ingestion Queue</h2>
-            <p className="text-sm text-slate-600">
-              Ingest job flyers, circulars, or links. AI Agent automatically extracts fields into drafts for faculty approval.
+            <h2 className="text-lg font-bold text-foreground">AI Extraction & Ingestion Queue</h2>
+            <p className="text-sm text-muted-foreground">
+              Ingest job flyers, circulars, or links. Fields are automatically extracted into drafts for faculty approval.
             </p>
           </div>
         </div>
@@ -192,7 +192,7 @@ export function DraftReviewQueue(): React.JSX.Element {
         <button
           type="button"
           onClick={() => { setIsIngestModalOpen(true); }}
-          className="inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:from-purple-700 hover:to-indigo-700 hover:shadow"
+          className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary hover:bg-primary/90 px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-xs transition-colors cursor-pointer"
         >
           <Sparkles className="h-4 w-4" />
           Ingest New Source (AI Agent)
@@ -200,7 +200,7 @@ export function DraftReviewQueue(): React.JSX.Element {
       </div>
 
       {/* Filter Tabs & Search */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-200 pb-3">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-border pb-3">
         {/* Status Tabs */}
         <div className="flex flex-wrap items-center gap-2">
           {STATUS_TABS.map((tab) => {
@@ -220,14 +220,14 @@ export function DraftReviewQueue(): React.JSX.Element {
                 className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition ${
                   isActive
                     ? 'bg-slate-900 text-white shadow-sm'
-                    : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                    : 'bg-card text-muted-foreground hover:bg-muted/40 border border-border'
                 }`}
               >
                 {tab.label}
                 {count > 0 && (
                   <span
                     className={`rounded-full px-1.5 py-0.2 text-xs font-semibold ${
-                      isActive ? 'bg-slate-700 text-white' : 'bg-slate-100 text-slate-600'
+                      isActive ? 'bg-slate-700 text-white' : 'bg-muted/40 text-muted-foreground'
                     }`}
                   >
                     {count}
@@ -240,13 +240,13 @@ export function DraftReviewQueue(): React.JSX.Element {
 
         {/* Search */}
         <div className="relative w-full md:w-64">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+          <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
           <input
             type="text"
             placeholder="Search drafts..."
             value={searchQuery}
             onChange={(e) => { setSearchQuery(e.target.value); }}
-            className="w-full rounded-lg border border-slate-300 bg-white py-2 pl-9 pr-3 text-sm placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            className="w-full rounded-lg border border-border bg-card py-2 pl-9 pr-3 text-sm placeholder-slate-400 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </div>
       </div>
@@ -254,8 +254,8 @@ export function DraftReviewQueue(): React.JSX.Element {
       {/* Queue Table */}
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
-          <p className="mt-2 text-sm text-slate-500">Loading AI Agent drafts queue...</p>
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="mt-2 text-sm text-muted-foreground">Loading AI Agent drafts queue...</p>
         </div>
       ) : isError ? (
         <div className="rounded-xl border border-red-200 bg-red-50 p-8 text-center">
@@ -270,10 +270,10 @@ export function DraftReviewQueue(): React.JSX.Element {
           </button>
         </div>
       ) : filteredDrafts.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-slate-300 bg-white p-12 text-center">
+        <div className="rounded-xl border border-dashed border-border bg-card p-12 text-center">
           <Sparkles className="mx-auto h-10 w-10 text-slate-300" />
-          <h3 className="mt-3 text-base font-semibold text-slate-800">No drafts in this view</h3>
-          <p className="mt-1 text-sm text-slate-500">
+          <h3 className="mt-3 text-base font-semibold text-foreground">No drafts in this view</h3>
+          <p className="mt-1 text-sm text-muted-foreground">
             {searchQuery
               ? 'No drafts match your search filter.'
               : 'Upload a placement poster flyer or submit a URL to extract and ingest with AI Agent.'}
@@ -281,16 +281,16 @@ export function DraftReviewQueue(): React.JSX.Element {
           <button
             type="button"
             onClick={() => { setIsIngestModalOpen(true); }}
-            className="mt-4 inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:from-purple-700 hover:to-indigo-700"
+            className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary hover:bg-primary/90 px-4 py-2 text-sm font-semibold text-primary-foreground shadow-xs transition-colors cursor-pointer"
           >
             <Sparkles className="h-4 w-4" /> Ingest Source (AI Agent)
           </button>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div className="overflow-hidden rounded-xl border border-border bg-card shadow-xs">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm text-slate-600">
-              <thead className="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wider text-slate-500">
+            <table className="w-full text-left text-sm text-muted-foreground">
+              <thead className="border-b border-border bg-muted/20 text-xs font-medium text-muted-foreground">
                 <tr>
                   <th className="px-6 py-3.5">Opportunity / Role</th>
                   <th className="px-6 py-3.5">Company</th>
@@ -308,22 +308,22 @@ export function DraftReviewQueue(): React.JSX.Element {
                   const isFailedRun = draft.extractionRun?.status === 'failed';
 
                   return (
-                    <tr key={draft.id} className="hover:bg-slate-50/80 transition-colors">
-                      <td className="px-6 py-4 font-medium text-slate-900">
-                        <div className="font-semibold text-slate-900 hover:text-indigo-600">
+                    <tr key={draft.id} className="hover:bg-muted/20/80 transition-colors">
+                      <td className="px-6 py-4 font-medium text-foreground">
+                        <div className="font-semibold text-foreground hover:text-primary">
                           {draft.title || (
-                            <span className="italic text-slate-400">Untitled Opportunity</span>
+                            <span className="italic text-muted-foreground">Untitled Opportunity</span>
                           )}
                         </div>
-                        <div className="mt-0.5 text-xs text-slate-500 flex items-center gap-2">
+                        <div className="mt-0.5 text-xs text-muted-foreground flex items-center gap-2">
                           <span className="capitalize">{draft.type ?? 'Job'}</span>
                           {draft.location && <span>• {draft.location}</span>}
                         </div>
                       </td>
 
                       <td className="px-6 py-4">
-                        <span className="font-medium text-slate-800">
-                          {draft.companyName || <span className="italic text-slate-400">Unknown</span>}
+                        <span className="font-medium text-foreground">
+                          {draft.companyName || <span className="italic text-muted-foreground">Unknown</span>}
                         </span>
                       </td>
 
@@ -346,11 +346,11 @@ export function DraftReviewQueue(): React.JSX.Element {
                             Possible Match
                           </span>
                         ) : (
-                          <span className="text-xs text-slate-400">{draft.duplicateCheck ? 'None detected' : 'Check in review'}</span>
+                          <span className="text-xs text-muted-foreground">{draft.duplicateCheck ? 'None detected' : 'Check in review'}</span>
                         )}
                       </td>
 
-                      <td className="px-6 py-4 text-xs text-slate-500 whitespace-nowrap">
+                      <td className="px-6 py-4 text-xs text-muted-foreground whitespace-nowrap">
                         {new Date(draft.createdAt).toLocaleDateString()}
                       </td>
 
@@ -370,7 +370,7 @@ export function DraftReviewQueue(): React.JSX.Element {
                             <button
                               type="button"
                               onClick={() => { void (navigate(`/dashboard/opportunities/drafts/${draft.id}/review`)); }}
-                              className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-50 border border-indigo-200 px-3 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-600 hover:text-white transition shadow-sm"
+                              className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-50 border border-indigo-200 px-3 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-primary hover:text-white transition shadow-sm"
                             >
                               Review Draft
                               <ArrowRight className="h-3 w-3" />
@@ -385,7 +385,7 @@ export function DraftReviewQueue(): React.JSX.Element {
                             }}
                             disabled={deleteMutation.isPending}
                             title="Delete Draft"
-                            className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white p-1.5 text-slate-400 hover:border-red-200 hover:bg-red-50 hover:text-red-600 transition disabled:opacity-50"
+                            className="inline-flex items-center justify-center rounded-lg border border-border bg-card p-1.5 text-muted-foreground hover:border-red-200 hover:bg-red-50 hover:text-red-600 transition disabled:opacity-50"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
                           </button>
@@ -400,7 +400,7 @@ export function DraftReviewQueue(): React.JSX.Element {
 
           {/* Pagination Controls */}
           {meta && meta.totalPages > 1 && (
-            <div className="flex items-center justify-between border-t border-slate-200 px-6 py-3 text-xs text-slate-500">
+            <div className="flex items-center justify-between border-t border-border px-6 py-3 text-xs text-muted-foreground">
               <span>
                 Showing page {meta.page} of {meta.totalPages} ({meta.totalItems} total drafts)
               </span>
@@ -409,7 +409,7 @@ export function DraftReviewQueue(): React.JSX.Element {
                   type="button"
                   onClick={() => { setPage((p) => Math.max(1, p - 1)); }}
                   disabled={page <= 1}
-                  className="rounded border border-slate-200 px-2.5 py-1 text-xs font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-50"
+                  className="rounded border border-border px-2.5 py-1 text-xs font-medium text-muted-foreground hover:bg-muted/20 disabled:opacity-50"
                 >
                   Previous
                 </button>
@@ -417,7 +417,7 @@ export function DraftReviewQueue(): React.JSX.Element {
                   type="button"
                   onClick={() => { setPage((p) => Math.min(meta.totalPages, p + 1)); }}
                   disabled={page >= meta.totalPages}
-                  className="rounded border border-slate-200 px-2.5 py-1 text-xs font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-50"
+                  className="rounded border border-border px-2.5 py-1 text-xs font-medium text-muted-foreground hover:bg-muted/20 disabled:opacity-50"
                 >
                   Next
                 </button>

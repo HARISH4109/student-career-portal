@@ -5,6 +5,7 @@ import { and, asc, count, desc, eq, ilike, or } from 'drizzle-orm';
 import { validateCompensation } from './validate-compensation';
 
 import { ConflictError, NotFoundError, ValidationError } from '@/shared/errors/app-error';
+import { escapeLikePattern } from '@/shared/db/escape-like';
 
 /**
  * Data-access layer for the AI extraction pipeline entities:
@@ -81,8 +82,8 @@ export class OpportunityDraftRepository {
           const department = await tx.query.departments.findFirst({
             where: or(
               eq(schema.departments.code, trimmed),
-              ilike(schema.departments.code, trimmed),
-              ilike(schema.departments.name, `%${trimmed}%`),
+              ilike(schema.departments.code, escapeLikePattern(trimmed)),
+              ilike(schema.departments.name, `%${escapeLikePattern(trimmed)}%`),
             ),
           });
           if (department) {

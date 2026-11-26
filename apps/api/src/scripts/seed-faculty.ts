@@ -13,21 +13,24 @@ interface SeedUserConfig {
 
 const USERS_TO_SEED: SeedUserConfig[] = [
   {
-    email: 'faculty@university.edu',
-    password: 'Password@123',
+    email: process.env.SEED_FACULTY_EMAIL || 'faculty@university.edu',
+    password: process.env.SEED_FACULTY_PASSWORD || '',
     fullName: 'Placement Officer (Faculty)',
     roleName: 'PLACEMENT_FACULTY',
   },
   {
-    email: 'admin@university.edu',
-    password: 'Password@123',
+    email: process.env.SEED_ADMIN_EMAIL || 'admin@university.edu',
+    password: process.env.SEED_ADMIN_PASSWORD || '',
     fullName: 'System Administrator',
     roleName: 'ADMIN',
   },
 ];
 
 async function seedHardcodedUsers(): Promise<void> {
-  console.log('Seeding hardcoded faculty & admin users...');
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('Refusing to run dev seed script in production environment.');
+  }
+  console.log('Seeding dev faculty & admin users...');
 
   // 1. Ensure roles exist in DB
   const facultyRole = await db.query.roles.findFirst({
@@ -47,6 +50,9 @@ async function seedHardcodedUsers(): Promise<void> {
   };
 
   for (const userConfig of USERS_TO_SEED) {
+    if (!userConfig.password) {
+      throw new Error(`Missing password env var for ${userConfig.email}. Set SEED_FACULTY_PASSWORD and SEED_ADMIN_PASSWORD.`);
+    }
     console.log(`\nProvisioning: ${userConfig.email} (${userConfig.roleName})...`);
 
     let supabaseUserId: string;
@@ -56,13 +62,8 @@ async function seedHardcodedUsers(): Promise<void> {
     const existingSupabaseUser = userList.users.find((u) => u.email === userConfig.email);
 
     if (existingSupabaseUser) {
-      console.log(`User ${userConfig.email} already exists in Supabase. Updating password...`);
+      console.log(`User ${userConfig.email} already exists in Supabase; preserving existing password.`);
       supabaseUserId = existingSupabaseUser.id;
-      await supabaseAdmin.auth.admin.updateUserById(supabaseUserId, {
-        password: userConfig.password,
-        email_confirm: true,
-        user_metadata: { full_name: userConfig.fullName },
-      });
     } else {
       console.log(`Creating ${userConfig.email} in Supabase Auth...`);
       const { data: created, error } = await supabaseAdmin.auth.admin.createUser({
@@ -105,17 +106,7 @@ async function seedHardcodedUsers(): Promise<void> {
     console.log(`✓ ${userConfig.email} successfully configured as ${userConfig.roleName}!`);
   }
 
-  console.log('\n=============================================');
-  console.log('HARDCODED CREDENTIALS READY FOR LOGIN:');
-  console.log('---------------------------------------------');
-  console.log('Faculty Account:');
-  console.log('  Email:    faculty@university.edu');
-  console.log('  Password: Password@123');
-  console.log('---------------------------------------------');
-  console.log('Admin Account:');
-  console.log('  Email:    admin@university.edu');
-  console.log('  Password: Password@123');
-  console.log('=============================================\n');
+  console.log('\n✓ Dev faculty & admin users provisioned.');
 }
 
 seedHardcodedUsers()

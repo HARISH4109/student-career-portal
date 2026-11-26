@@ -37,17 +37,17 @@ function formatRelativeTime(dateString: string): string {
 function getNotificationIcon(type: string) {
   switch (type) {
     case 'application_update':
-      return <FileText className="h-4 w-4 text-emerald-600" />;
+      return <FileText className="h-4 w-4 text-emerald-700 dark:text-emerald-400" />;
     case 'new_opportunity':
     case 'opportunity_deadline':
-      return <Briefcase className="h-4 w-4 text-blue-600" />;
+      return <Briefcase className="h-4 w-4 text-primary" />;
     case 'test_assigned':
     case 'test_result_ready':
-      return <BookOpen className="h-4 w-4 text-purple-600" />;
+      return <BookOpen className="h-4 w-4 text-purple-400" />;
     case 'roadmap_reminder':
-      return <Route className="h-4 w-4 text-amber-600" />;
+      return <Route className="h-4 w-4 text-amber-700 dark:text-amber-400" />;
     default:
-      return <Bell className="h-4 w-4 text-slate-600" />;
+      return <Bell className="h-4 w-4 text-muted-foreground" />;
   }
 }
 
@@ -113,11 +113,11 @@ export function NotificationBell(): React.JSX.Element {
           setIsOpen(!isOpen);
         }}
         aria-label="Open notifications"
-        className="relative p-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors"
+        className="relative p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors cursor-pointer"
       >
         <Bell className="h-5 w-5" />
         {unreadCount > 0 && (
-          <span className="absolute top-1.5 right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white shadow-sm ring-2 ring-white animate-pulse">
+          <span className="absolute top-1.5 right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground shadow-xs">
             {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}
@@ -138,14 +138,14 @@ export function NotificationBell(): React.JSX.Element {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -8, scale: 0.95 }}
               transition={{ duration: 0.15 }}
-              className="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl bg-white shadow-2xl ring-1 ring-slate-200 z-50 overflow-hidden flex flex-col"
+              className="absolute right-0 mt-2 w-80 sm:w-96 rounded-xl bg-popover border border-border shadow-2xl z-50 overflow-hidden flex flex-col"
             >
               {/* Header */}
-              <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50/70">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-muted/30">
                 <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-bold text-slate-800">Notifications</h3>
+                  <h3 className="text-sm font-semibold text-foreground">Notifications</h3>
                   {unreadCount > 0 && (
-                    <span className="px-2 py-0.5 text-xs font-semibold bg-blue-100 text-blue-700 rounded-full">
+                    <span className="px-2 py-0.5 text-xs font-semibold font-mono bg-primary/10 text-primary border border-primary/20 rounded-full">
                       {unreadCount} new
                     </span>
                   )}
@@ -157,7 +157,7 @@ export function NotificationBell(): React.JSX.Element {
                         markAllMutation.mutate();
                       }}
                       title="Mark all as read"
-                      className="p-1.5 text-slate-400 hover:text-blue-600 rounded-lg hover:bg-white text-xs font-medium flex items-center gap-1 transition-colors"
+                      className="p-1.5 text-muted-foreground hover:text-primary rounded-lg hover:bg-accent text-xs font-medium flex items-center gap-1 transition-colors cursor-pointer"
                     >
                       <CheckCheck className="h-4 w-4" />
                       <span className="hidden sm:inline">Mark all read</span>
@@ -169,7 +169,7 @@ export function NotificationBell(): React.JSX.Element {
                       setPrefsOpen(true);
                     }}
                     title="Notification settings"
-                    className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-white transition-colors"
+                    className="p-1.5 text-muted-foreground hover:text-foreground rounded-lg hover:bg-accent transition-colors cursor-pointer"
                   >
                     <Settings className="h-4 w-4" />
                   </button>
@@ -177,14 +177,14 @@ export function NotificationBell(): React.JSX.Element {
               </div>
 
               {/* Notification List */}
-              <div className="max-h-[380px] overflow-y-auto divide-y divide-slate-100">
+              <div className="max-h-[380px] overflow-y-auto divide-y divide-border/60">
                 {isLoading ? (
-                  <div className="py-8 text-center text-xs text-slate-400">Loading notifications…</div>
+                  <div className="py-8 text-center text-xs text-muted-foreground">Loading notifications…</div>
                 ) : notifications.length === 0 ? (
-                  <div className="py-12 text-center text-slate-400 space-y-2">
-                    <Bell className="h-8 w-8 mx-auto text-slate-300 stroke-[1.5]" />
-                    <p className="text-sm font-medium text-slate-500">All caught up!</p>
-                    <p className="text-xs text-slate-400">You have no new notifications.</p>
+                  <div className="py-12 text-center text-muted-foreground space-y-2">
+                    <Bell className="h-8 w-8 mx-auto text-muted-foreground/40 stroke-[1.5]" />
+                    <p className="text-sm font-medium text-foreground">All caught up</p>
+                    <p className="text-xs text-muted-foreground">You have no new notifications.</p>
                   </div>
                 ) : (
                   notifications.map((notif) => (
@@ -193,29 +193,29 @@ export function NotificationBell(): React.JSX.Element {
                       onClick={() => {
                         handleNotificationClick(notif);
                       }}
-                      className={`flex items-start gap-3 p-3.5 hover:bg-slate-50/80 cursor-pointer transition-colors relative ${
-                        !notif.isRead ? 'bg-blue-50/30' : ''
+                      className={`flex items-start gap-3 p-3.5 hover:bg-muted/30 cursor-pointer transition-colors relative ${
+                        !notif.isRead ? 'bg-primary/5' : ''
                       }`}
                     >
-                      <div className="mt-0.5 p-2 rounded-xl bg-slate-100 flex-shrink-0">
+                      <div className="mt-0.5 p-2 rounded-lg bg-muted/40 border border-border/50 flex-shrink-0">
                         {getNotificationIcon(notif.type)}
                       </div>
                       <div className="flex-1 min-w-0 pr-2">
                         <div className="flex items-baseline justify-between gap-1">
-                          <p className={`text-xs font-semibold truncate ${!notif.isRead ? 'text-slate-900' : 'text-slate-700'}`}>
+                          <p className={`text-xs ${!notif.isRead ? 'font-semibold text-foreground' : 'font-medium text-muted-foreground'}`}>
                             {notif.title}
                           </p>
-                          <span className="text-[10px] text-slate-400 flex items-center gap-0.5 flex-shrink-0">
+                          <span className="text-[10px] text-muted-foreground font-mono flex items-center gap-0.5 flex-shrink-0">
                             <Clock className="h-2.5 w-2.5" />
                             {formatRelativeTime(notif.createdAt)}
                           </span>
                         </div>
-                        <p className="text-xs text-slate-500 line-clamp-2 mt-0.5">
+                        <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5 leading-relaxed">
                           {notif.message}
                         </p>
                       </div>
                       {!notif.isRead && (
-                        <div className="mt-2 h-2 w-2 rounded-full bg-blue-600 flex-shrink-0" />
+                        <div className="mt-2 h-2 w-2 rounded-full bg-primary flex-shrink-0" />
                       )}
                     </div>
                   ))

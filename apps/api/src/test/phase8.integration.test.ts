@@ -47,6 +47,9 @@ vi.mock('@/infrastructure/supabase', () => ({
           data: { user: { id: token, email: `${token}@example.test`, user_metadata: {} } },
           error: null,
         }),
+      admin: {
+        updateUserById: () => Promise.resolve({ data: {}, error: null }),
+      },
     },
   },
 }));

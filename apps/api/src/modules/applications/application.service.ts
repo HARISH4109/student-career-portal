@@ -215,7 +215,7 @@ export class ApplicationService {
       throw new ForbiddenError('You can only update the status of your own applications');
     }
 
-    const allowedStatuses: ApplicationStatus[] = [
+    const validStatuses: ApplicationStatus[] = [
       'applied',
       'under_review',
       'shortlisted',
@@ -225,16 +225,24 @@ export class ApplicationService {
       'rejected',
       'withdrawn',
     ];
-
-    if (!allowedStatuses.includes(dto.status as ApplicationStatus)) {
+    if (!validStatuses.includes(dto.status as ApplicationStatus)) {
       throw new ValidationError(`Invalid application status: ${dto.status}`);
+    }
+
+    // Students may only withdraw their own non-terminal applications; official
+    // stage progression ('shortlisted', 'interview', 'selected', 'rejected') is staff-only.
+    if (dto.status !== 'withdrawn') {
+      throw new ForbiddenError('Students may only withdraw their own applications');
+    }
+    if (!WITHDRAWABLE_STATUSES.includes(application.status)) {
+      throw new ConflictError(`Cannot withdraw application with status '${application.status}'`);
     }
 
     await this.appRepo.updateStudentApplicationStatus(
       id,
-      dto.status as ApplicationStatus,
+      'withdrawn',
       user.id,
-      dto.remarks || 'Self-updated by student in tracker',
+      dto.remarks || 'Withdrawn by student',
     );
 
     const full = await this.appRepo.findById(id);

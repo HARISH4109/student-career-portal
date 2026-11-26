@@ -1,4 +1,5 @@
 import type { ResumeContent } from '@career-portal/shared-types';
+import { safeHref } from '@/shared/lib/safe-url';
 
 /**
  * Escapes HTML characters to prevent XSS in print preview window.
@@ -173,9 +174,9 @@ export function generateResumeHtml(
       ${content.email ? `<span>${escapeHtml(content.email)}</span>` : ''}
       ${content.phone ? `<span>${escapeHtml(content.phone)}</span>` : ''}
       ${content.location ? `<span>${escapeHtml(content.location)}</span>` : ''}
-      ${content.linkedinUrl ? `<span><a href="${escapeHtml(content.linkedinUrl)}">LinkedIn</a></span>` : ''}
-      ${content.githubUrl ? `<span><a href="${escapeHtml(content.githubUrl)}">GitHub</a></span>` : ''}
-      ${content.portfolioUrl ? `<span><a href="${escapeHtml(content.portfolioUrl)}">Portfolio</a></span>` : ''}
+      ${safeHref(content.linkedinUrl) ? `<span><a href="${escapeHtml(safeHref(content.linkedinUrl))}">LinkedIn</a></span>` : ''}
+      ${safeHref(content.githubUrl) ? `<span><a href="${escapeHtml(safeHref(content.githubUrl))}">GitHub</a></span>` : ''}
+      ${safeHref(content.portfolioUrl) ? `<span><a href="${escapeHtml(safeHref(content.portfolioUrl))}">Portfolio</a></span>` : ''}
     </div>
   </div>
 
@@ -252,8 +253,8 @@ export function generateResumeHtml(
         
         ${proj.link || proj.githubUrl ? `
           <div style="font-size: 8.5pt; margin-top: 2px;">
-            ${proj.link ? `<a href="${escapeHtml(proj.link)}">Live Demo ↗</a> ` : ''}
-            ${proj.githubUrl ? `<a href="${escapeHtml(proj.githubUrl)}">GitHub ↗</a>` : ''}
+            ${safeHref(proj.link) ? `<a href="${escapeHtml(safeHref(proj.link))}">Live Demo ↗</a> ` : ''}
+            ${safeHref(proj.githubUrl) ? `<a href="${escapeHtml(safeHref(proj.githubUrl))}">GitHub ↗</a>` : ''}
           </div>
         ` : ''}
       </div>
@@ -278,7 +279,7 @@ export function generateResumeHtml(
         <li>
           <strong>${escapeHtml(c.name)}</strong> — ${escapeHtml(c.issuer || '')}
           ${c.issueDate ? ` (${escapeHtml(c.issueDate)})` : ''}
-          ${c.credentialUrl ? ` <a href="${escapeHtml(c.credentialUrl)}">[Verify]</a>` : ''}
+          ${safeHref(c.credentialUrl) ? ` <a href="${escapeHtml(safeHref(c.credentialUrl))}">[Verify]</a>` : ''}
         </li>
       `).join('')}
     </ul>

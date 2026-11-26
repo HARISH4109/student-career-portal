@@ -136,26 +136,26 @@ export function NoticeFormModal({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
-          className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl border border-slate-100 max-h-[92vh] flex flex-col"
+          className="w-full max-w-2xl rounded-2xl bg-card p-6 shadow-2xl border border-border max-h-[92vh] flex flex-col"
         >
           {/* Header */}
-          <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+          <div className="flex items-center justify-between pb-4 border-b border-border">
             <div>
-              <h2 className="text-lg font-bold text-slate-900">
+              <h2 className="text-lg font-bold text-foreground">
                 {noticeToEdit ? 'Edit Notice' : 'Post Announcement / Notice'}
               </h2>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-muted-foreground">
                 Broadcast announcements, hackathons, and seminars across the Computer Science & Engineering department
               </p>
             </div>
             <button
               onClick={onClose}
-              className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100"
+              className="p-1.5 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted/50"
             >
               <X className="h-5 w-5" />
             </button>
@@ -164,7 +164,7 @@ export function NoticeFormModal({
           {/* Form */}
           <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto py-4 space-y-4 pr-1">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
+              <label className="block text-xs font-semibold text-muted-foreground tracking-normal mb-1">
                 Notice Title *
               </label>
               <input
@@ -173,17 +173,17 @@ export function NoticeFormModal({
                 value={title}
                 onChange={(e) => { setTitle(e.target.value); }}
                 placeholder="e.g. Smart India Hackathon 2026 - Department Shortlisting"
-                className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
               />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Category</label>
+                <label className="block text-xs font-semibold text-muted-foreground tracking-normal mb-1">Category</label>
                 <select
                   value={category}
                   onChange={(e) => { setCategory(e.target.value as NoticeCategory); }}
-                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                  className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 >
                   <option value="placement">Placement</option>
                   <option value="academic">Academic</option>
@@ -193,11 +193,11 @@ export function NoticeFormModal({
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Publish Status</label>
+                <label className="block text-xs font-semibold text-muted-foreground tracking-normal mb-1">Publish Status</label>
                 <select
                   value={status}
                   onChange={(e) => { setStatus(e.target.value as NoticeStatus); }}
-                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                  className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 >
                   <option value="published">Published Immediately (All Students)</option>
                   <option value="scheduled">Scheduled for Future</option>
@@ -208,7 +208,7 @@ export function NoticeFormModal({
 
             {status === 'scheduled' && (
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-muted-foreground tracking-normal mb-1">
                   Schedule Publish Date & Time
                 </label>
                 <input
@@ -216,22 +216,22 @@ export function NoticeFormModal({
                   required
                   value={publishedAt}
                   onChange={(e) => { setPublishedAt(e.target.value); }}
-                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                  className="w-full rounded-xl border border-border bg-background px-3.5 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
             )}
 
             {/* Poster Upload / URL Section */}
-            <div className="rounded-xl bg-slate-50/80 p-4 border border-slate-200/80 space-y-3">
+            <div className="rounded-xl bg-muted/20 p-4 border border-border space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-                  <ImageIcon className="h-4 w-4 text-blue-600" /> Event Poster or Banner (Optional)
+                <span className="text-xs font-bold tracking-normal text-foreground flex items-center gap-1.5">
+                  <ImageIcon className="h-4 w-4 text-primary" /> Event Poster or Banner (Optional)
                 </span>
                 {posterUrl && (
                   <button
                     type="button"
                     onClick={() => { setPosterUrl(''); }}
-                    className="text-xs text-red-600 hover:text-red-700 font-medium"
+                    className="text-xs text-destructive hover:underline font-medium"
                   >
                     Remove Poster
                   </button>
@@ -239,7 +239,7 @@ export function NoticeFormModal({
               </div>
 
               {posterUrl ? (
-                <div className="relative rounded-xl overflow-hidden border border-slate-200 bg-slate-900/5 max-h-48 flex items-center justify-center">
+                <div className="relative rounded-xl overflow-hidden border border-border bg-muted/30 max-h-48 flex items-center justify-center">
                   <img
                     src={posterUrl}
                     alt="Poster preview"
@@ -250,7 +250,7 @@ export function NoticeFormModal({
               ) : (
                 <div className="space-y-2">
                   <div className="flex items-center gap-3">
-                    <label className="flex-1 flex flex-col items-center justify-center p-3 border-2 border-dashed border-slate-200 hover:border-blue-400 bg-white rounded-xl cursor-pointer transition-colors group">
+                    <label className="flex-1 flex flex-col items-center justify-center p-3 border-2 border-dashed border-border hover:border-primary bg-background/50 hover:bg-background rounded-xl cursor-pointer transition-colors group">
                       <input
                         type="file"
                         accept="image/png,image/jpeg,image/webp,image/gif"
@@ -258,11 +258,11 @@ export function NoticeFormModal({
                         onChange={handlePosterFileUpload}
                         disabled={isUploadingPoster}
                       />
-                      <div className="flex items-center gap-2 text-xs font-semibold text-slate-600 group-hover:text-blue-600">
+                      <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground group-hover:text-primary">
                         {isUploadingPoster ? (
-                          <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                          <Loader2 className="h-4 w-4 animate-spin text-primary" />
                         ) : (
-                          <Upload className="h-4 w-4 text-slate-400 group-hover:text-blue-500" />
+                          <Upload className="h-4 w-4 text-muted-foreground group-hover:text-primary" />
                         )}
                         <span>{isUploadingPoster ? 'Uploading Poster…' : 'Upload Image (PNG, JPG, WebP max 5MB)'}</span>
                       </div>
@@ -270,7 +270,7 @@ export function NoticeFormModal({
                   </div>
 
                   <div className="relative flex items-center gap-2">
-                    <span className="text-[11px] text-slate-400 font-medium">or paste image link:</span>
+                    <span className="text-[11px] text-muted-foreground font-medium">or paste image link:</span>
                     <input
                       type="url"
                       placeholder="https://example.com/poster.jpg"
@@ -279,58 +279,58 @@ export function NoticeFormModal({
                         setPosterUrl(e.target.value);
                         setPosterError(null);
                       }}
-                      className="flex-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      className="flex-1 rounded-lg border border-border bg-background px-3 py-1.5 text-xs text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                     />
                   </div>
                 </div>
               )}
 
               {posterError && (
-                <p className="text-xs text-red-600 font-medium">{posterError}</p>
+                <p className="text-xs text-destructive font-medium">{posterError}</p>
               )}
             </div>
 
             {/* Event Link / Registration URL */}
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1.5">
-                <ExternalLink className="h-3.5 w-3.5 text-blue-600" /> Registration / External Action Link (Optional)
+              <label className="block text-xs font-semibold text-muted-foreground tracking-normal mb-1 flex items-center gap-1.5">
+                <ExternalLink className="h-3.5 w-3.5 text-primary" /> Registration / External Action Link (Optional)
               </label>
               <input
                 type="url"
                 value={actionUrl}
                 onChange={(e) => { setActionUrl(e.target.value); }}
                 placeholder="https://hackathon-registration.dev or registration form link"
-                className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full rounded-xl border border-border bg-background px-3.5 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
               />
             </div>
 
             {/* Content */}
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Notice Description / Content *</label>
+              <label className="block text-xs font-semibold text-muted-foreground tracking-normal mb-1">Notice Description / Content *</label>
               <textarea
                 required
                 rows={5}
                 value={content}
                 onChange={(e) => { setContent(e.target.value); }}
                 placeholder="Write detailed announcements, eligibility, schedule, and guidelines here…"
-                className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full rounded-xl border border-border bg-background px-3.5 py-2.5 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
               />
             </div>
 
             {/* Pin to top */}
-            <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200/70">
+            <div className="flex items-center justify-between p-3 rounded-xl bg-muted/20 border border-border">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={isPinned}
                   onChange={(e) => { setIsPinned(e.target.checked); }}
-                  className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                  className="h-4 w-4 rounded border-border text-primary focus:ring-primary bg-background"
                 />
                 <div>
-                  <span className="text-xs font-semibold text-slate-800 block">
+                  <span className="text-xs font-semibold text-foreground block">
                     Pin notice to top of Notice Board
                   </span>
-                  <span className="text-[11px] text-slate-500">
+                  <span className="text-[11px] text-muted-foreground">
                     Keeps urgent hackathons and major notices at the top for maximum visibility
                   </span>
                 </div>
@@ -339,20 +339,20 @@ export function NoticeFormModal({
 
             {/* Attachments */}
             <div className="space-y-2">
-              <label className="block text-xs font-semibold text-slate-700">Additional Document Attachments (Optional)</label>
+              <label className="block text-xs font-semibold text-muted-foreground tracking-normal">Additional Document Attachments (Optional)</label>
               {attachments.map((att, idx) => (
                 <div
                   key={idx}
-                  className="flex items-center justify-between p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs"
+                  className="flex items-center justify-between p-2.5 bg-muted/20 border border-border rounded-lg text-xs"
                 >
-                  <span className="flex items-center gap-2 text-slate-700 truncate font-medium">
-                    <Paperclip className="h-3.5 w-3.5 text-slate-400 flex-shrink-0" />
+                  <span className="flex items-center gap-2 text-foreground truncate font-medium">
+                    <Paperclip className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
                     {att.name}
                   </span>
                   <button
                     type="button"
                     onClick={() => { handleRemoveAttachment(idx); }}
-                    className="text-red-500 hover:text-red-700 p-1"
+                    className="text-destructive hover:opacity-80 p-1"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>
@@ -365,19 +365,19 @@ export function NoticeFormModal({
                   placeholder="Document Name (e.g. Schedule.pdf)"
                   value={newAttachName}
                   onChange={(e) => { setNewAttachName(e.target.value); }}
-                  className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-xs"
+                  className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground"
                 />
                 <input
                   type="url"
                   placeholder="URL link (https://...)"
                   value={newAttachUrl}
                   onChange={(e) => { setNewAttachUrl(e.target.value); }}
-                  className="flex-1 rounded-lg border border-slate-200 px-3 py-2 text-xs"
+                  className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground"
                 />
                 <button
                   type="button"
                   onClick={handleAddAttachment}
-                  className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-medium flex items-center gap-1"
+                  className="px-3 py-2 bg-muted hover:bg-muted/80 text-foreground rounded-lg text-xs font-medium flex items-center gap-1"
                 >
                   <Plus className="h-3.5 w-3.5" /> Add
                 </button>
@@ -385,18 +385,18 @@ export function NoticeFormModal({
             </div>
 
             {/* Footer Buttons */}
-            <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+            <div className="pt-4 border-t border-border flex items-center justify-end gap-3">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg"
+                className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={mutation.isPending}
-                className="px-5 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm disabled:opacity-50"
+                className="px-5 py-2 text-sm font-semibold text-primary-foreground bg-primary hover:bg-primary/90 rounded-lg shadow-sm disabled:opacity-50 transition-colors"
               >
                 {mutation.isPending ? 'Saving…' : noticeToEdit ? 'Save Changes' : 'Publish Notice'}
               </button>

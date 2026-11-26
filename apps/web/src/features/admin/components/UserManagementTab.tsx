@@ -137,9 +137,9 @@ export function UserManagementTab(): React.JSX.Element {
       )}
 
       {/* Filter / Search Bar */}
-      <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 rounded-xl border border-border bg-card p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
             placeholder="Search by full name or email address..."
@@ -148,7 +148,7 @@ export function UserManagementTab(): React.JSX.Element {
               setSearch(e.target.value);
               setPage(1);
             }}
-            className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-9 pr-4 text-sm text-slate-800 placeholder-slate-400 transition-colors focus:border-blue-500 focus:bg-white focus:outline-none"
+            className="w-full rounded-lg border border-border bg-background py-2 pl-9 pr-4 text-sm text-foreground placeholder-muted-foreground transition-colors focus:border-primary focus:outline-none"
           />
         </div>
 
@@ -159,7 +159,7 @@ export function UserManagementTab(): React.JSX.Element {
               setRoleFilter(e.target.value);
               setPage(1);
             }}
-            className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:border-blue-500 focus:outline-none"
+            className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
           >
             <option value="">All Roles</option>
             <option value="STUDENT">Student</option>
@@ -173,7 +173,7 @@ export function UserManagementTab(): React.JSX.Element {
               setActiveFilter(e.target.value);
               setPage(1);
             }}
-            className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:border-blue-500 focus:outline-none"
+            className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
           >
             <option value="all">All Status</option>
             <option value="active">Active Only</option>
@@ -183,52 +183,52 @@ export function UserManagementTab(): React.JSX.Element {
       </div>
 
       {/* User Table */}
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-slate-200">
-            <thead className="bg-slate-50">
+          <table className="min-w-full divide-y divide-border">
+            <thead className="bg-muted/30">
               <tr>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                <th className="px-6 py-3.5 text-left text-xs font-medium text-muted-foreground">
                   User Details
                 </th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                <th className="px-6 py-3.5 text-left text-xs font-medium text-muted-foreground">
                   Roles
                 </th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                <th className="px-6 py-3.5 text-left text-xs font-medium text-muted-foreground">
                   Status
                 </th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                <th className="px-6 py-3.5 text-left text-xs font-medium text-muted-foreground">
                   Created
                 </th>
-                <th className="px-6 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
+                <th className="px-6 py-3.5 text-right text-xs font-medium text-muted-foreground">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200 bg-white">
+            <tbody className="divide-y divide-border bg-card">
               {isLoading ? (
                 <tr>
                   <td colSpan={5} className="py-12 text-center">
-                    <div className="flex flex-col items-center justify-center gap-2 text-slate-500">
-                      <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+                    <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
+                      <Loader2 className="h-6 w-6 animate-spin text-primary" />
                       <span className="text-sm">Loading user directory...</span>
                     </div>
                   </td>
                 </tr>
               ) : users.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-12 text-center text-sm text-slate-500">
+                  <td colSpan={5} className="py-12 text-center text-sm text-muted-foreground">
                     No users found matching your filters.
                   </td>
                 </tr>
               ) : (
                 users.map((user) => (
-                  <tr key={user.id} className="transition-colors hover:bg-slate-50/70">
+                  <tr key={user.id} className="transition-colors hover:bg-muted/20">
                     <td className="px-6 py-4">
                       <div className="flex flex-col">
-                        <span className="font-semibold text-slate-900">{user.fullName}</span>
-                        <span className="text-xs text-slate-500">{user.email}</span>
-                        {user.phone && <span className="text-xs text-slate-400">{user.phone}</span>}
+                        <span className="font-semibold text-foreground">{user.fullName}</span>
+                        <span className="text-xs text-muted-foreground font-mono">{user.email}</span>
+                        {user.phone && <span className="text-xs text-muted-foreground/70 font-mono">{user.phone}</span>}
                       </div>
                     </td>
                     <td className="px-6 py-4">
@@ -238,17 +238,17 @@ export function UserManagementTab(): React.JSX.Element {
                             key={r}
                             className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${
                               r === 'ADMIN'
-                                ? 'bg-purple-100 text-purple-700 border border-purple-200'
+                                ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
                                 : r === 'PLACEMENT_FACULTY'
-                                ? 'bg-amber-100 text-amber-700 border border-amber-200'
-                                : 'bg-blue-100 text-blue-700 border border-blue-200'
+                                ? 'bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800/50'
+                                : 'bg-primary/10 text-primary border border-primary/20'
                             }`}
                           >
                             {r}
                             <button
                               title={`Revoke ${r}`}
                               onClick={() => revokeRoleMutation.mutate({ userId: user.id, role: r })}
-                              className="ml-0.5 rounded-full p-0.5 hover:bg-black/10"
+                              className="ml-0.5 rounded-full p-0.5 hover:bg-foreground/10 cursor-pointer"
                             >
                               <X className="h-3 w-3" />
                             </button>
@@ -260,7 +260,7 @@ export function UserManagementTab(): React.JSX.Element {
                             setSelectedRoleToAssign('STUDENT');
                           }}
                           title="Assign new role"
-                          className="inline-flex items-center gap-1 rounded-full border border-dashed border-slate-300 bg-white px-2 py-0.5 text-xs text-slate-600 hover:border-blue-400 hover:text-blue-600"
+                          className="inline-flex items-center gap-1 rounded-full border border-dashed border-border bg-card px-2 py-0.5 text-xs text-muted-foreground hover:border-primary hover:text-primary cursor-pointer"
                         >
                           <Plus className="h-3 w-3" /> Role
                         </button>
@@ -268,10 +268,10 @@ export function UserManagementTab(): React.JSX.Element {
                     </td>
                     <td className="px-6 py-4">
                       <span
-                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium border ${
                           user.isActive
-                            ? 'bg-emerald-100 text-emerald-700'
-                            : 'bg-rose-100 text-rose-700'
+                            ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20'
+                            : 'bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20'
                         }`}
                       >
                         {user.isActive ? (
@@ -285,7 +285,7 @@ export function UserManagementTab(): React.JSX.Element {
                         )}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-xs text-slate-500">
+                    <td className="px-6 py-4 text-xs text-muted-foreground font-mono">
                       {new Date(user.createdAt).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 text-right">
@@ -293,7 +293,7 @@ export function UserManagementTab(): React.JSX.Element {
                         <button
                           onClick={() => deactivateMutation.mutate(user.id)}
                           disabled={deactivateMutation.isPending}
-                          className="inline-flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-100 transition-colors disabled:opacity-50"
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-rose-500/20 bg-rose-500/10 px-3 py-1.5 text-xs font-semibold text-rose-700 dark:text-rose-400 hover:bg-rose-500/20 transition-colors disabled:opacity-50 cursor-pointer"
                         >
                           <UserX className="h-3.5 w-3.5" /> Deactivate
                         </button>
@@ -301,7 +301,7 @@ export function UserManagementTab(): React.JSX.Element {
                         <button
                           onClick={() => activateMutation.mutate(user.id)}
                           disabled={activateMutation.isPending}
-                          className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 transition-colors disabled:opacity-50"
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/20 transition-colors disabled:opacity-50 cursor-pointer"
                         >
                           <UserCheck className="h-3.5 w-3.5" /> Activate
                         </button>
@@ -316,7 +316,7 @@ export function UserManagementTab(): React.JSX.Element {
 
         {/* Pagination bar */}
         {meta && meta.totalPages > 1 && (
-          <div className="flex items-center justify-between border-t border-slate-200 bg-slate-50 px-6 py-3.5 text-xs text-slate-500">
+          <div className="flex items-center justify-between border-t border-border bg-muted/20 px-6 py-3.5 text-xs text-muted-foreground">
             <span>
               Showing Page {meta.page} of {meta.totalPages} ({meta.totalItems} total users)
             </span>
@@ -324,14 +324,14 @@ export function UserManagementTab(): React.JSX.Element {
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page <= 1}
-                className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-slate-600 hover:bg-slate-100 disabled:opacity-50"
+                className="flex items-center gap-1 rounded-lg border border-border bg-card px-2.5 py-1 text-foreground hover:bg-muted/40 disabled:opacity-50 cursor-pointer"
               >
                 <ChevronLeft className="h-4 w-4" /> Previous
               </button>
               <button
                 onClick={() => setPage((p) => Math.min(meta.totalPages, p + 1))}
                 disabled={page >= meta.totalPages}
-                className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-slate-600 hover:bg-slate-100 disabled:opacity-50"
+                className="flex items-center gap-1 rounded-lg border border-border bg-card px-2.5 py-1 text-foreground hover:bg-muted/40 disabled:opacity-50 cursor-pointer"
               >
                 Next <ChevronRight className="h-4 w-4" />
               </button>
@@ -342,16 +342,16 @@ export function UserManagementTab(): React.JSX.Element {
 
       {/* Role Assignment Modal */}
       {roleModalUser && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl border border-slate-200">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
+          <div className="w-full max-w-md rounded-xl bg-card p-6 shadow-xl border border-border">
+            <div className="flex items-center justify-between border-b border-border pb-3">
               <div className="flex items-center gap-2">
-                <Shield className="h-5 w-5 text-blue-600" />
-                <h3 className="font-bold text-slate-900">Assign Institutional Role</h3>
+                <Shield className="h-5 w-5 text-primary" />
+                <h3 className="font-bold text-foreground">Assign Institutional Role</h3>
               </div>
               <button
                 onClick={() => setRoleModalUser(null)}
-                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100"
+                className="rounded-lg p-1 text-muted-foreground hover:bg-muted/40 cursor-pointer"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -359,17 +359,17 @@ export function UserManagementTab(): React.JSX.Element {
 
             <div className="mt-4 space-y-4">
               <div>
-                <p className="text-xs text-slate-500">Target User</p>
-                <p className="text-sm font-semibold text-slate-800">{roleModalUser.fullName}</p>
-                <p className="text-xs text-slate-500">{roleModalUser.email}</p>
+                <p className="text-xs text-muted-foreground">Target User</p>
+                <p className="text-sm font-semibold text-foreground">{roleModalUser.fullName}</p>
+                <p className="text-xs text-muted-foreground font-mono">{roleModalUser.email}</p>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Select Role</label>
+                <label className="block text-xs font-semibold text-foreground mb-1">Select Role</label>
                 <select
                   value={selectedRoleToAssign}
                   onChange={(e) => setSelectedRoleToAssign(e.target.value as RoleName)}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none"
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
                 >
                   {ALL_ROLES.map((r) => (
                     <option key={r} value={r} disabled={roleModalUser.roles.includes(r)}>
@@ -380,10 +380,10 @@ export function UserManagementTab(): React.JSX.Element {
               </div>
             </div>
 
-            <div className="mt-6 flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
+            <div className="mt-6 flex items-center justify-end gap-3 border-t border-border pt-4">
               <button
                 onClick={() => setRoleModalUser(null)}
-                className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50"
+                className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted/40 cursor-pointer"
               >
                 Cancel
               </button>
@@ -395,7 +395,7 @@ export function UserManagementTab(): React.JSX.Element {
                   })
                 }
                 disabled={assignRoleMutation.isPending}
-                className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition-colors disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50 cursor-pointer"
               >
                 {assignRoleMutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
                 Assign Role

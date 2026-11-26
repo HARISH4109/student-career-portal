@@ -54,3 +54,18 @@ export const passwordResetLimiter = rateLimit({
     },
   },
 });
+
+/** Token refresh: 30 attempts per 15-minute window per IP */
+export const refreshLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    error: {
+      code: 'RATE_LIMITED' as const,
+      message: 'Too many token refresh requests. Please try again later.',
+    },
+  },
+});

@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { optionalHttpUrlSchema } from './url-validation';
+
 // ── Resume Section Entries ──────────────────────────────────────────────
 export const educationEntrySchema = z.object({
   id: z.string().optional(),
@@ -32,8 +34,8 @@ export const resumeProjectEntrySchema = z.object({
   title: z.string().min(1, 'Project title is required'),
   role: z.string().optional().or(z.literal('')),
   technologies: z.array(z.string()).default([]),
-  link: z.string().optional().or(z.literal('')),
-  githubUrl: z.string().optional().or(z.literal('')),
+  link: optionalHttpUrlSchema('Invalid project URL'),
+  githubUrl: optionalHttpUrlSchema('Invalid GitHub URL'),
   description: z.string().optional().or(z.literal('')),
   highlights: z.array(z.string()).default([]),
 });
@@ -45,7 +47,7 @@ export const resumeCertificationEntrySchema = z.object({
   issuer: z.string().min(1, 'Issuer is required'),
   issueDate: z.string().optional().or(z.literal('')),
   expiryDate: z.string().optional().or(z.literal('')),
-  credentialUrl: z.string().optional().or(z.literal('')),
+  credentialUrl: optionalHttpUrlSchema('Invalid credential URL'),
 });
 export type ResumeCertificationEntry = z.infer<typeof resumeCertificationEntrySchema>;
 
@@ -71,9 +73,9 @@ export const resumeContentSchema = z.object({
   email: z.string().email('Valid email required'),
   phone: z.string().optional().or(z.literal('')),
   location: z.string().optional().or(z.literal('')),
-  linkedinUrl: z.string().optional().or(z.literal('')),
-  githubUrl: z.string().optional().or(z.literal('')),
-  portfolioUrl: z.string().optional().or(z.literal('')),
+  linkedinUrl: optionalHttpUrlSchema('Invalid LinkedIn URL'),
+  githubUrl: optionalHttpUrlSchema('Invalid GitHub URL'),
+  portfolioUrl: optionalHttpUrlSchema('Invalid Portfolio URL'),
   summary: z.string().max(2000).default(''),
   education: z.array(educationEntrySchema).default([]),
   experience: z.array(experienceEntrySchema).default([]),

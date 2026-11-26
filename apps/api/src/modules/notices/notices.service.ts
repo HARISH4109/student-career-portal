@@ -5,6 +5,7 @@ import type {
   UpdateNoticeInput,
 } from '@career-portal/shared-types';
 import { eq } from 'drizzle-orm';
+import { NotFoundError } from '@/shared/errors/app-error';
 import { auditService } from '../audit/audit.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { NoticesRepository } from './notices.repository';
@@ -44,10 +45,18 @@ export class NoticesService {
     return this.repository.findAllNotices(query);
   }
 
-  async getNoticeById(id: string) {
+  async getNoticeById(id: string, includeUnpublished = false) {
     const notice = await this.repository.findById(id);
     if (!notice) {
-      throw new Error('Notice not found');
+      throw new NotFoundError('Notice');
+    }
+    if (!includeUnpublished) {
+      const now = Date.now();
+      const publishedAt = new Date(notice.publishedAt).getTime();
+      const expiresAt = notice.expiresAt ? new Date(notice.expiresAt).getTime() : null;
+      if (notice.status !== 'published' || publishedAt > now || (expiresAt !== null && expiresAt <= now)) {
+        throw new NotFoundError('Notice');
+      }
     }
     return notice;
   }

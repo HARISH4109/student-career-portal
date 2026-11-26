@@ -512,7 +512,7 @@ export class PreparationService {
       }
     }
 
-    // Merge autosaved answers with submitted payload answers
+    // Merge autosaved answers with submitted payload answers (ignore late payload answers)
     const submittedMap = new Map<string, { selectedIndex: number | null; timeSpentSeconds: number }>();
     for (const ans of attempt.answers) {
       submittedMap.set(ans.questionId, {
@@ -520,11 +520,13 @@ export class PreparationService {
         timeSpentSeconds: ans.timeSpentSeconds ?? 0,
       });
     }
-    for (const ans of dto.answers) {
-      submittedMap.set(ans.questionId, {
-        selectedIndex: ans.selectedIndex ?? null,
-        timeSpentSeconds: ans.timeSpentSeconds,
-      });
+    if (!isLate) {
+      for (const ans of dto.answers) {
+        submittedMap.set(ans.questionId, {
+          selectedIndex: ans.selectedIndex ?? null,
+          timeSpentSeconds: ans.timeSpentSeconds,
+        });
+      }
     }
 
     // Grade each question atomically

@@ -16,7 +16,7 @@ import { OpportunityDraftRepository } from './opportunity-draft.repository';
 import { aiJobLogger } from '@/modules/audit/ai-job-logger';
 import { auditService } from '@/modules/audit/audit.service';
 import { containsPromptInjectionPatterns, sanitizeAiInput } from '@/shared/security/ai-input-guard';
-import { validateUrlForFetch } from '@/shared/security/ssrf-guard';
+import { validateUrlForFetchResolved } from '@/shared/security/ssrf-guard';
 import { OpportunityExtractionService } from './opportunity-extraction.service';
 
 
@@ -57,19 +57,21 @@ export class OpportunityDraftService {
   ): Promise<OpportunityDraftResponseDto> {
     // SSRF Check if sourceType is url
     if (dto.sourceType === 'url') {
-      const urlCheck = validateUrlForFetch(dto.content);
+      const urlCheck = await validateUrlForFetchResolved(dto.content);
       if (!urlCheck.valid) {
         throw new ValidationError(`URL validation failed: ${urlCheck.reason}`);
       }
     }
 
-    // AI Input sanitization and prompt injection heuristic check
-    dto.content = sanitizeAiInput(dto.content);
-    if (containsPromptInjectionPatterns(dto.content)) {
-      logger.warn(
-        { userId: user.id, sourceType: dto.sourceType },
-        'Potential prompt injection pattern detected in AI ingestion input',
-      );
+    // AI Input sanitization and prompt injection heuristic check (only for text/url/email - do not truncate binary image or pdf data)
+    if (dto.sourceType !== 'image' && dto.sourceType !== 'pdf') {
+      dto.content = sanitizeAiInput(dto.content);
+      if (containsPromptInjectionPatterns(dto.content)) {
+        logger.warn(
+          { userId: user.id, sourceType: dto.sourceType },
+          'Potential prompt injection pattern detected in AI ingestion input',
+        );
+      }
     }
 
     // 1. Content hash (salted so multiple drafts can be created from the same source content without unique collision)

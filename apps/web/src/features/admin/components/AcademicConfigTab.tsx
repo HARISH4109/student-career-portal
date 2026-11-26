@@ -261,34 +261,34 @@ export function AcademicConfigTab(): React.JSX.Element {
       )}
 
       {/* Sub-navigation bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-4">
         <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => setActiveSection('courses')}
-            className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-colors ${
+            className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors cursor-pointer ${
               activeSection === 'courses'
-                ? 'bg-blue-600 text-white'
-                : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-card border border-border text-foreground hover:bg-muted/40'
             }`}
           >
             <GraduationCap className="h-4 w-4" /> Degree Courses ({courses.length})
           </button>
           <button
             onClick={() => setActiveSection('streams')}
-            className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-colors ${
+            className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors cursor-pointer ${
               activeSection === 'streams'
-                ? 'bg-blue-600 text-white'
-                : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-card border border-border text-foreground hover:bg-muted/40'
             }`}
           >
             <Layers className="h-4 w-4" /> Specialization Streams ({streams.length})
           </button>
           <button
             onClick={() => setActiveSection('batches')}
-            className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-colors ${
+            className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors cursor-pointer ${
               activeSection === 'batches'
-                ? 'bg-blue-600 text-white'
-                : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-card border border-border text-foreground hover:bg-muted/40'
             }`}
           >
             <Calendar className="h-4 w-4" /> Graduation Batches ({batches.length})
@@ -298,14 +298,14 @@ export function AcademicConfigTab(): React.JSX.Element {
         <div className="flex items-center gap-3">
           <Link
             to="/dashboard/programs"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700 underline"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
           >
             <BookOpen className="h-4 w-4" /> Full Programs Manager →
           </Link>
           {activeSection === 'courses' && (
             <button
               onClick={openCreateCourseModal}
-              className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-xs hover:bg-blue-700 transition-colors"
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-xs hover:bg-primary/90 transition-colors cursor-pointer"
             >
               <Plus className="h-4 w-4" /> Add Course / Program
             </button>
@@ -313,7 +313,7 @@ export function AcademicConfigTab(): React.JSX.Element {
           {activeSection === 'streams' && (
             <button
               onClick={openCreateStreamModal}
-              className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-xs hover:bg-blue-700 transition-colors"
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-xs hover:bg-primary/90 transition-colors cursor-pointer"
             >
               <Plus className="h-4 w-4" /> Add Stream
             </button>
@@ -324,7 +324,7 @@ export function AcademicConfigTab(): React.JSX.Element {
                 setBatchYear(new Date().getFullYear() + 1);
                 setIsBatchModalOpen(true);
               }}
-              className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-xs hover:bg-blue-700 transition-colors"
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-xs hover:bg-primary/90 transition-colors cursor-pointer"
             >
               <Plus className="h-4 w-4" /> Add Batch
             </button>
@@ -334,70 +334,70 @@ export function AcademicConfigTab(): React.JSX.Element {
 
       {/* Courses / Programs Section */}
       {activeSection === 'courses' && (
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-slate-200">
-              <thead className="bg-slate-50">
+            <table className="min-w-full divide-y divide-border">
+              <thead className="bg-muted/30">
                 <tr>
-                  <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <th className="px-6 py-3.5 text-left text-xs font-medium text-muted-foreground">
                     Course / Degree Program
                   </th>
-                  <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <th className="px-6 py-3.5 text-left text-xs font-medium text-muted-foreground">
                     Degree Level
                   </th>
-                  <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <th className="px-6 py-3.5 text-left text-xs font-medium text-muted-foreground">
                     Duration
                   </th>
-                  <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <th className="px-6 py-3.5 text-left text-xs font-medium text-muted-foreground">
                     Streams
                   </th>
-                  <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <th className="px-6 py-3.5 text-left text-xs font-medium text-muted-foreground">
                     Status
                   </th>
-                  <th className="px-6 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <th className="px-6 py-3.5 text-right text-xs font-medium text-muted-foreground">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200 bg-white">
+              <tbody className="divide-y divide-border bg-card">
                 {isLoadingCourses ? (
                   <tr>
-                    <td colSpan={6} className="py-12 text-center text-slate-500">
-                      <Loader2 className="mx-auto h-6 w-6 animate-spin text-blue-600" />
+                    <td colSpan={6} className="py-12 text-center text-muted-foreground">
+                      <Loader2 className="mx-auto h-6 w-6 animate-spin text-primary" />
                     </td>
                   </tr>
                 ) : courses.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-12 text-center text-sm text-slate-500">
+                    <td colSpan={6} className="py-12 text-center text-sm text-muted-foreground">
                       No degree courses registered yet. Click &quot;Add Course / Program&quot; to define your curriculum.
                     </td>
                   </tr>
                 ) : (
                   courses.map((course) => (
-                    <tr key={course.id} className="transition-colors hover:bg-slate-50/70">
+                    <tr key={course.id} className="transition-colors hover:bg-muted/20">
                       <td className="px-6 py-4">
                         <div className="flex flex-col">
-                          <span className="text-sm font-semibold text-slate-900">{course.name}</span>
-                          <span className="font-mono text-[11px] text-slate-400">ID: {course.id.slice(0, 8)}...</span>
+                          <span className="text-sm font-semibold text-foreground">{course.name}</span>
+                          <span className="font-mono text-[11px] text-muted-foreground/70">ID: {course.id.slice(0, 8)}...</span>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-700 border border-blue-100">
+                        <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary border border-primary/20">
                           {course.degreeLevel}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-xs font-medium text-slate-700">
+                      <td className="px-6 py-4 whitespace-nowrap text-xs font-medium text-foreground font-mono">
                         {course.durationYears} {course.durationYears === 1 ? 'Year' : 'Years'}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-xs text-slate-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-xs text-muted-foreground font-mono">
                         {course.streams?.length ?? 0} {course.streams?.length === 1 ? 'stream' : 'streams'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
-                          className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                          className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium border ${
                             course.isActive
-                              ? 'bg-emerald-100 text-emerald-700'
-                              : 'bg-slate-100 text-slate-600'
+                              ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20'
+                              : 'bg-muted/30 text-muted-foreground border-border'
                           }`}
                         >
                           {course.isActive ? 'Active' : 'Inactive'}
@@ -407,14 +407,14 @@ export function AcademicConfigTab(): React.JSX.Element {
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => openEditCourseModal(course)}
-                            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors"
+                            className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted/40 hover:text-foreground transition-colors cursor-pointer"
                             title="Edit course"
                           >
                             <Edit2 className="h-4 w-4" />
                           </button>
                           <button
                             onClick={() => deleteCourseMutation.mutate(course.id)}
-                            className="rounded-lg p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition-colors"
+                            className="rounded-lg p-1.5 text-muted-foreground hover:bg-rose-500/10 hover:text-rose-700 dark:text-rose-400 transition-colors cursor-pointer"
                             title="Deactivate course"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -433,13 +433,13 @@ export function AcademicConfigTab(): React.JSX.Element {
       {/* Streams Section */}
       {activeSection === 'streams' && (
         <div className="space-y-4">
-          <div className="flex items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white p-3">
+          <div className="flex items-center justify-between gap-4 rounded-xl border border-border bg-card p-3">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-slate-600">Filter by Degree Course:</span>
+              <span className="text-xs font-semibold text-muted-foreground">Filter by Degree Course:</span>
               <select
                 value={streamCourseFilter}
                 onChange={(e) => setStreamCourseFilter(e.target.value)}
-                className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-700 focus:border-blue-500 focus:outline-none"
+                className="rounded-lg border border-border bg-background px-2.5 py-1 text-xs text-foreground focus:border-primary focus:outline-none"
               >
                 <option value="">All Degree Courses</option>
                 {courses.map((c) => (
@@ -449,43 +449,43 @@ export function AcademicConfigTab(): React.JSX.Element {
                 ))}
               </select>
             </div>
-            <span className="text-xs text-slate-400">
+            <span className="text-xs text-muted-foreground font-mono">
               Showing {streams.length} stream{streams.length === 1 ? '' : 's'}
             </span>
           </div>
 
-          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-slate-200">
-                <thead className="bg-slate-50">
+              <table className="min-w-full divide-y divide-border">
+                <thead className="bg-muted/30">
                   <tr>
-                    <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    <th className="px-6 py-3.5 text-left text-xs font-medium text-muted-foreground">
                       Code
                     </th>
-                    <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    <th className="px-6 py-3.5 text-left text-xs font-medium text-muted-foreground">
                       Stream Name
                     </th>
-                    <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    <th className="px-6 py-3.5 text-left text-xs font-medium text-muted-foreground">
                       Parent Degree Program
                     </th>
-                    <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    <th className="px-6 py-3.5 text-left text-xs font-medium text-muted-foreground">
                       Status
                     </th>
-                    <th className="px-6 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    <th className="px-6 py-3.5 text-right text-xs font-medium text-muted-foreground">
                       Actions
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-200 bg-white">
+                <tbody className="divide-y divide-border bg-card">
                   {isLoadingStreams ? (
                     <tr>
-                      <td colSpan={5} className="py-12 text-center text-slate-500">
-                        <Loader2 className="mx-auto h-6 w-6 animate-spin text-blue-600" />
+                      <td colSpan={5} className="py-12 text-center text-muted-foreground">
+                        <Loader2 className="mx-auto h-6 w-6 animate-spin text-primary" />
                       </td>
                     </tr>
                   ) : streams.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="py-12 text-center text-sm text-slate-500">
+                      <td colSpan={5} className="py-12 text-center text-sm text-muted-foreground">
                         No specialization streams found. Click &quot;Add Stream&quot; to create one.
                       </td>
                     </tr>
@@ -493,18 +493,18 @@ export function AcademicConfigTab(): React.JSX.Element {
                     streams.map((stream) => {
                       const parentCourse = courses.find((c) => c.id === stream.programId);
                       return (
-                        <tr key={stream.id} className="transition-colors hover:bg-slate-50/70">
-                          <td className="px-6 py-4 font-mono text-xs font-bold text-slate-700">{stream.code}</td>
-                          <td className="px-6 py-4 text-sm font-semibold text-slate-900">{stream.name}</td>
-                          <td className="px-6 py-4 text-xs text-slate-600">
+                        <tr key={stream.id} className="transition-colors hover:bg-muted/20">
+                          <td className="px-6 py-4 font-mono text-xs font-bold text-primary">{stream.code}</td>
+                          <td className="px-6 py-4 text-sm font-semibold text-foreground">{stream.name}</td>
+                          <td className="px-6 py-4 text-xs text-muted-foreground">
                             {parentCourse ? `${parentCourse.name} (${parentCourse.degreeLevel})` : stream.programId.slice(0, 8)}
                           </td>
                           <td className="px-6 py-4">
                             <span
-                              className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                              className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium border ${
                                 stream.isActive
-                                  ? 'bg-emerald-100 text-emerald-700'
-                                  : 'bg-slate-100 text-slate-600'
+                                  ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20'
+                                  : 'bg-muted/30 text-muted-foreground border-border'
                               }`}
                             >
                               {stream.isActive ? 'Active' : 'Inactive'}
@@ -514,14 +514,14 @@ export function AcademicConfigTab(): React.JSX.Element {
                             <div className="flex items-center justify-end gap-2">
                               <button
                                 onClick={() => openEditStreamModal(stream)}
-                                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors"
+                                className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted/40 hover:text-foreground transition-colors cursor-pointer"
                                 title="Edit stream"
                               >
                                 <Edit2 className="h-4 w-4" />
                               </button>
                               <button
                                 onClick={() => deleteStreamMutation.mutate(stream.id)}
-                                className="rounded-lg p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition-colors"
+                                className="rounded-lg p-1.5 text-muted-foreground hover:bg-rose-500/10 hover:text-rose-700 dark:text-rose-400 transition-colors cursor-pointer"
                                 title="Deactivate stream"
                               >
                                 <Trash2 className="h-4 w-4" />
@@ -541,47 +541,47 @@ export function AcademicConfigTab(): React.JSX.Element {
 
       {/* Batches Section */}
       {activeSection === 'batches' && (
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-slate-200">
-              <thead className="bg-slate-50">
+            <table className="min-w-full divide-y divide-border">
+              <thead className="bg-muted/30">
                 <tr>
-                  <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <th className="px-6 py-3.5 text-left text-xs font-medium text-muted-foreground">
                     Graduation Year
                   </th>
-                  <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <th className="px-6 py-3.5 text-left text-xs font-medium text-muted-foreground">
                     Status
                   </th>
-                  <th className="px-6 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <th className="px-6 py-3.5 text-right text-xs font-medium text-muted-foreground">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200 bg-white">
+              <tbody className="divide-y divide-border bg-card">
                 {isLoadingBatches ? (
                   <tr>
-                    <td colSpan={3} className="py-12 text-center text-slate-500">
-                      <Loader2 className="mx-auto h-6 w-6 animate-spin text-blue-600" />
+                    <td colSpan={3} className="py-12 text-center text-muted-foreground">
+                      <Loader2 className="mx-auto h-6 w-6 animate-spin text-primary" />
                     </td>
                   </tr>
                 ) : batches.length === 0 ? (
                   <tr>
-                    <td colSpan={3} className="py-12 text-center text-sm text-slate-500">
+                    <td colSpan={3} className="py-12 text-center text-sm text-muted-foreground">
                       No graduation batches registered yet.
                     </td>
                   </tr>
                 ) : (
                   batches.map((b) => (
-                    <tr key={b.id} className="transition-colors hover:bg-slate-50/70">
-                      <td className="px-6 py-4 font-bold text-sm text-slate-900">
+                    <tr key={b.id} className="transition-colors hover:bg-muted/20">
+                      <td className="px-6 py-4 font-bold font-mono text-sm text-foreground">
                         Class of {b.graduationYear}
                       </td>
                       <td className="px-6 py-4">
                         <span
-                          className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                          className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium border ${
                             b.isActive
-                              ? 'bg-emerald-100 text-emerald-700'
-                              : 'bg-slate-100 text-slate-600'
+                              ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20'
+                              : 'bg-muted/30 text-muted-foreground border-border'
                           }`}
                         >
                           {b.isActive ? 'Active' : 'Inactive'}
@@ -590,7 +590,7 @@ export function AcademicConfigTab(): React.JSX.Element {
                       <td className="px-6 py-4 text-right">
                         <button
                           onClick={() => deleteBatchMutation.mutate(b.id)}
-                          className="rounded-lg p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition-colors"
+                          className="rounded-lg p-1.5 text-muted-foreground hover:bg-rose-500/10 hover:text-rose-700 dark:text-rose-400 transition-colors cursor-pointer"
                           title="Deactivate batch"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -607,15 +607,15 @@ export function AcademicConfigTab(): React.JSX.Element {
 
       {/* Course Modal */}
       {isCourseModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl border border-slate-200">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 className="font-bold text-slate-900">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
+          <div className="w-full max-w-md rounded-xl bg-card p-6 shadow-xl border border-border">
+            <div className="flex items-center justify-between border-b border-border pb-3">
+              <h3 className="font-bold text-foreground">
                 {courseToEdit ? 'Edit Degree Course' : 'Create Degree Course / Program'}
               </h3>
               <button
                 onClick={() => setIsCourseModalOpen(false)}
-                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100"
+                className="rounded-lg p-1 text-muted-foreground hover:bg-muted/40 cursor-pointer"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -623,7 +623,7 @@ export function AcademicConfigTab(): React.JSX.Element {
 
             <div className="mt-4 space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">
                   Course / Program Name *
                 </label>
                 <input
@@ -631,18 +631,18 @@ export function AcademicConfigTab(): React.JSX.Element {
                   placeholder="e.g. B.Tech Computer Science and Engineering"
                   value={courseName}
                   onChange={(e) => setCourseName(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none"
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">
                   Degree Level *
                 </label>
                 <select
                   value={courseDegreeLevel}
                   onChange={(e) => setCourseDegreeLevel(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none"
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
                 >
                   <option value="Bachelors">Bachelors (e.g. B.Tech, B.E., B.Sc)</option>
                   <option value="Masters">Masters (e.g. M.Tech, M.S., MCA)</option>
@@ -652,7 +652,7 @@ export function AcademicConfigTab(): React.JSX.Element {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">
                   Duration (Years) *
                 </label>
                 <input
@@ -661,15 +661,15 @@ export function AcademicConfigTab(): React.JSX.Element {
                   max={6}
                   value={courseDuration}
                   onChange={(e) => setCourseDuration(Number(e.target.value))}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none"
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
                 />
               </div>
             </div>
 
-            <div className="mt-6 flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
+            <div className="mt-6 flex items-center justify-end gap-3 border-t border-border pt-4">
               <button
                 onClick={() => setIsCourseModalOpen(false)}
-                className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50"
+                className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted/40 cursor-pointer"
               >
                 Cancel
               </button>
@@ -693,7 +693,7 @@ export function AcademicConfigTab(): React.JSX.Element {
                   }
                 }}
                 disabled={!courseName.trim() || createCourseMutation.isPending || updateCourseMutation.isPending}
-                className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition-colors disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50 cursor-pointer"
               >
                 {(createCourseMutation.isPending || updateCourseMutation.isPending) && (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -707,15 +707,15 @@ export function AcademicConfigTab(): React.JSX.Element {
 
       {/* Stream Modal */}
       {isStreamModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl border border-slate-200">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 className="font-bold text-slate-900">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
+          <div className="w-full max-w-md rounded-xl bg-card p-6 shadow-xl border border-border">
+            <div className="flex items-center justify-between border-b border-border pb-3">
+              <h3 className="font-bold text-foreground">
                 {streamToEdit ? 'Edit Specialization Stream' : 'Create Specialization Stream'}
               </h3>
               <button
                 onClick={() => setIsStreamModalOpen(false)}
-                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100"
+                className="rounded-lg p-1 text-muted-foreground hover:bg-muted/40 cursor-pointer"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -724,13 +724,13 @@ export function AcademicConfigTab(): React.JSX.Element {
             <div className="mt-4 space-y-4">
               {!streamToEdit && (
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-semibold text-muted-foreground mb-1">
                     Parent Degree Course *
                   </label>
                   <select
                     value={streamProgramId}
                     onChange={(e) => setStreamProgramId(e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
                   >
                     {courses.map((c) => (
                       <option key={c.id} value={c.id}>
@@ -742,7 +742,7 @@ export function AcademicConfigTab(): React.JSX.Element {
               )}
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">
                   Stream Name *
                 </label>
                 <input
@@ -750,12 +750,12 @@ export function AcademicConfigTab(): React.JSX.Element {
                   placeholder="e.g. Artificial Intelligence & Machine Learning"
                   value={streamName}
                   onChange={(e) => setStreamName(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none"
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">
                   Stream Code *
                 </label>
                 <input
@@ -763,15 +763,15 @@ export function AcademicConfigTab(): React.JSX.Element {
                   placeholder="e.g. CSE-AIML"
                   value={streamCode}
                   onChange={(e) => setStreamCode(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none"
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground uppercase focus:border-primary focus:outline-none"
                 />
               </div>
             </div>
 
-            <div className="mt-6 flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
+            <div className="mt-6 flex items-center justify-end gap-3 border-t border-border pt-4">
               <button
                 onClick={() => setIsStreamModalOpen(false)}
-                className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50"
+                className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted/40 cursor-pointer"
               >
                 Cancel
               </button>
@@ -794,7 +794,7 @@ export function AcademicConfigTab(): React.JSX.Element {
                   }
                 }}
                 disabled={!streamName.trim() || !streamCode.trim() || createStreamMutation.isPending || updateStreamMutation.isPending}
-                className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition-colors disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50 cursor-pointer"
               >
                 {(createStreamMutation.isPending || updateStreamMutation.isPending) && (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -808,13 +808,13 @@ export function AcademicConfigTab(): React.JSX.Element {
 
       {/* Batch Modal */}
       {isBatchModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl border border-slate-200">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 className="font-bold text-slate-900">Add Graduation Batch</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
+          <div className="w-full max-w-md rounded-xl bg-card p-6 shadow-xl border border-border">
+            <div className="flex items-center justify-between border-b border-border pb-3">
+              <h3 className="font-bold text-foreground">Add Graduation Batch</h3>
               <button
                 onClick={() => setIsBatchModalOpen(false)}
-                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100"
+                className="rounded-lg p-1 text-muted-foreground hover:bg-muted/40 cursor-pointer"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -822,7 +822,7 @@ export function AcademicConfigTab(): React.JSX.Element {
 
             <div className="mt-4 space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-muted-foreground mb-1">
                   Graduation Year *
                 </label>
                 <input
@@ -831,22 +831,22 @@ export function AcademicConfigTab(): React.JSX.Element {
                   max={2100}
                   value={batchYear}
                   onChange={(e) => setBatchYear(Number(e.target.value))}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none"
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
                 />
               </div>
             </div>
 
-            <div className="mt-6 flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
+            <div className="mt-6 flex items-center justify-end gap-3 border-t border-border pt-4">
               <button
                 onClick={() => setIsBatchModalOpen(false)}
-                className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50"
+                className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted/40 cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={() => createBatchMutation.mutate({ graduationYear: batchYear })}
                 disabled={!batchYear || createBatchMutation.isPending}
-                className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition-colors disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50 cursor-pointer"
               >
                 {createBatchMutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
                 Add Batch

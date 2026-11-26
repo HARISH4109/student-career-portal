@@ -287,9 +287,14 @@ export class OpportunityExtractionService {
         },
       };
 
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (env.N8N_WEBHOOK_SECRET) {
+        headers['X-Webhook-Secret'] = env.N8N_WEBHOOK_SECRET;
+      }
+
       const response = await fetch(webhookUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify(payload),
         signal: AbortSignal.timeout(180_000), // 3 minute timeout for AI vision processing
       });

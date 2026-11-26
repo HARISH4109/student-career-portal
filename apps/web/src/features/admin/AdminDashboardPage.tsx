@@ -53,41 +53,42 @@ export function AdminDashboardPage(): React.JSX.Element {
   };
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
+    <div className="space-y-6 w-full max-w-[1536px] mx-auto pb-12">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-5">
         <div>
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-lg bg-purple-100 text-purple-700">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-xl bg-primary/10 text-primary">
               <Shield className="h-5 w-5" />
             </div>
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">
               Institutional Administration & Governance
             </h1>
           </div>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-muted-foreground">
             Institutional controls, role privileges, academic taxonomy, security audit trails, and system health.
           </p>
         </div>
       </div>
 
       {/* Unified Tab Navigation Bar */}
-      <div className="border-b border-slate-200">
-        <nav className="-mb-px flex space-x-2 overflow-x-auto pb-1">
+      <div className="border-b border-border">
+        <nav className="-mb-px flex space-x-2 overflow-x-auto pb-1 scrollbar-none">
           {TABS.map((tab) => {
             const isActive = activeTab === tab.id;
             return (
               <button
                 key={tab.id}
+                type="button"
                 onClick={() => { handleTabChange(tab.id); }}
-                className={`flex whitespace-nowrap items-center gap-2 border-b-2 px-4 py-2.5 text-sm font-semibold transition-all ${
+                className={`flex whitespace-nowrap items-center gap-2 border-b-2 px-4 py-2.5 text-sm font-semibold transition-colors cursor-pointer ${
                   isActive
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-muted-foreground hover:border-border hover:text-foreground'
                 }`}
               >
-                <span className={isActive ? 'text-blue-600' : 'text-slate-400'}>{tab.icon}</span>
-                {tab.label}
+                <span className={isActive ? 'text-primary' : 'text-muted-foreground'}>{tab.icon}</span>
+                <span>{tab.label}</span>
               </button>
             );
           })}

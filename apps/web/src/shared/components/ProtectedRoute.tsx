@@ -27,10 +27,10 @@ export function ProtectedRoute({
   // Still checking initial session
   if (!isInitialized || (!user && isLoading)) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50">
+      <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-3">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-          <p className="text-sm text-slate-500">Loading…</p>
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Loading…</p>
         </div>
       </div>
     );
@@ -48,10 +48,10 @@ export function ProtectedRoute({
       : user?.roles.includes(requiredRole);
     if (!hasRole) {
       return (
-        <div className="flex min-h-screen items-center justify-center bg-slate-50">
+        <div className="flex min-h-screen items-center justify-center bg-background">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-slate-900">Access Denied</h1>
-            <p className="mt-2 text-slate-500">
+            <h1 className="text-2xl font-bold text-foreground">Access Denied</h1>
+            <p className="mt-2 text-muted-foreground">
               You don&apos;t have the required role to access this page.
             </p>
           </div>
@@ -63,10 +63,10 @@ export function ProtectedRoute({
   // Permission check
   if (requiredPermission && !user?.permissions.includes(requiredPermission)) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50">
+      <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-slate-900">Access Denied</h1>
-          <p className="mt-2 text-slate-500">
+          <h1 className="text-2xl font-bold text-foreground">Access Denied</h1>
+          <p className="mt-2 text-muted-foreground">
             You don&apos;t have permission to access this page.
           </p>
         </div>

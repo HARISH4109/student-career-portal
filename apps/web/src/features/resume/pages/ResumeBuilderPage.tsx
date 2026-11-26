@@ -6,6 +6,7 @@ import type {
   ResumeContent,
   ResumeProjectEntry,
 } from '@career-portal/shared-types';
+import { safeHref } from '@/shared/lib/safe-url';
 import {
   AlertCircle,
   ArrowLeft,
@@ -392,7 +393,7 @@ export function ResumeBuilderPage(): React.JSX.Element {
         if (cleanedSummary) {
           updateField('summary', cleanedSummary);
         }
-        setEnhanceNotification({ id: 'summary', message: '✨ Professional summary rewritten for high ATS impact!' });
+        setEnhanceNotification({ id: 'summary', message: 'Professional summary rewritten for ATS optimization.' });
         setTimeout(() => { setEnhanceNotification(null); }, 4000);
       }
     } catch (err) {
@@ -814,7 +815,7 @@ export function ResumeBuilderPage(): React.JSX.Element {
         }
         if (!exp.startDate?.trim()) issues.push({ section: 'Experience', field: `Entry ${String(i + 1)}: Start date is missing`, severity: 'warning' });
       });
-    } else issues.push({ section: 'Experience', field: 'No experience entries — even internships count!', severity: 'info' });
+    } else issues.push({ section: 'Experience', field: 'No experience entries — even internships count.', severity: 'info' });
 
     // Skills
     if (content.skills.length >= 5) filled += 2;
@@ -854,7 +855,7 @@ export function ResumeBuilderPage(): React.JSX.Element {
     return (
       <div className="flex h-96 items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
           <p className="text-sm text-slate-500">Loading resume builder…</p>
         </div>
       </div>
@@ -884,11 +885,11 @@ export function ResumeBuilderPage(): React.JSX.Element {
       )}
 
       {/* ── Top Command Bar ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4 bg-white p-4 rounded-2xl shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-border pb-4 bg-card p-4 rounded-xl shadow-xs">
         <div className="flex items-center gap-3">
           <Link
             to="/dashboard/resumes"
-            className="rounded-xl border border-slate-200 p-2 text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition"
+            className="rounded-lg border border-border p-2 text-muted-foreground hover:bg-muted/40 hover:text-foreground transition cursor-pointer"
           >
             <ArrowLeft className="h-4 w-4" />
           </Link>
@@ -897,10 +898,10 @@ export function ResumeBuilderPage(): React.JSX.Element {
               type="text"
               value={title}
               onChange={(e) => { setTitle(e.target.value); }}
-              className="text-lg font-bold text-slate-900 bg-transparent border-b border-transparent hover:border-slate-300 focus:border-blue-500 focus:outline-none"
+              className="text-lg font-bold text-foreground bg-transparent border-b border-transparent hover:border-border focus:border-primary focus:outline-none"
               placeholder="Resume Name"
             />
-            <p className="text-xs text-slate-500">Structured Resume Editor with Real-Time Live Preview</p>
+            <p className="text-xs text-muted-foreground">Structured Resume Editor with Real-Time Live Preview</p>
           </div>
         </div>
 
@@ -909,7 +910,7 @@ export function ResumeBuilderPage(): React.JSX.Element {
           <select
             value={templateId}
             onChange={(e) => { setTemplateId(e.target.value); }}
-            className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 focus:outline-none focus:border-blue-500"
+            className="rounded-lg border border-border bg-background px-3 py-2 text-xs font-medium text-foreground focus:outline-none focus:border-primary"
           >
             <option value="modern">Modern Minimal</option>
             <option value="classic">Executive Classic</option>
@@ -917,12 +918,12 @@ export function ResumeBuilderPage(): React.JSX.Element {
           </select>
 
           {/* Primary Toggle */}
-          <label className="flex items-center gap-1.5 cursor-pointer text-xs text-slate-700 px-2">
+          <label className="flex items-center gap-1.5 cursor-pointer text-xs text-foreground px-2">
             <input
               type="checkbox"
               checked={isPrimary}
               onChange={(e) => { setIsPrimary(e.target.checked); }}
-              className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+              className="rounded border-border text-primary focus:ring-primary"
             />
             Primary Resume
           </label>
@@ -931,12 +932,12 @@ export function ResumeBuilderPage(): React.JSX.Element {
             type="button"
             onClick={() => { void (handleAnalyze)(); }}
             disabled={analyzeMutation.isPending || isSaving}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-purple-50 px-3.5 py-2 text-xs font-semibold text-purple-700 border border-purple-200 hover:bg-purple-100 disabled:opacity-60 transition"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-primary/10 px-3.5 py-2 text-xs font-semibold text-primary border border-primary/20 hover:bg-primary/20 disabled:opacity-60 transition cursor-pointer"
           >
             {analyzeMutation.isPending ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin text-purple-600" />
+              <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
             ) : (
-              <Sparkles className="h-3.5 w-3.5 text-purple-600" />
+              <Sparkles className="h-3.5 w-3.5 text-primary" />
             )}
             {analyzeMutation.isPending ? 'Analyzing...' : 'AI Score'}
           </button>
@@ -945,7 +946,7 @@ export function ResumeBuilderPage(): React.JSX.Element {
             type="button"
             onClick={() => { void (handleSave)(); }}
             disabled={isSaving}
-            className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2 text-xs font-semibold text-white shadow-sm hover:bg-blue-700 disabled:opacity-60 transition"
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2 text-xs font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 disabled:opacity-60 transition cursor-pointer"
           >
             {isSaving ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -954,13 +955,13 @@ export function ResumeBuilderPage(): React.JSX.Element {
             ) : (
               <Save className="h-3.5 w-3.5" />
             )}
-            {saveSuccess ? 'Saved!' : 'Save Resume'}
+            {saveSuccess ? 'Saved' : 'Save Resume'}
           </button>
 
           <button
             type="button"
             onClick={() => { downloadResumePdf({ title, content, templateId }); }}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-slate-800 transition"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-muted/40 hover:bg-muted border border-border px-4 py-2 text-xs font-semibold text-foreground shadow-sm transition cursor-pointer"
             title="Download formatted resume as PDF"
           >
             <Download className="h-3.5 w-3.5" />
@@ -974,7 +975,7 @@ export function ResumeBuilderPage(): React.JSX.Element {
         {/* ── LEFT PANE: Form Sections ── */}
         <div className="space-y-5">
           {/* Section Selector Tabs */}
-          <div className="flex overflow-x-auto gap-1.5 bg-slate-100/80 p-1.5 rounded-xl">
+          <div className="flex overflow-x-auto gap-1.5 bg-muted/20 border border-border p-1.5 rounded-xl">
             {[
               { id: 'basics', label: 'Basics & Summary', icon: User },
               { id: 'education', label: 'Education', icon: GraduationCap },
@@ -990,11 +991,10 @@ export function ResumeBuilderPage(): React.JSX.Element {
                 <button
                   key={tab.id}
                   onClick={() => { setActiveSection(tab.id as typeof activeSection); }}
-                  className={`flex-1 min-w-[100px] flex items-center justify-center gap-1.5 rounded-lg py-2 text-[11px] font-semibold transition ${
-                    isActive ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
-                  }`}
+                  className={`flex-1 min-w-[100px] flex items-center justify-center gap-1.5 rounded-lg py-2 text-[11px] font-semibold transition cursor-pointer ${isActive ? 'bg-primary/20 text-primary border border-primary/30 shadow-xs' : 'text-muted-foreground hover:text-foreground'
+                    }`}
                 >
-                  <Icon className={`h-3.5 w-3.5 ${isActive ? 'text-blue-600' : 'text-slate-400'}`} />
+                  <Icon className={`h-3.5 w-3.5 ${isActive ? 'text-primary' : 'text-muted-foreground'}`} />
                   {tab.label}
                 </button>
               );
@@ -1085,20 +1085,20 @@ export function ResumeBuilderPage(): React.JSX.Element {
                     type="button"
                     onClick={() => { void (handleEnhanceSummary)(); }}
                     disabled={enhancingKey === 'summary'}
-                    className="inline-flex items-center gap-1 text-[11px] font-semibold text-purple-700 bg-purple-50 hover:bg-purple-100 px-2.5 py-1 rounded-lg border border-purple-200 disabled:opacity-60 transition shadow-xs"
+                    className="inline-flex items-center gap-1 text-[11px] font-medium text-foreground bg-muted/40 hover:bg-muted px-2.5 py-1 rounded-lg border border-border disabled:opacity-60 transition-colors shadow-xs"
                     title="Improve and polish with AI action verbs and ATS keywords"
                   >
                     {enhancingKey === 'summary' ? (
-                      <Loader2 className="h-3 w-3 animate-spin text-purple-600" />
+                      <Loader2 className="h-3 w-3 animate-spin text-primary" />
                     ) : (
-                      <Sparkles className="h-3 w-3 text-purple-600" />
+                      <Sparkles className="h-3 w-3 text-primary" />
                     )}
-                    {enhancingKey === 'summary' ? 'Enhancing...' : '✨ AI Enhancer'}
+                    {enhancingKey === 'summary' ? 'Enhancing...' : 'Enhance with AI'}
                   </button>
                 </div>
                 {enhanceNotification?.id === 'summary' && (
-                  <div className="mb-2 text-[11px] font-medium text-purple-700 bg-purple-50 border border-purple-200 px-2.5 py-1 rounded-md flex items-center gap-1.5">
-                    <Sparkles className="h-3.5 w-3.5 text-purple-600 shrink-0" />
+                  <div className="mb-2 text-[11px] font-medium text-amber-900 dark:text-amber-200 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/50 px-2.5 py-1 rounded-md flex items-center gap-1.5">
+                    <Sparkles className="h-3.5 w-3.5 text-[#B9903B] shrink-0" />
                     {enhanceNotification.message}
                   </div>
                 )}
@@ -1321,7 +1321,7 @@ export function ResumeBuilderPage(): React.JSX.Element {
                         id={`current-job-${String(idx)}`}
                         checked={exp.isCurrent}
                         onChange={(e) => { toggleExperienceCurrent(idx, e.target.checked); }}
-                        className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                        className="rounded border-border text-primary focus:ring-primary"
                       />
                       <label htmlFor={`current-job-${String(idx)}`} className="text-[11px] text-slate-600 cursor-pointer">
                         I am currently working in this role
@@ -1340,20 +1340,20 @@ export function ResumeBuilderPage(): React.JSX.Element {
                           type="button"
                           onClick={() => { void (handleEnhanceExperience(idx)); }}
                           disabled={enhancingKey === `exp-${String(idx)}`}
-                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-purple-700 bg-purple-50 hover:bg-purple-100 px-2.5 py-1 rounded-lg border border-purple-200 disabled:opacity-60 transition shadow-xs"
+                          className="inline-flex items-center gap-1 text-[11px] font-medium text-foreground bg-muted/40 hover:bg-muted px-2.5 py-1 rounded-lg border border-border disabled:opacity-60 transition-colors shadow-xs"
                           title="Improve and polish with AI action verbs, technical depth, and quantifiable metrics"
                         >
                           {enhancingKey === `exp-${String(idx)}` ? (
-                            <Loader2 className="h-3 w-3 animate-spin text-purple-600" />
+                            <Loader2 className="h-3 w-3 animate-spin text-primary" />
                           ) : (
-                            <Sparkles className="h-3 w-3 text-purple-600" />
+                            <Sparkles className="h-3 w-3 text-primary" />
                           )}
-                          {enhancingKey === `exp-${String(idx)}` ? 'Enhancing...' : '✨ AI Enhancer'}
+                          {enhancingKey === `exp-${String(idx)}` ? 'Enhancing...' : 'Enhance with AI'}
                         </button>
                       </div>
                       {enhanceNotification?.id === `exp-${String(idx)}` && (
-                        <div className="mb-2 text-[11px] font-medium text-purple-700 bg-purple-50 border border-purple-200 px-2.5 py-1 rounded-md flex items-center gap-1.5">
-                          <Sparkles className="h-3.5 w-3.5 text-purple-600 shrink-0" />
+                        <div className="mb-2 text-[11px] font-medium text-amber-900 dark:text-amber-200 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/50 px-2.5 py-1 rounded-md flex items-center gap-1.5">
+                          <Sparkles className="h-3.5 w-3.5 text-[#B9903B] shrink-0" />
                           {enhanceNotification.message}
                         </div>
                       )}
@@ -1416,9 +1416,9 @@ export function ResumeBuilderPage(): React.JSX.Element {
                   <button
                     type="button"
                     onClick={importSkillsFromProfile}
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-100 transition"
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary/20 transition"
                   >
-                    <Sparkles className="h-3.5 w-3.5 text-blue-600" />
+                    <Sparkles className="h-3.5 w-3.5 text-primary" />
                     Import from Profile ({studentProfile.skills.length})
                   </button>
                 )}
@@ -1441,7 +1441,7 @@ export function ResumeBuilderPage(): React.JSX.Element {
                 <button
                   type="button"
                   onClick={() => { addSkill(); }}
-                  className="rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-700"
+                  className="rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary/90"
                 >
                   Add
                 </button>
@@ -1460,7 +1460,7 @@ export function ResumeBuilderPage(): React.JSX.Element {
                           key={s.id}
                           type="button"
                           onClick={() => { addSkill([s.name]); }}
-                          className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-700 border border-slate-200 transition"
+                          className="inline-flex items-center gap-1 rounded-md bg-muted/40 px-2 py-0.5 text-[11px] font-medium text-muted-foreground hover:bg-primary/15 hover:text-primary border border-border transition"
                         >
                           <Plus className="h-2.5 w-2.5" />
                           {s.name}
@@ -1471,7 +1471,7 @@ export function ResumeBuilderPage(): React.JSX.Element {
               )}
 
               {/* Skills Tags List */}
-              <div className="pt-2 border-t border-slate-100">
+              <div className="pt-2 border-t border-border">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs font-medium text-slate-700">
                     Selected Skills ({content.skills.length})
@@ -1495,13 +1495,13 @@ export function ResumeBuilderPage(): React.JSX.Element {
                     {content.skills.map((skill) => (
                       <span
                         key={skill}
-                        className="inline-flex items-center gap-1.5 rounded-lg bg-blue-50 px-3 py-1 text-xs font-medium text-blue-800 border border-blue-200 shadow-2xs"
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-primary/10 px-3 py-1 text-xs font-medium text-primary border border-primary/20 shadow-2xs"
                       >
                         {skill}
                         <button
                           type="button"
                           onClick={() => { removeSkill(skill); }}
-                          className="text-blue-400 hover:text-red-600"
+                          className="text-primary hover:text-destructive"
                           title="Remove skill"
                         >
                           <X className="h-3.5 w-3.5" />
@@ -1560,7 +1560,7 @@ export function ResumeBuilderPage(): React.JSX.Element {
                           type="text"
                           value={proj.title}
                           onChange={(e) => { updateProject(idx, 'title', e.target.value); }}
-                          placeholder="e.g. AI-Powered Career Portal"
+                          placeholder="e.g. Campus Placement Portal"
                           className="w-full rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-blue-500"
                         />
                       </div>
@@ -1569,12 +1569,13 @@ export function ResumeBuilderPage(): React.JSX.Element {
                         <input
                           type="text"
                           value={proj.technologies.join(', ')}
-                          onChange={(e) =>
-                            { updateProject(
+                          onChange={(e) => {
+                            updateProject(
                               idx,
                               'technologies',
                               e.target.value.split(',').map((t) => t.trim()).filter(Boolean),
-                            ); }
+                            );
+                          }
                           }
                           placeholder="e.g. React, Node.js, PostgreSQL, Docker"
                           className="w-full rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-blue-500"
@@ -1608,20 +1609,20 @@ export function ResumeBuilderPage(): React.JSX.Element {
                           type="button"
                           onClick={() => { void (handleEnhanceProject(idx)); }}
                           disabled={enhancingKey === `proj-${String(idx)}`}
-                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-purple-700 bg-purple-50 hover:bg-purple-100 px-2.5 py-1 rounded-lg border border-purple-200 disabled:opacity-60 transition shadow-xs"
+                          className="inline-flex items-center gap-1 text-[11px] font-medium text-foreground bg-muted/40 hover:bg-muted px-2.5 py-1 rounded-lg border border-border disabled:opacity-60 transition-colors shadow-xs"
                           title="Improve and polish project description with architectural approach and quantifiable impact"
                         >
                           {enhancingKey === `proj-${String(idx)}` ? (
-                            <Loader2 className="h-3 w-3 animate-spin text-purple-600" />
+                            <Loader2 className="h-3 w-3 animate-spin text-primary" />
                           ) : (
-                            <Sparkles className="h-3 w-3 text-purple-600" />
+                            <Sparkles className="h-3 w-3 text-primary" />
                           )}
-                          {enhancingKey === `proj-${String(idx)}` ? 'Enhancing...' : '✨ AI Enhancer'}
+                          {enhancingKey === `proj-${String(idx)}` ? 'Enhancing...' : 'Enhance with AI'}
                         </button>
                       </div>
                       {enhanceNotification?.id === `proj-${String(idx)}` && (
-                        <div className="mb-2 text-[11px] font-medium text-purple-700 bg-purple-50 border border-purple-200 px-2.5 py-1 rounded-md flex items-center gap-1.5">
-                          <Sparkles className="h-3.5 w-3.5 text-purple-600 shrink-0" />
+                        <div className="mb-2 text-[11px] font-medium text-amber-900 dark:text-amber-200 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/50 px-2.5 py-1 rounded-md flex items-center gap-1.5">
+                          <Sparkles className="h-3.5 w-3.5 text-[#B9903B] shrink-0" />
                           {enhanceNotification.message}
                         </div>
                       )}
@@ -1756,9 +1757,9 @@ export function ResumeBuilderPage(): React.JSX.Element {
                           placeholder="https://www.credly.com/badges/... or verification link"
                           className="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-blue-500"
                         />
-                        {cert.credentialUrl && (
+                        {safeHref(cert.credentialUrl) && (
                           <a
-                            href={cert.credentialUrl}
+                            href={safeHref(cert.credentialUrl)}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-1 mt-1 text-[10px] text-blue-600 hover:text-blue-700 font-medium"
@@ -1945,28 +1946,26 @@ export function ResumeBuilderPage(): React.JSX.Element {
           )}
 
           {/* ── Resume Completeness Validator (Super Builder) ── */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm space-y-4">
+          <div className="rounded-xl border border-border bg-card p-5 shadow-sm space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <ShieldCheck className={`h-5 w-5 ${validation.score >= 80 ? 'text-emerald-600' : validation.score >= 50 ? 'text-amber-500' : 'text-red-500'}`} />
+                <ShieldCheck className={`h-5 w-5 ${validation.score >= 80 ? 'text-emerald-700 dark:text-emerald-400' : validation.score >= 50 ? 'text-amber-700 dark:text-amber-400' : 'text-rose-700 dark:text-rose-400'}`} />
                 <div>
-                  <h3 className="text-sm font-semibold text-slate-900">Resume Health Check</h3>
-                  <p className="text-[10px] text-slate-500">Senior-level validation for a professional resume</p>
+                  <h3 className="text-sm font-semibold tracking-normal text-foreground">Resume Health Check</h3>
+                  <p className="text-[10px] text-muted-foreground">Senior-level validation for a professional resume</p>
                 </div>
               </div>
-              <div className={`text-lg font-bold ${
-                validation.score >= 80 ? 'text-emerald-600' : validation.score >= 50 ? 'text-amber-600' : 'text-red-600'
-              }`}>
+              <div className={`text-lg font-bold font-mono tabular-nums ${validation.score >= 80 ? 'text-emerald-700 dark:text-emerald-400' : validation.score >= 50 ? 'text-amber-700 dark:text-amber-400' : 'text-rose-700 dark:text-rose-400'
+                }`}>
                 {validation.score}%
               </div>
             </div>
 
             {/* Progress bar */}
-            <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+            <div className="w-full h-1.5 bg-muted/40 rounded-full overflow-hidden">
               <div
-                className={`h-full rounded-full transition-all duration-500 ${
-                  validation.score >= 80 ? 'bg-emerald-500' : validation.score >= 50 ? 'bg-amber-500' : 'bg-red-500'
-                }`}
+                className={`h-full rounded-full transition-[width] duration-500 ${validation.score >= 80 ? 'bg-emerald-500' : validation.score >= 50 ? 'bg-amber-400' : 'bg-rose-500'
+                  }`}
                 style={{ width: `${String(validation.score)}%` }}
               />
             </div>
@@ -1977,20 +1976,19 @@ export function ResumeBuilderPage(): React.JSX.Element {
                 {validation.issues.map((issue, i) => (
                   <div
                     key={i}
-                    className={`flex items-start gap-2 rounded-lg px-3 py-1.5 text-[11px] ${
-                      issue.severity === 'error'
-                        ? 'bg-red-50 text-red-800 border border-red-100'
-                        : issue.severity === 'warning'
-                          ? 'bg-amber-50 text-amber-800 border border-amber-100'
-                          : 'bg-blue-50 text-blue-800 border border-blue-100'
-                    }`}
+                    className={`flex items-start gap-2 rounded-lg px-3 py-1.5 text-[11px] border ${issue.severity === 'error'
+                      ? 'bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/20'
+                      : issue.severity === 'warning'
+                        ? 'bg-amber-500/10 text-amber-300 border-amber-500/20'
+                        : 'bg-primary/10 text-primary border-primary/20'
+                      }`}
                   >
                     {issue.severity === 'error' ? (
-                      <XCircle className="h-3.5 w-3.5 shrink-0 mt-0.5 text-red-500" />
+                      <XCircle className="h-3.5 w-3.5 shrink-0 mt-0.5 text-rose-700 dark:text-rose-400" />
                     ) : issue.severity === 'warning' ? (
-                      <AlertCircle className="h-3.5 w-3.5 shrink-0 mt-0.5 text-amber-500" />
+                      <AlertCircle className="h-3.5 w-3.5 shrink-0 mt-0.5 text-amber-700 dark:text-amber-400" />
                     ) : (
-                      <CheckCircle2 className="h-3.5 w-3.5 shrink-0 mt-0.5 text-blue-500" />
+                      <CheckCircle2 className="h-3.5 w-3.5 shrink-0 mt-0.5 text-primary" />
                     )}
                     <div>
                       <span className="font-semibold">{issue.section}:</span> {issue.field}
@@ -1999,8 +1997,8 @@ export function ResumeBuilderPage(): React.JSX.Element {
                 ))}
               </div>
             ) : (
-              <div className="flex items-center gap-2 rounded-lg bg-emerald-50 border border-emerald-200 px-3 py-2 text-xs text-emerald-800 font-medium">
-                <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+              <div className="flex items-center gap-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 text-xs text-emerald-300 font-medium">
+                <CheckCircle2 className="h-4 w-4 text-emerald-700 dark:text-emerald-400" />
                 Your resume is complete and well-structured! Ready for submission.
               </div>
             )}
@@ -2009,18 +2007,18 @@ export function ResumeBuilderPage(): React.JSX.Element {
 
         {/* ── RIGHT PANE: Live Rendered Resume Preview ── */}
         <div className="sticky top-6">
-          <div className="rounded-2xl border border-slate-300 bg-white shadow-lg overflow-hidden flex flex-col">
+          <div className="rounded-xl border border-border bg-card shadow-lg overflow-hidden flex flex-col">
             {/* Preview Toolbar */}
-            <div className="flex items-center justify-between px-5 py-3 border-b border-slate-200 bg-slate-50">
+            <div className="flex items-center justify-between px-5 py-3 border-b border-border bg-muted/30">
               <div className="flex items-center gap-2">
-                <Eye className="h-4 w-4 text-slate-500" />
-                <span className="text-xs font-semibold text-slate-700">Live Resume Preview</span>
+                <Eye className="h-4 w-4 text-primary" />
+                <span className="text-xs font-semibold text-foreground">Live Resume Preview</span>
               </div>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => { downloadResumePdf({ title, content, templateId }); }}
-                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-lg border border-blue-200 transition"
+                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary bg-primary/10 hover:bg-primary/20 px-2.5 py-1 rounded-lg border border-primary/20 transition cursor-pointer"
                   title="Print or Save as PDF"
                 >
                   <Download className="h-3 w-3" />
@@ -2029,12 +2027,12 @@ export function ResumeBuilderPage(): React.JSX.Element {
                 <button
                   type="button"
                   onClick={() => { downloadResumeJson({ title, content, templateId }); }}
-                  className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-600 hover:text-slate-800 bg-white hover:bg-slate-100 px-2 py-1 rounded-lg border border-slate-200 transition"
+                  className="inline-flex items-center gap-1 text-[11px] font-medium text-foreground bg-muted/20 hover:bg-muted/40 px-2 py-1 rounded-lg border border-border transition cursor-pointer"
                   title="Export structured JSON"
                 >
                   JSON
                 </button>
-                <span className="text-[11px] text-slate-400 uppercase tracking-wider font-mono">
+                <span className="text-[11px] text-muted-foreground tracking-normal font-mono">
                   {templateId}
                 </span>
               </div>
@@ -2048,38 +2046,35 @@ export function ResumeBuilderPage(): React.JSX.Element {
               const sectionTitleClass = isClassic
                 ? 'text-xs font-serif font-bold uppercase tracking-widest text-slate-900 border-b border-slate-300 pb-1 text-center'
                 : isTechnical
-                  ? 'text-xs font-mono font-bold uppercase tracking-wider text-teal-700 border-b-2 border-teal-600 pb-1 flex items-center gap-1.5'
-                  : 'text-xs font-sans font-bold uppercase tracking-wider text-blue-600 border-b-2 border-blue-200 pb-1';
+                  ? 'text-xs font-mono font-bold tracking-normal text-teal-700 border-b-2 border-teal-600 pb-1 flex items-center gap-1.5'
+                  : 'text-xs font-sans font-bold tracking-normal text-blue-600 border-b-2 border-blue-200 pb-1';
 
               return (
                 <div
-                  className={`p-8 space-y-5 min-h-[600px] max-h-[750px] overflow-y-auto bg-white text-xs leading-relaxed transition-all ${
-                    isClassic
-                      ? 'font-serif text-slate-900 bg-stone-50/30'
-                      : isTechnical
-                        ? 'font-sans text-slate-800 border-t-4 border-teal-600'
-                        : 'font-sans text-slate-800 border-t-4 border-blue-600'
-                  }`}
+                  className={`p-8 space-y-5 min-h-[600px] max-h-[750px] overflow-y-auto bg-white text-xs leading-relaxed transition-colors ${isClassic
+                    ? 'font-serif text-slate-900 bg-stone-50/30'
+                    : isTechnical
+                      ? 'font-sans text-slate-800 border-t-4 border-teal-600'
+                      : 'font-sans text-slate-800 border-t-4 border-blue-600'
+                    }`}
                 >
                   {/* Document Header */}
                   <div
-                    className={`pb-4 space-y-1 ${
-                      isClassic
-                        ? 'border-b-2 border-slate-900 text-center'
-                        : isTechnical
-                          ? 'border-b-2 border-teal-600 text-left'
-                          : 'border-b border-slate-200 text-center'
-                    }`}
+                    className={`pb-4 space-y-1 ${isClassic
+                      ? 'border-b-2 border-slate-900 text-center'
+                      : isTechnical
+                        ? 'border-b-2 border-teal-600 text-left'
+                        : 'border-b border-slate-200 text-center'
+                      }`}
                   >
                     <div className="flex items-baseline justify-between">
                       <h2
-                        className={`tracking-tight ${
-                          isClassic
-                            ? 'font-serif text-2xl font-bold uppercase text-slate-900 w-full text-center'
-                            : isTechnical
-                              ? 'font-mono text-xl font-bold text-slate-900'
-                              : 'font-sans text-2xl font-black text-slate-900 w-full text-center'
-                        }`}
+                        className={`tracking-tight ${isClassic
+                          ? 'font-serif text-2xl font-bold uppercase text-slate-900 w-full text-center'
+                          : isTechnical
+                            ? 'font-mono text-xl font-bold text-slate-900'
+                            : 'font-sans text-2xl font-black text-slate-900 w-full text-center'
+                          }`}
                       >
                         {content.fullName || 'Your Full Name'}
                       </h2>
@@ -2090,26 +2085,24 @@ export function ResumeBuilderPage(): React.JSX.Element {
                       )}
                     </div>
                     <div
-                      className={`flex flex-wrap gap-2 text-[11px] ${
-                        isClassic
-                          ? 'justify-center font-serif text-slate-700'
-                          : isTechnical
-                            ? 'justify-start font-mono text-slate-600'
-                            : 'justify-center font-sans text-slate-600'
-                      }`}
+                      className={`flex flex-wrap gap-2 text-[11px] ${isClassic
+                        ? 'justify-center font-serif text-slate-700'
+                        : isTechnical
+                          ? 'justify-start font-mono text-slate-600'
+                          : 'justify-center font-sans text-slate-600'
+                        }`}
                     >
                       {content.email && <span>{content.email}</span>}
                       {content.phone && <span>· {content.phone}</span>}
                       {content.location && <span>· {content.location}</span>}
                     </div>
                     <div
-                      className={`flex flex-wrap gap-2 text-[11px] pt-0.5 ${
-                        isClassic
-                          ? 'justify-center font-serif text-blue-900 underline'
-                          : isTechnical
-                            ? 'justify-start font-mono text-teal-700'
-                            : 'justify-center font-sans text-blue-600'
-                      }`}
+                      className={`flex flex-wrap gap-2 text-[11px] pt-0.5 ${isClassic
+                        ? 'justify-center font-serif text-blue-900 underline'
+                        : isTechnical
+                          ? 'justify-start font-mono text-teal-700'
+                          : 'justify-center font-sans text-blue-600'
+                        }`}
                     >
                       {content.linkedinUrl && <span>LinkedIn</span>}
                       {content.githubUrl && <span>· GitHub</span>}

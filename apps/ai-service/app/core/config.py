@@ -15,6 +15,14 @@ class Settings(BaseSettings):
     node_env: str = "development"
     ai_service_port: int = 8000
 
+    # Provider Switch: "auto", "groq", "nvidia", or "openai"
+    ai_provider: str = "auto"
+
+    # Groq Cloud API Configuration (Recommended: Fast & High Quality)
+    groq_api_key: str = ""
+    groq_base_url: str = "https://api.groq.com/openai/v1"
+    groq_model: str = "llama-3.3-70b-versatile"
+
     # NVIDIA NIM Microservices Configuration
     nvidia_api_key: str = ""
     nvidia_base_url: str = "https://integrate.api.nvidia.com/v1"
@@ -26,7 +34,7 @@ class Settings(BaseSettings):
 
     # Shared secret used to authenticate calls from apps/api -> ai-service,
     # since this service is never exposed directly to the frontend/internet.
-    ai_service_internal_token: str = "career-portal-internal-secret-token"
+    ai_service_internal_token: str
 
     api_base_url: str = "http://localhost:4000"
 

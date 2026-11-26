@@ -1,7 +1,9 @@
 import { Router } from 'express';
+import express from 'express';
 
 import { OpportunityController } from './opportunity.controller';
 
+import { aiRateLimiter } from '@/middlewares/ai-rate-limit.middleware';
 import { requireAuth } from '@/middlewares/require-auth.middleware';
 import { requirePermission } from '@/middlewares/require-permission.middleware';
 
@@ -18,7 +20,7 @@ opportunitiesRouter.get('/:id', requirePermission('opportunities.view'), control
 
 // Faculty-only: create, edit, status management
 opportunitiesRouter.post('/', requirePermission('opportunities.create'), controller.create);
-opportunitiesRouter.post('/extract', requirePermission('opportunities.create'), controller.extractFromSource);
+opportunitiesRouter.post('/extract', express.json({ limit: '20mb' }), requirePermission('opportunities.create'), aiRateLimiter, controller.extractFromSource);
 opportunitiesRouter.put('/:id', requirePermission('opportunities.edit'), controller.update);
 opportunitiesRouter.patch('/:id/status', requirePermission('opportunities.publish'), controller.updateStatus);
 opportunitiesRouter.delete('/:id', requirePermission('opportunities.create'), controller.delete);

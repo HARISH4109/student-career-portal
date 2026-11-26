@@ -13,6 +13,17 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 
 import { useAutosaveAnswer, useStartTest, useSubmitTest } from '../api/preparation-api';
+import {
+  Badge,
+  Button,
+  Card,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/shared/components/ui';
 
 export function TestTakingPage(): React.JSX.Element {
   const { id: testId } = useParams<{ id: string }>();
@@ -155,19 +166,19 @@ export function TestTakingPage(): React.JSX.Element {
 
   if (startTestMutation.isError) {
     return (
-      <div className="mx-auto max-w-lg rounded-2xl border border-rose-200 bg-rose-50 p-8 text-center">
-        <AlertTriangle className="mx-auto h-12 w-12 text-rose-500" />
-        <h3 className="mt-4 text-lg font-bold text-slate-900">Unable to Start Test</h3>
-        <p className="mt-2 text-sm text-slate-600">
+      <div className="mx-auto max-w-lg rounded-2xl border border-destructive/20 bg-destructive/10 p-8 text-center shadow-lg">
+        <AlertTriangle className="mx-auto h-12 w-12 text-destructive" />
+        <h3 className="mt-4 text-lg font-bold text-foreground">Unable to Start Test</h3>
+        <p className="mt-2 text-sm text-muted-foreground">
           {startTestMutation.error.message || 'An error occurred while launching the assessment.'}
         </p>
-        <button
+        <Button
           type="button"
           onClick={() => { void navigate('/dashboard/preparation'); }}
-          className="mt-6 rounded-xl bg-slate-900 px-5 py-2.5 text-xs font-semibold text-white hover:bg-slate-800"
+          className="mt-6"
         >
           Return to Tests Catalog
-        </button>
+        </Button>
       </div>
     );
   }
@@ -175,8 +186,8 @@ export function TestTakingPage(): React.JSX.Element {
   if (startTestMutation.isPending || !testData) {
     return (
       <div className="flex h-[70vh] flex-col items-center justify-center space-y-4">
-        <Loader2 className="h-10 w-10 animate-spin text-indigo-600" />
-        <p className="text-base font-semibold text-slate-700">Initializing Assessment Session...</p>
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+        <p className="text-base font-semibold text-foreground">Initializing Assessment Session...</p>
       </div>
     );
   }
@@ -187,103 +198,103 @@ export function TestTakingPage(): React.JSX.Element {
   return (
     <div className="relative min-h-[85vh] flex flex-col justify-between space-y-6">
       {/* ── Top Bar with Countdown Timer & Progress ──────────────────────── */}
-      <header className="sticky top-0 z-30 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white/95 px-6 py-4 shadow-sm backdrop-blur-md">
-        <div>
-          <span className="text-xs font-semibold text-indigo-600 uppercase tracking-wider">
-            Active Assessment
-          </span>
-          <h2 className="text-lg font-bold text-slate-900">{testData.title}</h2>
+      <header className="sticky top-0 z-30 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border/80 bg-card/95 px-5 py-3.5 shadow-xs backdrop-blur-md">
+        <div className="flex items-center gap-2.5">
+          <span className="h-4 w-1 rounded-full bg-[#B9903B]" aria-hidden="true" />
+          <div>
+            <span className="text-[11px] font-medium text-muted-foreground font-mono">
+              Official Assessment Session
+            </span>
+            <h2 className="text-base font-bold text-card-foreground leading-snug">{testData.title}</h2>
+          </div>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           {/* Autosave status indicator */}
-          <div className="hidden sm:flex items-center gap-1.5 text-xs text-slate-400">
+          <div className="hidden sm:flex items-center gap-1.5 text-xs text-muted-foreground">
             {autosaveStatus === 'saving' ? (
               <>
-                <Loader2 className="h-3.5 w-3.5 animate-spin text-indigo-500" />
-                <span>Autosaving...</span>
+                <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
+                <span>Saving answer...</span>
               </>
             ) : (
               <>
-                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
-                <span>Autosaved</span>
+                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+                <span>Saved</span>
               </>
             )}
           </div>
 
           {/* Timer Display */}
           <div
-            className={`flex items-center gap-2 rounded-xl px-4 py-2 font-mono text-base font-extrabold tracking-wider shadow-inner transition-colors ${
-              isTimeLow
-                ? 'bg-rose-50 text-rose-600 border border-rose-200 animate-pulse'
-                : 'bg-slate-900 text-white'
-            }`}
+            className={`flex items-center gap-2 rounded-lg px-3.5 py-1.5 font-mono text-sm font-semibold transition-colors ${isTimeLow
+              ? 'bg-destructive/10 text-destructive border border-destructive/30'
+              : 'bg-muted/70 text-foreground border border-border/70'
+              }`}
           >
-            <Clock className="h-4 w-4" />
+            <Clock className={`h-3.5 w-3.5 ${isTimeLow ? 'text-destructive' : 'text-muted-foreground'}`} />
             <span>{formattedTime}</span>
           </div>
 
           {/* Submit Button */}
-          <button
+          <Button
             type="button"
             disabled={submitTestMutation.isPending}
             onClick={() => { setShowSubmitModal(true); }}
-            className="rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-emerald-700 transition"
+            className="bg-emerald-700 hover:bg-emerald-800 text-white text-xs h-9"
           >
             Submit Test
-          </button>
+          </Button>
         </div>
       </header>
 
       {submitTestMutation.isError ? (
-        <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
-          {submitTestMutation.error.message}
-          <button type="button" onClick={handleForceSubmit} className="ml-3 font-semibold underline">
+        <div role="alert" className="rounded-xl border border-destructive/20 bg-destructive/10 p-4 text-sm text-destructive flex items-center justify-between">
+          <span>{submitTestMutation.error.message}</span>
+          <Button type="button" variant="ghost" size="sm" onClick={handleForceSubmit} className="underline font-semibold text-destructive">
             Retry submission
-          </button>
+          </Button>
         </div>
       ) : null}
 
       {/* ── Main Content: Question Panel + Question Navigation Sidebar ──── */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 flex-1">
         {/* Left: Question Box */}
-        <main className="lg:col-span-3 flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-6 md:p-8 shadow-sm">
+        <Card className="lg:col-span-3 flex flex-col justify-between p-6 md:p-8">
           {currentQuestion ? (
             <div className="space-y-6">
               {/* Question Header */}
-              <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div className="flex items-center justify-between border-b border-border/60 pb-4">
                 <div className="flex items-center gap-3">
-                  <span className="rounded-lg bg-indigo-50 px-3 py-1 font-mono text-xs font-bold text-indigo-700">
+                  <Badge variant="secondary" className="font-mono text-xs">
                     Question {currentQuestionIndex + 1} of {questions.length}
-                  </span>
+                  </Badge>
                   {currentQuestion.topic ? (
-                    <span className="text-xs font-medium text-slate-500">
-                      Topic: <strong className="text-slate-800">{currentQuestion.topic}</strong>
+                    <span className="text-xs font-medium text-muted-foreground">
+                      Topic: <strong className="text-foreground">{currentQuestion.topic}</strong>
                     </span>
                   ) : null}
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <span className="text-xs font-semibold text-slate-600">
+                  <span className="text-xs font-semibold text-muted-foreground font-mono">
                     +{currentQuestion.marks} Mark{currentQuestion.marks > 1 ? 's' : ''}
                   </span>
-                  <button
+                  <Button
                     type="button"
+                    variant={flaggedQuestions[currentQuestion.id] ? 'secondary' : 'ghost'}
+                    size="sm"
                     onClick={toggleFlagQuestion}
-                    className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-medium transition ${
-                      flaggedQuestions[currentQuestion.id]
-                        ? 'bg-amber-100 text-amber-800'
-                        : 'text-slate-400 hover:text-slate-700 hover:bg-slate-100'
-                    }`}
+                    className={`gap-1.5 ${flaggedQuestions[currentQuestion.id] ? 'bg-amber-100 text-amber-900 hover:bg-amber-200 dark:bg-amber-900/30 dark:text-amber-300' : ''}`}
                   >
                     <Bookmark className="h-3.5 w-3.5" />
                     <span>{flaggedQuestions[currentQuestion.id] ? 'Flagged' : 'Flag'}</span>
-                  </button>
+                  </Button>
                 </div>
               </div>
 
               {/* Question Text */}
-              <div className="text-base md:text-lg font-medium text-slate-900 leading-relaxed">
+              <div className="text-base md:text-lg font-medium text-card-foreground leading-relaxed">
                 {currentQuestion.questionText}
               </div>
 
@@ -298,22 +309,20 @@ export function TestTakingPage(): React.JSX.Element {
                     <label
                       key={idx}
                       onClick={() => { handleSelectOption(idx); }}
-                      className={`flex cursor-pointer items-start gap-4 rounded-xl border p-4 transition-all duration-150 ${
-                        isSelected
-                          ? 'border-indigo-600 bg-indigo-50/50 shadow-sm'
-                          : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50/50'
-                      }`}
+                      className={`flex cursor-pointer items-start gap-4 rounded-xl border p-4 transition-colors duration-150 ${isSelected
+                        ? 'border-primary bg-primary/5 ring-1 ring-primary/20 shadow-xs'
+                        : 'border-border bg-card hover:border-muted-foreground/30 hover:bg-accent/40'
+                        }`}
                     >
                       <span
-                        className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold transition ${
-                          isSelected
-                            ? 'bg-indigo-600 text-white'
-                            : 'bg-slate-100 text-slate-600 border border-slate-200'
-                        }`}
+                        className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold font-mono transition ${isSelected
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-muted text-muted-foreground border border-border'
+                          }`}
                       >
                         {label}
                       </span>
-                      <span className={`text-sm md:text-base leading-snug ${isSelected ? 'font-semibold text-slate-900' : 'text-slate-700'}`}>
+                      <span className={`text-sm md:text-base leading-snug ${isSelected ? 'font-semibold text-foreground' : 'text-card-foreground'}`}>
                         {optionText}
                       </span>
                     </label>
@@ -322,79 +331,82 @@ export function TestTakingPage(): React.JSX.Element {
               </div>
             </div>
           ) : (
-            <p className="text-center text-slate-400">No question available</p>
+            <p className="text-center text-muted-foreground">No question available</p>
           )}
 
           {/* Navigation Bottom Controls */}
-          <div className="mt-8 pt-6 border-t border-slate-100 flex items-center justify-between gap-4">
-            <button
+          <div className="mt-8 pt-6 border-t border-border/60 flex items-center justify-between gap-4">
+            <Button
               type="button"
+              variant="outline"
               disabled={currentQuestionIndex === 0}
               onClick={() => { setCurrentQuestionIndex((prev) => Math.max(0, prev - 1)); }}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:pointer-events-none"
+              className="gap-2"
             >
               <ArrowLeft className="h-4 w-4" />
               <span>Previous</span>
-            </button>
+            </Button>
 
             {currentQuestion && selectedAnswers[currentQuestion.id] !== undefined && selectedAnswers[currentQuestion.id] !== null ? (
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="sm"
                 onClick={handleClearAnswer}
-                className="text-xs font-semibold text-slate-500 hover:text-slate-800"
+                className="text-xs text-muted-foreground hover:text-foreground"
               >
                 Clear Choice
-              </button>
+              </Button>
             ) : null}
 
             {isLastQuestion ? (
-              <button
+              <Button
                 type="button"
                 onClick={() => { setShowSubmitModal(true); }}
-                className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-xs font-semibold text-white shadow-sm hover:bg-emerald-700"
+                className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white"
               >
                 <span>Review & Submit</span>
                 <Send className="h-4 w-4" />
-              </button>
+              </Button>
             ) : (
-              <button
+              <Button
                 type="button"
                 onClick={() => { setCurrentQuestionIndex((prev) => Math.min(questions.length - 1, prev + 1)); }}
-                className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-xs font-semibold text-white shadow-sm hover:bg-indigo-700"
+                className="gap-2"
               >
                 <span>Next</span>
                 <ArrowRight className="h-4 w-4" />
-              </button>
+              </Button>
             )}
           </div>
-        </main>
+        </Card>
 
         {/* Right: Question Palette / Overview */}
-        <aside className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm flex flex-col justify-between space-y-6">
+        <Card className="p-6 flex flex-col justify-between space-y-6">
           <div className="space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 className="text-sm font-bold text-slate-900">Question Palette</h3>
-              <span className="text-xs font-medium text-slate-500">
+            <div className="flex items-center justify-between border-b border-border/60 pb-3">
+              <h3 className="text-sm font-bold text-card-foreground">Question Palette</h3>
+              <span className="text-xs font-medium text-muted-foreground font-mono">
                 {answeredCount}/{questions.length} answered
               </span>
             </div>
 
             {/* Status Legend */}
-            <div className="grid grid-cols-2 gap-2 text-[11px] text-slate-600">
+            <div className="grid grid-cols-2 gap-2 text-[11px] text-muted-foreground">
               <div className="flex items-center gap-1.5">
-                <span className="h-3 w-3 rounded-full bg-emerald-500" />
+                <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
                 <span>Answered</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="h-3 w-3 rounded-full bg-amber-400" />
+                <span className="h-2.5 w-2.5 rounded-full bg-amber-400" />
                 <span>Flagged</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="h-3 w-3 rounded-full bg-slate-200" />
+                <span className="h-2.5 w-2.5 rounded-full bg-muted" />
                 <span>Unanswered</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="h-3 w-3 rounded-full border-2 border-indigo-600 bg-white" />
+                <span className="h-2.5 w-2.5 rounded-full border-2 border-primary bg-background" />
                 <span>Current</span>
               </div>
             </div>
@@ -406,18 +418,17 @@ export function TestTakingPage(): React.JSX.Element {
                 const isAnswered = selectedAnswers[q.id] !== undefined && selectedAnswers[q.id] !== null;
                 const isFlagged = flaggedQuestions[q.id];
 
-                let bgClass = 'bg-slate-100 text-slate-700 hover:bg-slate-200';
-                if (isAnswered) bgClass = 'bg-emerald-500 text-white font-bold';
-                if (isFlagged) bgClass = 'bg-amber-400 text-slate-900 font-bold';
+                let bgClass = 'bg-muted/70 text-muted-foreground hover:bg-muted';
+                if (isAnswered) bgClass = 'bg-emerald-700 dark:bg-emerald-600 text-white font-semibold';
+                if (isFlagged) bgClass = 'bg-amber-500 text-white font-semibold';
 
                 return (
                   <button
                     key={q.id}
                     type="button"
                     onClick={() => { setCurrentQuestionIndex(idx); }}
-                    className={`h-9 w-9 rounded-lg text-xs transition ${bgClass} ${
-                      isCurrent ? 'ring-2 ring-indigo-600 ring-offset-2' : ''
-                    }`}
+                    className={`h-8 w-8 rounded-md text-xs font-mono transition-colors duration-150 cursor-pointer ${bgClass} ${isCurrent ? 'ring-2 ring-primary ring-offset-2 ring-offset-card' : ''
+                      }`}
                   >
                     {idx + 1}
                   </button>
@@ -426,67 +437,59 @@ export function TestTakingPage(): React.JSX.Element {
             </div>
           </div>
 
-          <div className="rounded-xl bg-slate-50 p-4 text-xs text-slate-500 space-y-2 border border-slate-100">
-            <p className="font-semibold text-slate-700">Integrity Rules:</p>
+          <div className="rounded-xl bg-muted/40 p-4 text-xs text-muted-foreground space-y-2 border border-border/60">
+            <p className="font-semibold text-foreground">Integrity Rules:</p>
             <p>Answers are saved server-side immediately. If time runs out, your current answers are auto-submitted.</p>
           </div>
-        </aside>
+        </Card>
       </div>
 
-      {/* ── Submit Confirmation Modal ─────────────────────────────────────── */}
-      {showSubmitModal ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl space-y-6">
-            <div className="text-center space-y-2">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
-                <Send className="h-6 w-6" />
-              </div>
-              <h3 className="text-lg font-bold text-slate-900">Confirm Test Submission</h3>
-              <p className="text-xs text-slate-500">
-                Once submitted, your answers will be graded server-side and cannot be modified.
+      {/* ── Submit Confirmation Dialog ─────────────────────────────────────── */}
+      <Dialog open={showSubmitModal} onOpenChange={setShowSubmitModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 mb-2">
+              <Send className="h-6 w-6" />
+            </div>
+            <DialogTitle className="text-center">Confirm Test Submission</DialogTitle>
+            <DialogDescription className="text-center">
+              Once submitted, your answers will be graded server-side and cannot be modified.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid grid-cols-2 gap-3 rounded-xl bg-muted/40 p-4 text-center my-4 border border-border/60">
+            <div className="border-r border-border pr-2">
+              <p className="text-2xl font-bold text-emerald-600 font-mono">{answeredCount}</p>
+              <p className="text-xs font-medium text-muted-foreground">Answered</p>
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-muted-foreground font-mono">
+                {questions.length - answeredCount}
               </p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 rounded-xl bg-slate-50 p-4 text-center">
-              <div className="border-r border-slate-200 pr-2">
-                <p className="text-2xl font-extrabold text-emerald-600">{answeredCount}</p>
-                <p className="text-xs font-medium text-slate-500">Answered</p>
-              </div>
-              <div>
-                <p className="text-2xl font-extrabold text-slate-400">
-                  {questions.length - answeredCount}
-                </p>
-                <p className="text-xs font-medium text-slate-500">Unanswered</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={() => { setShowSubmitModal(false); }}
-                className="flex-1 rounded-xl border border-slate-200 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-              >
-                Continue Test
-              </button>
-              <button
-                type="button"
-                disabled={submitTestMutation.isPending}
-                onClick={handleForceSubmit}
-                className="flex-1 rounded-xl bg-emerald-600 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-emerald-700 disabled:opacity-60 flex items-center justify-center gap-1.5"
-              >
-                {submitTestMutation.isPending ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    <span>Grading...</span>
-                  </>
-                ) : (
-                  <span>Submit Now</span>
-                )}
-              </button>
+              <p className="text-xs font-medium text-muted-foreground">Unanswered</p>
             </div>
           </div>
-        </div>
-      ) : null}
+
+          <DialogFooter className="grid grid-cols-2 gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => { setShowSubmitModal(false); }}
+            >
+              Continue Test
+            </Button>
+            <Button
+              type="button"
+              disabled={submitTestMutation.isPending}
+              onClick={handleForceSubmit}
+              loading={submitTestMutation.isPending}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white"
+            >
+              Submit Now
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -6,6 +6,8 @@ import type {
 } from '@career-portal/shared-types';
 import { and, asc, count, desc, eq, exists, ilike, inArray, sql } from 'drizzle-orm';
 
+import { escapeLikePattern } from '@/shared/db/escape-like';
+
 type Transaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 export class CareerRepository {
   constructor(readonly database: typeof db | Transaction = db) {}
@@ -33,7 +35,7 @@ export class CareerRepository {
   async paths(query: CareerCatalogQuery) {
     const where = and(
       query.status === 'active' ? eq(schema.careerPaths.isActive, true) : undefined,
-      ilike(schema.careerPaths.title, `%${query.search}%`),
+      ilike(schema.careerPaths.title, `%${escapeLikePattern(query.search)}%`),
     );
     const data = await this.database
       .select()
@@ -146,7 +148,7 @@ export class CareerRepository {
     const r = schema.learningResources;
     const where = and(
       query.status === 'active' ? eq(r.isActive, true) : undefined,
-      ilike(r.title, `%${query.search}%`),
+      ilike(r.title, `%${escapeLikePattern(query.search)}%`),
       query.type ? eq(r.type, query.type) : undefined,
       query.difficulty ? eq(r.difficulty, query.difficulty) : undefined,
       query.skillId

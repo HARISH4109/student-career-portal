@@ -10,6 +10,27 @@ import { logger } from '@/infrastructure/logger';
 import { emitNotificationToUser } from '@/infrastructure/socket';
 import { NotificationsRepository } from './notifications.repository';
 
+function escapeHtml(text: string): string {
+  return text
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
+function sanitizeEmailActionUrl(url?: string | null): string | null {
+  if (!url) return null;
+  const trimmed = url.trim();
+  if (trimmed.startsWith('/') && !trimmed.startsWith('//')) return trimmed;
+  try {
+    const parsed = new URL(trimmed);
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:' ? trimmed : null;
+  } catch {
+    return null;
+  }
+}
+
 export class NotificationsService {
   constructor(
     private readonly repository = new NotificationsRepository(),
@@ -85,13 +106,14 @@ export class NotificationsService {
         });
 
         if (user?.email) {
+          const safeActionUrl = sanitizeEmailActionUrl(params.actionUrl);
           void sendEmail({
             to: user.email,
             subject: params.title,
-            text: `${params.message}\n\nView details: ${params.actionUrl ?? 'Career Portal'}`,
-            html: `<h3>${params.title}</h3><p>${params.message}</p>${
-              params.actionUrl
-                ? `<p><a href="${params.actionUrl}">Click here to view</a></p>`
+            text: `${params.message}\n\nView details: ${safeActionUrl ?? 'Career Portal'}`,
+            html: `<h3>${escapeHtml(params.title)}</h3><p>${escapeHtml(params.message)}</p>${
+              safeActionUrl
+                ? `<p><a href="${escapeHtml(safeActionUrl)}">Click here to view</a></p>`
                 : ''
             }`,
           });

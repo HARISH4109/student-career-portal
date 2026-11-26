@@ -77,27 +77,27 @@ export function NotificationPreferencesModal({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
-          className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl border border-slate-100 max-h-[90vh] flex flex-col"
+          className="w-full max-w-lg rounded-xl bg-card p-6 shadow-2xl border border-border max-h-[90vh] flex flex-col text-foreground"
         >
           {/* Header */}
-          <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-            <div className="flex items-center gap-2">
-              <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
+          <div className="flex items-center justify-between pb-4 border-b border-border">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 bg-primary/10 text-primary border border-primary/20 rounded-lg">
                 <Settings className="h-5 w-5" />
               </div>
               <div>
-                <h2 className="text-lg font-bold text-slate-900">Notification Preferences</h2>
-                <p className="text-xs text-slate-500">Configure how and when you want to be notified</p>
+                <h2 className="text-base font-semibold text-foreground">Notification Preferences</h2>
+                <p className="text-xs text-muted-foreground">Configure delivery channels and category alerts</p>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100"
+              className="p-1.5 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted/40 transition-colors cursor-pointer"
             >
               <X className="h-5 w-5" />
             </button>
@@ -106,42 +106,42 @@ export function NotificationPreferencesModal({
           {/* Body */}
           <div className="flex-1 overflow-y-auto py-4 space-y-6">
             {isLoading ? (
-              <div className="py-8 text-center text-sm text-slate-400">Loading settings…</div>
+              <div className="py-8 text-center text-sm text-muted-foreground">Loading settings…</div>
             ) : (
               <>
                 {/* Channels */}
                 <div className="space-y-3">
-                  <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                  <h3 className="text-xs font-semibold tracking-normal text-muted-foreground">
                     Delivery Channels
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <label className="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50 transition-colors">
+                    <label className="flex items-start gap-3 p-3.5 rounded-lg border border-border/80 bg-muted/20 cursor-pointer hover:bg-muted/30 transition-colors">
                       <input
                         type="checkbox"
                         checked={pushEnabled}
                         onChange={(e) => { setEmailEnabled(e.target.checked); setPushEnabled(e.target.checked); }}
-                        className="mt-1 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                        className="mt-1 h-4 w-4 rounded border-border text-primary focus:ring-primary/25"
                       />
                       <div className="space-y-0.5">
-                        <span className="flex items-center gap-1.5 text-sm font-semibold text-slate-800">
-                          <Bell className="h-4 w-4 text-blue-600" /> In-App Alerts
+                        <span className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
+                          <Bell className="h-4 w-4 text-primary" /> In-App Alerts
                         </span>
-                        <p className="text-xs text-slate-500">Popups and notification center</p>
+                        <p className="text-xs text-muted-foreground">Popups and notification center</p>
                       </div>
                     </label>
 
-                    <label className="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50 transition-colors">
+                    <label className="flex items-start gap-3 p-3.5 rounded-lg border border-border/80 bg-muted/20 cursor-pointer hover:bg-muted/30 transition-colors">
                       <input
                         type="checkbox"
                         checked={emailEnabled}
                         onChange={(e) => { setEmailEnabled(e.target.checked); }}
-                        className="mt-1 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                        className="mt-1 h-4 w-4 rounded border-border text-primary focus:ring-primary/25"
                       />
                       <div className="space-y-0.5">
-                        <span className="flex items-center gap-1.5 text-sm font-semibold text-slate-800">
-                          <Mail className="h-4 w-4 text-emerald-600" /> Email
+                        <span className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
+                          <Mail className="h-4 w-4 text-emerald-700 dark:text-emerald-400" /> Email
                         </span>
-                        <p className="text-xs text-slate-500">Important status updates</p>
+                        <p className="text-xs text-muted-foreground">Important status updates</p>
                       </div>
                     </label>
                   </div>
@@ -149,7 +149,7 @@ export function NotificationPreferencesModal({
 
                 {/* Event types */}
                 <div className="space-y-3">
-                  <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                  <h3 className="text-xs font-semibold tracking-normal text-muted-foreground">
                     Notification Types
                   </h3>
                   <div className="space-y-2">
@@ -159,17 +159,17 @@ export function NotificationPreferencesModal({
                         <div
                           key={type}
                           onClick={() => { toggleMuted(type); }}
-                          className="flex items-center justify-between p-3 rounded-xl border border-slate-100 hover:border-slate-200 hover:bg-slate-50/50 cursor-pointer transition-all"
+                          className="flex items-center justify-between p-3 rounded-lg border border-border/80 bg-muted/20 hover:bg-muted/30 cursor-pointer transition-colors"
                         >
                           <div className="pr-4">
-                            <p className="text-sm font-medium text-slate-800">{meta.label}</p>
-                            <p className="text-xs text-slate-500">{meta.desc}</p>
+                            <p className="text-sm font-medium text-foreground">{meta.label}</p>
+                            <p className="text-xs text-muted-foreground">{meta.desc}</p>
                           </div>
                           <span
-                            className={`px-2.5 py-1 text-xs font-semibold rounded-full transition-colors ${
+                            className={`px-2.5 py-0.5 text-xs font-semibold rounded-full font-mono transition-colors border ${
                               isMuted
-                                ? 'bg-slate-100 text-slate-500'
-                                : 'bg-emerald-50 text-emerald-700'
+                                ? 'bg-muted text-muted-foreground border-border/80'
+                                : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20'
                             }`}
                           >
                             {isMuted ? 'Muted' : 'Enabled'}
@@ -184,17 +184,17 @@ export function NotificationPreferencesModal({
           </div>
 
           {/* Footer */}
-          <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+          <div className="pt-4 border-t border-border flex items-center justify-end gap-3">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+              className="px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-accent rounded-lg transition-colors cursor-pointer"
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
               disabled={mutation.isPending}
-              className="flex items-center gap-2 px-5 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-all disabled:opacity-50"
+              className="flex items-center gap-2 px-5 py-2 text-sm font-semibold text-primary-foreground bg-primary hover:bg-primary/90 rounded-lg shadow-sm transition-colors disabled:opacity-50 cursor-pointer"
             >
               {saveSuccess ? (
                 <>
@@ -212,4 +212,3 @@ export function NotificationPreferencesModal({
     </AnimatePresence>
   );
 }
-

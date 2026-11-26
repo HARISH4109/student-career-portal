@@ -5,6 +5,7 @@ import { AuthService } from './auth.service';
 
 import {
   passwordResetLimiter,
+  refreshLimiter,
   signInLimiter,
   signUpLimiter,
 } from '@/middlewares/auth-rate-limit.middleware';
@@ -19,7 +20,7 @@ export const authRouter = Router();
 // ── Public routes (no auth required) ──────────────────────────────────
 authRouter.post('/signup', signUpLimiter, authController.signUp);
 authRouter.post('/signin', signInLimiter, authController.signIn);
-authRouter.post('/refresh', authController.refresh);
+authRouter.post('/refresh', refreshLimiter, authController.refresh);
 authRouter.post('/forgot-password', passwordResetLimiter, authController.forgotPassword);
 authRouter.post('/reset-password', passwordResetLimiter, authController.resetPassword);
 
