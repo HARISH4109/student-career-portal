@@ -1,4 +1,3 @@
-import pytest
 from app.core.config import Settings
 from app.core.llm import (
     get_llm_client,

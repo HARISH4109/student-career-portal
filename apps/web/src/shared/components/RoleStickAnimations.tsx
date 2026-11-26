@@ -1061,7 +1061,7 @@ export function DashboardRoleStickAnimation({
   role,
   className = 'w-full',
 }: {
-  role?: 'STUDENT' | 'PLACEMENT_FACULTY' | 'ADMIN' | string;
+  role?: string;
   className?: string;
 }): React.JSX.Element {
   if (role === 'ADMIN') {

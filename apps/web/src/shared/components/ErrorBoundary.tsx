@@ -49,9 +49,11 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
   private handleCopyError = (): void => {
     const errorDetails = `Error: ${this.state.error?.message || 'Unknown'}\n\nStack:\n${this.state.error?.stack || ''}\n\nComponent Stack:\n${this.state.errorInfo?.componentStack || ''}`;
-    navigator.clipboard.writeText(errorDetails).then(() => {
+    void navigator.clipboard.writeText(errorDetails).then(() => {
       this.setState({ copied: true });
       setTimeout(() => this.setState({ copied: false }), 2000);
+    }).catch(() => {
+      // ignore clipboard error
     });
   };
 
