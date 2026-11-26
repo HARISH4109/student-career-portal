@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import express from 'express';
 
 import { OpportunityDraftController } from './opportunity-draft.controller';
 
@@ -14,7 +15,7 @@ export const opportunityDraftRouter = Router();
 opportunityDraftRouter.use(requireAuth);
 
 // Draft ingestion, listing, viewing, editing (faculty with create permission)
-opportunityDraftRouter.post('/ingest', requirePermission('opportunities.create'), aiRateLimiter, controller.ingest);
+opportunityDraftRouter.post('/ingest', express.json({ limit: '20mb' }), requirePermission('opportunities.create'), aiRateLimiter, controller.ingest);
 opportunityDraftRouter.get('/counts', requirePermission('opportunities.create'), controller.getCounts);
 opportunityDraftRouter.get('/', requirePermission('opportunities.create'), controller.list);
 opportunityDraftRouter.get('/:id', requirePermission('opportunities.create'), controller.getById);

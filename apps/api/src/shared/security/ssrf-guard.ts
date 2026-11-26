@@ -1,3 +1,4 @@
+import dns from 'node:dns/promises';
 import net from 'node:net';
 
 export interface UrlValidationResult {
@@ -47,6 +48,17 @@ function isPrivateIPv4(ip: string): boolean {
 function isPrivateIPv6(ip: string): boolean {
   const normalized = ip.toLowerCase();
   if (normalized === '::1' || normalized === '::') return true;
+  // IPv4-mapped IPv6 (e.g. ::ffff:127.0.0.1 or ::ffff:7f00:1)
+  if (normalized.startsWith('::ffff:')) {
+    const mapped = normalized.slice(7);
+    if (net.isIPv4(mapped)) {
+      return isPrivateIPv4(mapped);
+    }
+    // Block hex-encoded IPv4-mapped addresses conservatively
+    return true;
+  }
+  // NAT64 / 64:ff9b::/96
+  if (normalized.startsWith('64:ff9b:')) return true;
   // fc00::/7 (Unique Local)
   if (normalized.startsWith('fc') || normalized.startsWith('fd')) return true;
   // fe80::/10 (Link-Local)
@@ -126,6 +138,40 @@ export function validateUrlForFetch(urlStr: string): UrlValidationResult {
       valid: false,
       reason: 'Numeric/hexadecimal encoded IP addresses are not permitted.',
     };
+  }
+
+  return { valid: true };
+}
+
+/**
+ * Resolves DNS for non-IP hostnames and verifies every returned address is public,
+ * mitigating DNS rebinding and internal hostname aliases before outbound fetches.
+ */
+export async function validateUrlForFetchResolved(urlStr: string): Promise<UrlValidationResult> {
+  const staticCheck = validateUrlForFetch(urlStr);
+  if (!staticCheck.valid) return staticCheck;
+
+  const parsed = new URL(urlStr);
+  const unbracketedHost = parsed.hostname.toLowerCase().replace(/^\[|\]$/g, '');
+  if (net.isIP(unbracketedHost) !== 0) {
+    return staticCheck;
+  }
+
+  try {
+    const records = await dns.lookup(unbracketedHost, { all: true });
+    if (records.length === 0) {
+      return { valid: false, reason: `Could not resolve host "${unbracketedHost}".` };
+    }
+    for (const record of records) {
+      if (record.family === 4 && isPrivateIPv4(record.address)) {
+        return { valid: false, reason: `Resolved IP "${record.address}" is within a private or reserved network.` };
+      }
+      if (record.family === 6 && isPrivateIPv6(record.address)) {
+        return { valid: false, reason: `Resolved IPv6 "${record.address}" is within a private or reserved range.` };
+      }
+    }
+  } catch {
+    return { valid: false, reason: `DNS resolution failed for "${unbracketedHost}".` };
   }
 
   return { valid: true };

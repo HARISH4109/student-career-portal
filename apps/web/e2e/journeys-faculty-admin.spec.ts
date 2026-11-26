@@ -223,16 +223,23 @@ test.describe('Faculty & Admin Critical Journeys (11, 13-16)', () => {
           body: JSON.stringify({
             success: true,
             data: {
-              totalStudents: 1250,
-              placedStudents: 980,
-              activeOpportunities: 45,
-              totalApplications: 3420,
-              placementRate: 78.4,
-              averageCgpa: 8.2,
-              departmentBreakdown: [
-                { department: 'Computer Science', total: 400, placed: 360 },
-                { department: 'Electronics', total: 350, placed: 280 },
-              ],
+              opportunitiesPublished: 45,
+              activeOpportunities: 32,
+              totalApplications: 120,
+              applicationFunnel: {
+                applied: 120,
+                under_review: 80,
+                shortlisted: 45,
+                assessment: 30,
+                interview: 20,
+                selected: 15,
+                rejected: 10,
+              },
+              testParticipation: {
+                totalTests: 8,
+                totalAttempts: 150,
+                averageScore: 78,
+              },
             },
           }),
         });

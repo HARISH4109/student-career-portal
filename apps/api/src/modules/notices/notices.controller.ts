@@ -64,8 +64,10 @@ export class NoticesController {
 
   getNoticeById: RequestHandler = (req, res, next) => {
     void (async () => {
+      const user = requestUser(req);
       const id = idParam(req);
-      const notice = await this.service.getNoticeById(id);
+      const isStaff = user.permissions.includes('notices.publish');
+      const notice = await this.service.getNoticeById(id, isStaff);
       sendSuccess(res, notice, 200);
     })().catch(next);
   };

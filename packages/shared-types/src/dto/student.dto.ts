@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { optionalHttpUrlSchema } from './url-validation';
+
 // ── Proficiency Levels ──────────────────────────────────────────────────
 export const PROFICIENCY_LEVELS = ['beginner', 'intermediate', 'advanced', 'expert'] as const;
 export type ProficiencyLevel = (typeof PROFICIENCY_LEVELS)[number];
@@ -10,8 +12,8 @@ export const projectEntrySchema = z.object({
   title: z.string().min(1, 'Project title is required').max(150),
   description: z.string().min(1, 'Project description is required').max(2000),
   technologies: z.array(z.string().min(1)).default([]),
-  link: z.string().url('Invalid project URL').optional().or(z.literal('')),
-  githubUrl: z.string().url('Invalid GitHub URL').optional().or(z.literal('')),
+  link: optionalHttpUrlSchema('Invalid project URL'),
+  githubUrl: optionalHttpUrlSchema('Invalid GitHub URL'),
   startDate: z.string().optional(),
   endDate: z.string().optional(),
   isCurrent: z.boolean().default(false),
@@ -26,7 +28,7 @@ export const certificationEntrySchema = z.object({
   issueDate: z.string().optional(),
   expiryDate: z.string().optional(),
   credentialId: z.string().max(100).optional().or(z.literal('')),
-  credentialUrl: z.string().url('Invalid credential URL').optional().or(z.literal('')),
+  credentialUrl: optionalHttpUrlSchema('Invalid credential URL'),
 });
 export type CertificationEntry = z.infer<typeof certificationEntrySchema>;
 
@@ -97,9 +99,9 @@ export const createStudentProfileSchema = z.object({
   batchId: z.string().uuid('Valid batch ID is required'),
   cgpa: z.number().min(0).max(10).optional().nullable(),
   bio: z.string().max(2000).optional().nullable(),
-  linkedinUrl: z.string().url('Invalid LinkedIn URL').optional().nullable().or(z.literal('')),
-  githubUrl: z.string().url('Invalid GitHub URL').optional().nullable().or(z.literal('')),
-  portfolioUrl: z.string().url('Invalid Portfolio URL').optional().nullable().or(z.literal('')),
+  linkedinUrl: optionalHttpUrlSchema('Invalid LinkedIn URL'),
+  githubUrl: optionalHttpUrlSchema('Invalid GitHub URL'),
+  portfolioUrl: optionalHttpUrlSchema('Invalid Portfolio URL'),
   careerInterests: z.array(z.string().min(1)).default([]),
   projects: z.array(projectEntrySchema).default([]),
   certifications: z.array(certificationEntrySchema).default([]),

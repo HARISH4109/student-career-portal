@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '@/features/auth/use-auth';
+import { safeHref } from '@/shared/lib/safe-url';
 import { NoticeFormModal } from '../components/NoticeFormModal';
 import {
   expireNotice,
@@ -24,6 +25,13 @@ import {
   getStudentNotices,
   setNoticePin,
 } from '../services/notices-api';
+import {
+  Badge,
+  Button,
+  Card,
+  EmptyState,
+  Input,
+} from '@/shared/components/ui';
 
 const CATEGORIES: Array<{ key: NoticeCategory | 'all'; label: string }> = [
   { key: 'all', label: 'All Notices' },
@@ -32,19 +40,6 @@ const CATEGORIES: Array<{ key: NoticeCategory | 'all'; label: string }> = [
   { key: 'event', label: 'Events' },
   { key: 'general', label: 'General' },
 ];
-
-function getCategoryColor(category: string) {
-  switch (category) {
-    case 'placement':
-      return 'bg-blue-50 text-blue-700 border-blue-200';
-    case 'academic':
-      return 'bg-purple-50 text-purple-700 border-purple-200';
-    case 'event':
-      return 'bg-amber-50 text-amber-700 border-amber-200';
-    default:
-      return 'bg-slate-100 text-slate-700 border-slate-200';
-  }
-}
 
 function formatDate(dateString: string): string {
   const date = new Date(dateString);
@@ -98,29 +93,29 @@ export function NoticesPage(): React.JSX.Element {
   const notices = noticesData?.data ?? [];
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto pb-12">
+    <div className="space-y-6 w-full max-w-[1536px] mx-auto pb-12">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-5">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            <Bell className="h-6 w-6 text-blue-600" /> Notice Board
+          <h1 className="text-2xl font-bold text-foreground tracking-tight flex items-center gap-2">
+            <Bell className="h-6 w-6 text-primary" /> Notice Board
           </h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-muted-foreground">
             Institutional announcements, placement schedules, and department updates
           </p>
         </div>
 
         <div className="flex items-center gap-3">
           {isStaff && (
-            <button
+            <Button
               onClick={() => {
                 setNoticeToEdit(null);
                 setIsModalOpen(true);
               }}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-xl shadow-sm transition-all"
+              className="gap-2"
             >
               <Plus className="h-4 w-4" /> Post Notice
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -128,15 +123,16 @@ export function NoticesPage(): React.JSX.Element {
       {/* Filter and Search Bar */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         {/* Category Pills */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-2 md:pb-0">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-2 md:pb-0 scrollbar-none">
           {CATEGORIES.map((cat) => (
             <button
               key={cat.key}
+              type="button"
               onClick={() => { setActiveCategory(cat.key); }}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
                 activeCategory === cat.key
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+                  ? 'bg-primary text-primary-foreground shadow-xs'
+                  : 'bg-card text-muted-foreground border border-border hover:bg-accent hover:text-accent-foreground'
               }`}
             >
               {cat.label}
@@ -146,42 +142,42 @@ export function NoticesPage(): React.JSX.Element {
 
         {/* Search Input */}
         <div className="relative w-full md:w-72">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-          <input
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
             type="text"
             placeholder="Search notices…"
             value={search}
             onChange={(e) => { setSearch(e.target.value); }}
-            className="w-full rounded-xl border border-slate-200 bg-white pl-9 pr-4 py-2 text-xs focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-sm"
+            className="pl-9 text-xs"
           />
         </div>
       </div>
 
       {/* Notice List */}
       {isLoading ? (
-        <div className="p-16 text-center text-slate-400 text-sm">Loading notice board…</div>
+        <div className="p-16 text-center text-muted-foreground text-sm font-medium">Loading notice board…</div>
       ) : notices.length === 0 ? (
-        <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center">
-          <Bell className="mx-auto h-12 w-12 text-slate-300 stroke-[1.5]" />
-          <h3 className="mt-3 text-base font-bold text-slate-800">No notices found</h3>
-          <p className="mt-1 text-sm text-slate-500">
-            {search ? 'Try adjusting your search criteria' : 'There are no active notices at this time.'}
-          </p>
-        </div>
+        <EmptyState
+          icon={Bell}
+          title="No notices found"
+          description={
+            search ? 'Try adjusting your search criteria' : 'There are no active notices at this time.'
+          }
+        />
       ) : (
         <div className="space-y-4">
           {notices.map((notice) => (
-            <div
+            <Card
               key={notice.id}
-              className={`rounded-2xl border bg-white p-6 shadow-sm transition-all hover:shadow-md ${
+              className={`p-6 transition-colors hover:shadow-md ${
                 notice.isPinned
-                  ? 'border-blue-300 ring-1 ring-blue-100 bg-blue-50/10'
-                  : 'border-slate-200'
+                  ? 'border-primary/40 ring-1 ring-primary/20 bg-primary/5'
+                  : ''
               }`}
             >
               {/* Poster Banner if present */}
               {notice.posterUrl && (
-                <div className="relative mb-5 -mx-6 -mt-6 overflow-hidden rounded-t-2xl border-b border-slate-100 bg-slate-900/5 max-h-72">
+                <div className="relative mb-5 -mx-6 -mt-6 overflow-hidden rounded-t-xl border-b border-border/60 bg-muted/20 max-h-72">
                   <img
                     src={notice.posterUrl}
                     alt={notice.title}
@@ -195,48 +191,39 @@ export function NoticesPage(): React.JSX.Element {
               <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
                 <div className="flex flex-wrap items-center gap-2">
                   {notice.isPinned && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
-                      <Pin className="h-3 w-3 fill-amber-700" /> Pinned
-                    </span>
+                    <Badge variant="warning" className="gap-1 font-bold">
+                      <Pin className="h-3 w-3 fill-amber-700 dark:fill-amber-300" /> Pinned
+                    </Badge>
                   )}
-                  <span
-                    className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold border ${getCategoryColor(
-                      notice.category,
-                    )}`}
-                  >
+                  <Badge variant="secondary" className="gap-1">
                     <Tag className="h-3 w-3" />
                     {notice.category.toUpperCase()}
-                  </span>
+                  </Badge>
 
                   {viewMode === 'manage' && (
-                    <span
-                      className={`px-2 py-0.5 text-[11px] font-semibold rounded-full ${
-                        notice.status === 'published'
-                          ? 'bg-emerald-50 text-emerald-700'
-                          : notice.status === 'scheduled'
-                          ? 'bg-blue-50 text-blue-700'
-                          : 'bg-slate-100 text-slate-600'
-                      }`}
+                    <Badge
+                      variant={notice.status === 'published' ? 'success' : 'outline'}
+                      className="text-[11px]"
                     >
                       {notice.status.toUpperCase()}
-                    </span>
+                    </Badge>
                   )}
 
                   {notice.targetDepartmentName && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-600">
+                    <Badge variant="outline" className="gap-1 text-[11px]">
                       <GraduationCap className="h-3 w-3" /> {notice.targetDepartmentName}
-                    </span>
+                    </Badge>
                   )}
 
                   {notice.targetBatchYear && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-600">
+                    <Badge variant="outline" className="gap-1 text-[11px] font-mono">
                       <Users className="h-3 w-3" /> Class of {notice.targetBatchYear}
-                    </span>
+                    </Badge>
                   )}
                 </div>
 
-                <div className="flex items-center gap-3 text-xs text-slate-400">
-                  <span className="flex items-center gap-1">
+                <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1 font-mono">
                     <Calendar className="h-3.5 w-3.5" />
                     {formatDate(notice.publishedAt || notice.createdAt)}
                   </span>
@@ -244,43 +231,44 @@ export function NoticesPage(): React.JSX.Element {
               </div>
 
               {/* Title & Content */}
-              <h2 className="text-lg font-bold text-slate-900 mb-2">{notice.title}</h2>
-              <div className="text-sm text-slate-700 whitespace-pre-line leading-relaxed mb-4">
+              <h2 className="text-lg font-bold text-card-foreground mb-2">{notice.title}</h2>
+              <div className="text-sm text-foreground whitespace-pre-line leading-relaxed mb-4">
                 {notice.content}
               </div>
 
               {/* Event / Action Link CTA */}
-              {(notice.actionUrl || notice.linkUrl) && (
+              {safeHref(notice.actionUrl || notice.linkUrl) && (
                 <div className="mb-4">
                   <a
-                    href={(notice.actionUrl || notice.linkUrl) ?? undefined}
+                    href={safeHref(notice.actionUrl || notice.linkUrl)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-sm transition-all hover:shadow hover:gap-2.5"
                   >
-                    <span>View Event / Register Now</span>
-                    <ExternalLink className="h-3.5 w-3.5" />
+                    <Button size="sm" className="gap-2">
+                      <span>View Event / Register Now</span>
+                      <ExternalLink className="h-3.5 w-3.5" />
+                    </Button>
                   </a>
                 </div>
               )}
 
               {/* Attachments */}
               {notice.attachments && notice.attachments.length > 0 && (
-                <div className="pt-3 border-t border-slate-100 flex flex-wrap gap-2 items-center">
-                  <span className="text-xs font-semibold text-slate-500 flex items-center gap-1">
+                <div className="pt-3 border-t border-border/60 flex flex-wrap gap-2 items-center">
+                  <span className="text-xs font-semibold text-muted-foreground flex items-center gap-1">
                     <Paperclip className="h-3.5 w-3.5" /> Attachments:
                   </span>
                   {notice.attachments.map((att, idx) => (
                     <a
                       key={idx}
-                      href={att.url}
+                      href={safeHref(att.url)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 text-xs font-medium text-slate-700 transition-colors"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted/40 hover:bg-muted border border-border text-xs font-medium text-foreground transition-colors"
                     >
-                      <Download className="h-3 w-3 text-blue-600" />
-                      {att.name}
-                      <ExternalLink className="h-2.5 w-2.5 text-slate-400" />
+                      <Download className="h-3 w-3 text-primary" />
+                      <span>{att.name}</span>
+                      <ExternalLink className="h-2.5 w-2.5 text-muted-foreground" />
                     </a>
                   ))}
                 </div>
@@ -288,38 +276,46 @@ export function NoticesPage(): React.JSX.Element {
 
               {/* Staff Actions */}
               {isStaff && viewMode === 'manage' && (
-                <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
-                  <button
+                <div className="mt-4 pt-3 border-t border-border/60 flex items-center justify-end gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => {
                       pinMutation.mutate({ id: notice.id, isPinned: !notice.isPinned });
                     }}
-                    className="flex items-center gap-1 px-3 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                    className="gap-1 text-muted-foreground"
                   >
                     <Pin className="h-3 w-3" />
-                    {notice.isPinned ? 'Unpin' : 'Pin'}
-                  </button>
-                  <button
+                    <span>{notice.isPinned ? 'Unpin' : 'Pin'}</span>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => {
                       setNoticeToEdit(notice);
                       setIsModalOpen(true);
                     }}
-                    className="flex items-center gap-1 px-3 py-1 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                    className="gap-1 text-muted-foreground"
                   >
-                    <Edit3 className="h-3 w-3" /> Edit
-                  </button>
+                    <Edit3 className="h-3 w-3" />
+                    <span>Edit</span>
+                  </Button>
                   {notice.status !== 'expired' && (
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={() => {
                         expireMutation.mutate(notice.id);
                       }}
-                      className="flex items-center gap-1 px-3 py-1 text-xs font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      className="gap-1 text-destructive hover:text-destructive hover:bg-destructive/10"
                     >
-                      <Clock className="h-3 w-3" /> Expire
-                    </button>
+                      <Clock className="h-3 w-3" />
+                      <span>Expire</span>
+                    </Button>
                   )}
                 </div>
               )}
-            </div>
+            </Card>
           ))}
         </div>
       )}

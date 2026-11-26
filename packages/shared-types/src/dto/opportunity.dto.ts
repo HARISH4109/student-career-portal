@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { isSafeHttpUrl, optionalHttpUrlSchema } from './url-validation';
+
 const queryBoolean = z.union([z.boolean(), z.enum(['true', 'false'])])
   .transform((value) => value === true || value === 'true');
 const deadlineSchema = z.string().datetime({ offset: true }).optional().nullable();
@@ -16,8 +18,8 @@ export type WorkMode = (typeof WORK_MODES)[number];
 
 export const createCompanySchema = z.object({
   name: z.string().min(1, 'Company name is required').max(200),
-  logoUrl: z.string().url('Invalid logo URL').optional().nullable().or(z.literal('')),
-  website: z.string().url('Invalid website URL').optional().nullable().or(z.literal('')),
+  logoUrl: optionalHttpUrlSchema('Invalid logo URL'),
+  website: optionalHttpUrlSchema('Invalid website URL'),
   industry: z.string().max(100).optional().nullable().or(z.literal('')),
   description: z.string().max(5000).optional().nullable().or(z.literal('')),
 });
@@ -292,7 +294,7 @@ export const extractedOpportunitySchema = z.object({
       return isNaN(num) ? null : num;
     }),
   applicationDeadline: z.string().nullable().default(null),
-  applyUrl: z.string().nullable().optional().default(null),
+  applyUrl: z.string().refine((val) => isSafeHttpUrl(val), 'Use an HTTP or HTTPS URL').nullable().optional().default(null),
   applicationEmail: z.string().nullable().optional().default(null),
   skills: z.array(z.string()).default([]),
   eligibility: extractedEligibilitySchema.default({}),
@@ -303,7 +305,7 @@ export type ExtractedOpportunityDto = z.infer<typeof extractedOpportunitySchema>
 /** Payload sent from frontend to backend extraction endpoint */
 export const extractOpportunityRequestSchema = z.object({
   sourceType: z.enum(['url', 'text', 'image']),
-  content: z.string().min(1, 'Content is required'),
+  content: z.string().min(1, 'Content is required').max(20_000_000, 'Content exceeds maximum size'),
   fileName: z.string().optional(),
   mimeType: z.string().optional(),
 });
@@ -314,7 +316,7 @@ export type ExtractOpportunityRequestDto = z.infer<typeof extractOpportunityRequ
 /** Payload to ingest a new source for AI extraction */
 export const ingestOpportunitySourceSchema = z.object({
   sourceType: z.enum(['email', 'pdf', 'image', 'text', 'url']),
-  content: z.string().min(1, 'Content is required'),
+  content: z.string().min(1, 'Content is required').max(20_000_000, 'Content exceeds maximum size'),
   fileName: z.string().optional(),
   mimeType: z.string().optional(),
 });

@@ -10,7 +10,7 @@ COPY apps/api/package.json ./apps/api/package.json
 COPY apps/web/package.json ./apps/web/package.json
 COPY packages/db/package.json ./packages/db/package.json
 COPY packages/shared-types/package.json ./packages/shared-types/package.json
-RUN npm ci
+RUN npm ci --ignore-scripts
 
 # ── Build ────────────────────────────────────────────────────────────────
 FROM base AS build
@@ -20,13 +20,23 @@ RUN npm run build -w packages/shared-types \
   && npm run build -w packages/db \
   && npm run build -w apps/api
 
+# ── Production Dependencies ──────────────────────────────────────────────
+FROM base AS prod-deps
+COPY package.json package-lock.json ./
+COPY apps/api/package.json ./apps/api/package.json
+COPY apps/web/package.json ./apps/web/package.json
+COPY packages/db/package.json ./packages/db/package.json
+COPY packages/shared-types/package.json ./packages/shared-types/package.json
+RUN npm ci --omit=dev --ignore-scripts
+
 # ── Runtime ──────────────────────────────────────────────────────────────
 FROM node:20-alpine AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
-RUN addgroup -S nodejs && adduser -S nodeuser -G nodejs
+RUN addgroup -S nodejs && adduser -S nodeuser -G nodejs \
+  && mkdir -p /app/uploads/posters && chown -R nodeuser:nodejs /app/uploads
 
-COPY --from=deps /app/node_modules ./node_modules
+COPY --from=prod-deps /app/node_modules ./node_modules
 COPY --from=build /app/apps/api/dist ./apps/api/dist
 COPY --from=build /app/packages/db/dist ./packages/db/dist
 COPY --from=build /app/packages/db/drizzle ./packages/db/drizzle

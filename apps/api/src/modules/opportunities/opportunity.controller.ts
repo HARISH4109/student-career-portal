@@ -13,6 +13,8 @@ import { OpportunityService } from './opportunity.service';
 import { ValidationError } from '@/shared/errors/app-error';
 import { requestUser } from '@/shared/http/request-user';
 import { sendSuccess } from '@/shared/http/send-success';
+import { sanitizeAiInput } from '@/shared/security/ai-input-guard';
+import { validateUrlForFetchResolved } from '@/shared/security/ssrf-guard';
 
 export class OpportunityController {
   constructor(
@@ -97,9 +99,19 @@ export class OpportunityController {
       if (!parsed.success) {
         throw new ValidationError('Invalid extraction request', this.formatZodErrors(parsed.error));
       }
+      let content = parsed.data.content;
+      if (parsed.data.sourceType === 'url') {
+        const urlCheck = await validateUrlForFetchResolved(content);
+        if (!urlCheck.valid) {
+          throw new ValidationError(`URL validation failed: ${urlCheck.reason}`);
+        }
+      }
+      if (parsed.data.sourceType !== 'image') {
+        content = sanitizeAiInput(content);
+      }
       const extracted = await this.extractionService.extract(
         parsed.data.sourceType,
-        parsed.data.content,
+        content,
         parsed.data.fileName,
         parsed.data.mimeType,
       );

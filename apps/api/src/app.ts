@@ -15,6 +15,9 @@ import { apiRouter } from '@/routes';
 export function createApp(): Express {
   const app = express();
 
+  // Trust reverse proxy (e.g. Nginx) so req.ip & rate limiters see real client IPs
+  app.set('trust proxy', env.TRUST_PROXY);
+
   // ── Security ─────────────────────────────────────────────────────────
   app.use(
     helmet({
@@ -38,8 +41,8 @@ export function createApp(): Express {
 
   // ── Core middleware ──────────────────────────────────────────────────
   app.use(compression());
-  app.use(express.json({ limit: '25mb' }));
-  app.use(express.urlencoded({ extended: true, limit: '25mb' }));
+  app.use(express.json({ limit: '1mb' }));
+  app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
   // Request-ID before pino-http so every log line carries the correlation ID
   app.use(requestId);
@@ -57,6 +60,8 @@ export function createApp(): Express {
     express.static(uploadsDir, {
       setHeaders: (res) => {
         res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+        res.setHeader('X-Content-Type-Options', 'nosniff');
+        res.setHeader('Content-Security-Policy', "default-src 'none'; sandbox");
       },
     }),
   );

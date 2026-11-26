@@ -2,6 +2,8 @@ import { db, schema } from '@career-portal/db';
 import type { ProficiencyLevel } from '@career-portal/shared-types';
 import { and, count, eq, ilike, sql } from 'drizzle-orm';
 
+import { escapeLikePattern } from '@/shared/db/escape-like';
+
 export class StudentRepository {
   async programMatchesDepartment(programId: string, departmentId: string): Promise<boolean> {
     const program = await db.query.academicPrograms.findFirst({ where: and(eq(schema.academicPrograms.id, programId), eq(schema.academicPrograms.departmentId, departmentId)) });
@@ -180,7 +182,7 @@ export class StudentRepository {
     }
     if (filters?.search) {
       conditions.push(
-        sql`(${ilike(schema.studentProfiles.rollNumber, `%${filters.search}%`)})`,
+        sql`(${ilike(schema.studentProfiles.rollNumber, `%${escapeLikePattern(filters.search)}%`)})`,
       );
     }
 

@@ -1,6 +1,8 @@
 import { db, schema } from '@career-portal/db';
 import { and, asc, count, desc, eq, exists, gte, ilike, inArray, lte, or, sql } from 'drizzle-orm';
 
+import { escapeLikePattern } from '@/shared/db/escape-like';
+
 type DatabaseTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
 export class OpportunityRepository {
@@ -247,13 +249,14 @@ export class OpportunityRepository {
       conditions.push(eq(schema.opportunities.companyId, filters.companyId));
     }
     if (filters.location) {
-      conditions.push(ilike(schema.opportunities.location, `%${filters.location}%`));
+      conditions.push(ilike(schema.opportunities.location, `%${escapeLikePattern(filters.location)}%`));
     }
     if (filters.search) {
+      const escapedSearch = escapeLikePattern(filters.search);
       conditions.push(
         or(
-          ilike(schema.opportunities.title, `%${filters.search}%`),
-          ilike(schema.opportunities.description, `%${filters.search}%`),
+          ilike(schema.opportunities.title, `%${escapedSearch}%`),
+          ilike(schema.opportunities.description, `%${escapedSearch}%`),
         ),
       );
     }

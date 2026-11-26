@@ -1,6 +1,8 @@
 import { db, schema } from '@career-portal/db';
 import { and, count, desc, eq, gte, ilike, lte, or } from 'drizzle-orm';
 
+import { escapeLikePattern } from '@/shared/db/escape-like';
+
 import type { AuditFilterOptions, AuditLogItem, AuditLogsQuery, CreateAuditLogParams } from './audit.dto';
 
 export class AuditRepository {
@@ -37,7 +39,7 @@ export class AuditRepository {
       conditions.push(eq(schema.auditLogs.requestId, requestId));
     }
     if (origin) {
-      conditions.push(ilike(schema.auditLogs.origin, `%${origin}%`));
+      conditions.push(ilike(schema.auditLogs.origin, `%${escapeLikePattern(origin)}%`));
     }
     if (dateFrom) {
       conditions.push(gte(schema.auditLogs.createdAt, new Date(dateFrom)));
@@ -47,13 +49,14 @@ export class AuditRepository {
       conditions.push(lte(schema.auditLogs.createdAt, toDate));
     }
     if (search) {
+      const escapedSearch = escapeLikePattern(search);
       conditions.push(
         or(
-          ilike(schema.auditLogs.action, `%${search}%`),
-          ilike(schema.auditLogs.entityType, `%${search}%`),
-          ilike(schema.auditLogs.userAgent, `%${search}%`),
-          ilike(schema.auditLogs.requestId, `%${search}%`),
-          ilike(schema.auditLogs.origin, `%${search}%`),
+          ilike(schema.auditLogs.action, `%${escapedSearch}%`),
+          ilike(schema.auditLogs.entityType, `%${escapedSearch}%`),
+          ilike(schema.auditLogs.userAgent, `%${escapedSearch}%`),
+          ilike(schema.auditLogs.requestId, `%${escapedSearch}%`),
+          ilike(schema.auditLogs.origin, `%${escapedSearch}%`),
         ),
       );
     }

@@ -10,7 +10,10 @@ import { and, count, eq, ilike, sql } from 'drizzle-orm';
 
 import { logger } from '@/infrastructure/logger';
 import { CacheKeys, redis } from '@/infrastructure/redis';
+import { getSocketServer } from '@/infrastructure/socket';
+import { supabaseAdmin } from '@/infrastructure/supabase';
 import { auditService } from '@/modules/audit/audit.service';
+import { escapeLikePattern } from '@/shared/db/escape-like';
 import { ConflictError, ForbiddenError, NotFoundError } from '@/shared/errors/app-error';
 
 export interface AuditContext {
@@ -54,8 +57,9 @@ export class UserManagementService {
       conditions.push(eq(schema.users.isActive, filters.isActive));
     }
     if (filters?.search) {
+      const escapedSearch = escapeLikePattern(filters.search);
       conditions.push(
-        sql`(${ilike(schema.users.fullName, `%${filters.search}%`)} OR ${ilike(schema.users.email, `%${filters.search}%`)})`,
+        sql`(${ilike(schema.users.fullName, `%${escapedSearch}%`)} OR ${ilike(schema.users.email, `%${escapedSearch}%`)})`,
       );
     }
     if (filters?.role) {
@@ -330,6 +334,18 @@ export class UserManagementService {
     }
 
     await this.invalidateUserCache(userId);
+
+    // Enforce account suspension across Supabase Auth & active Socket.IO sessions
+    try {
+      await supabaseAdmin.auth.admin?.updateUserById(userId, { ban_duration: isActive ? 'none' : '876000h' });
+    } catch (err: unknown) {
+      logger.warn({ err, userId, isActive }, 'Failed to sync Supabase Auth ban status');
+    }
+
+    if (!isActive) {
+      getSocketServer()?.in(`user:${userId}`).disconnectSockets(true);
+    }
+
     logger.info({ userId, isActive }, `User ${isActive ? 'activated' : 'deactivated'}`);
   }
 

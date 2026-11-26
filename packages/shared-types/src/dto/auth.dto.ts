@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { httpUrlSchema } from './url-validation';
+
 import { ROLE_NAMES } from '../enums';
 
 // ── Registration / Login ────────────────────────────────────────────────
@@ -68,7 +70,7 @@ export const updateUserProfileSchema = z.object({
     .string()
     .regex(/^\+?[0-9]{7,15}$/, 'Invalid phone number')
     .optional(),
-  avatarUrl: z.string().url().optional(),
+  avatarUrl: httpUrlSchema('Invalid avatar URL').optional(),
 });
 export type UpdateUserProfileDto = z.infer<typeof updateUserProfileSchema>;
 

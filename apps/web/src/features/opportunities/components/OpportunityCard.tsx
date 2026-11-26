@@ -19,23 +19,18 @@ interface OpportunityCardProps {
 }
 
 const TYPE_BADGE: Record<string, { label: string; className: string }> = {
-  job: { label: 'Job', className: 'bg-blue-100 text-blue-700' },
-  internship: { label: 'Internship', className: 'bg-violet-100 text-violet-700' },
+  job: { label: 'Job', className: 'bg-primary/10 text-primary border border-primary/20' },
+  internship: { label: 'Internship', className: 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/50' },
 };
 
-const WORK_MODE_ICON: Record<string, string> = {
-  remote: '🏠',
-  onsite: '🏢',
-  hybrid: '🔄',
-};
 
 const STATUS_COLORS: Record<string, string> = {
-  draft: 'border-l-slate-400',
-  pending_review: 'border-l-amber-400',
+  draft: 'border-l-slate-500',
+  pending_review: 'border-l-amber-500',
   published: 'border-l-emerald-500',
-  closed: 'border-l-red-400',
-  expired: 'border-l-slate-300',
-  rejected: 'border-l-red-500',
+  closed: 'border-l-slate-600',
+  expired: 'border-l-slate-700',
+  rejected: 'border-l-rose-500',
 };
 
 export function OpportunityCard({
@@ -44,7 +39,7 @@ export function OpportunityCard({
   onViewDetail,
   onToggleSave,
 }: OpportunityCardProps): React.JSX.Element {
-  const typeBadge = TYPE_BADGE[opp.type] ?? { label: opp.type, className: 'bg-blue-100 text-blue-700' };
+  const typeBadge = TYPE_BADGE[opp.type] ?? { label: opp.type, className: 'bg-primary/10 text-primary border border-primary/20' };
   const deadline = opp.applicationDeadline ? new Date(opp.applicationDeadline) : null;
   const isClosingSoon =
     opp.isClosingSoon ||
@@ -73,7 +68,7 @@ export function OpportunityCard({
 
   return (
     <div
-      className={`group relative rounded-xl border border-slate-200 bg-white shadow-sm transition-all duration-200 hover:shadow-md hover:border-slate-300 border-l-4 ${STATUS_COLORS[opp.status] ?? 'border-l-slate-200'} cursor-pointer`}
+      className={`group relative rounded-xl border border-border bg-card shadow-xs transition-colors duration-150 hover:border-primary/40 border-l-4 ${STATUS_COLORS[opp.status] ?? 'border-l-border'} cursor-pointer`}
       onClick={() => { onViewDetail(opp.id); }}
     >
       <div className="p-5">
@@ -84,23 +79,23 @@ export function OpportunityCard({
               {typeBadge.label}
             </span>
             {opp.status === 'closed' && (
-              <span className="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 ring-1 ring-amber-200">
+              <span className="inline-flex items-center rounded-full bg-muted/40 px-2 py-0.5 text-xs font-medium text-muted-foreground border border-border">
                 Closed
               </span>
             )}
             {isClosingSoon && !isExpired && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 ring-1 ring-amber-200/60">
+              <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-400 border border-amber-500/20">
                 <Clock className="h-3 w-3" />
                 Closing Soon
               </span>
             )}
             {isExpired && (
-              <span className="inline-flex items-center rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-600">
+              <span className="inline-flex items-center rounded-full bg-rose-500/10 px-2 py-0.5 text-xs font-medium text-rose-700 dark:text-rose-400 border border-rose-500/20">
                 Expired
               </span>
             )}
             {showStudentContext && opp.hasApplied && (
-              <span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
+              <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
                 Applied
               </span>
             )}
@@ -112,11 +107,11 @@ export function OpportunityCard({
                 e.stopPropagation();
                 onToggleSave(opp.id, !!opp.isSaved);
               }}
-              className="shrink-0 rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-50 hover:text-blue-600"
+              className="shrink-0 rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-primary"
               title={opp.isSaved ? 'Unsave' : 'Save'}
             >
               {opp.isSaved ? (
-                <BookmarkCheck className="h-5 w-5 text-blue-600" />
+                <BookmarkCheck className="h-5 w-5 text-primary" />
               ) : (
                 <Bookmark className="h-5 w-5" />
               )}
@@ -125,44 +120,43 @@ export function OpportunityCard({
         </div>
 
         {/* Title & Company */}
-        <h3 className="mt-3 text-lg font-semibold text-slate-900 group-hover:text-blue-700 transition-colors line-clamp-1">
+        <h3 className="mt-3 text-lg font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-1">
           {opp.title}
         </h3>
-        <p className="mt-1 text-sm font-medium text-slate-600">
+        <p className="mt-1 text-sm font-medium text-muted-foreground">
           {opp.company?.name ?? 'Company'}
         </p>
 
         {/* Description excerpt */}
-        <p className="mt-2 text-sm text-slate-500 line-clamp-2">{opp.description}</p>
+        <p className="mt-2 text-sm text-muted-foreground/80 line-clamp-2">{opp.description}</p>
 
         {/* Meta tags */}
-        <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-slate-500">
+        <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-muted-foreground font-mono tabular-nums">
           {opp.location && (
-            <span className="inline-flex items-center gap-1">
+            <span className="inline-flex items-center gap-1 font-sans">
               <MapPin className="h-3.5 w-3.5" />
               {opp.location}
             </span>
           )}
-          <span className="inline-flex items-center gap-1">
+          <span className="inline-flex items-center gap-1 font-sans capitalize">
             <Monitor className="h-3.5 w-3.5" />
-            {WORK_MODE_ICON[opp.workMode]} {opp.workMode.charAt(0).toUpperCase() + opp.workMode.slice(1)}
+            {opp.workMode}
           </span>
           {salary && (
             <span
-              className={`inline-flex items-center gap-1 font-medium ${
-                salary === 'Unpaid'
-                  ? 'text-amber-700'
-                  : salary === 'Not Provided'
-                    ? 'text-slate-400'
-                    : 'text-slate-700'
-              }`}
+              className={`inline-flex items-center gap-1 font-medium ${salary === 'Unpaid'
+                ? 'text-amber-700 dark:text-amber-400'
+                : salary === 'Not Provided'
+                  ? 'text-muted-foreground'
+                  : 'text-foreground'
+                }`}
             >
               {salary !== 'Unpaid' && salary !== 'Not Provided' && <IndianRupee className="h-3.5 w-3.5" />}
               {salary}
             </span>
           )}
           {deadline && (
-            <span className="inline-flex items-center gap-1">
+            <span className="inline-flex items-center gap-1 font-sans">
               <Calendar className="h-3.5 w-3.5" />
               {deadline.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
             </span>
@@ -175,13 +169,13 @@ export function OpportunityCard({
             {opp.skills.slice(0, 5).map((s) => (
               <span
                 key={s.skillId}
-                className="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600"
+                className="inline-flex items-center rounded-md bg-muted/50 border border-border/60 px-2 py-0.5 text-xs font-medium text-muted-foreground"
               >
                 {s.name}
               </span>
             ))}
             {opp.skills.length > 5 && (
-              <span className="inline-flex items-center text-xs text-slate-400">
+              <span className="inline-flex items-center text-xs text-muted-foreground/60">
                 +{opp.skills.length - 5} more
               </span>
             )}

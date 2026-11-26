@@ -16,7 +16,6 @@ import {
   Globe,
   GraduationCap,
   Link,
-  Loader2,
   Plus,
   Save,
   Trash2,
@@ -36,6 +35,7 @@ import {
 } from '../api/student-api';
 import { ProfileCompletionWidget } from '../components/ProfileCompletionWidget';
 import { SkillsManager } from '../components/SkillsManager';
+import { Badge, Button, Skeleton } from '@/shared/components/ui';
 
 export function ProfilePage(): React.JSX.Element {
   const { data: profile, isLoading: profileLoading } = useStudentProfile();
@@ -207,65 +207,74 @@ export function ProfilePage(): React.JSX.Element {
 
   if (profileLoading) {
     return (
-      <div className="flex h-96 items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-          <p className="text-sm text-slate-500">Loading student profile…</p>
+      <div className="max-w-7xl mx-auto space-y-8 animate-fade-in">
+        <div className="flex items-center gap-4 border-b border-border pb-6">
+          <Skeleton className="h-16 w-16 rounded-2xl" />
+          <div className="space-y-2 flex-1">
+            <Skeleton className="h-6 w-48" />
+            <Skeleton className="h-4 w-72" />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-4">
+            <Skeleton className="h-64 rounded-xl" />
+            <Skeleton className="h-48 rounded-xl" />
+          </div>
+          <div>
+            <Skeleton className="h-72 rounded-xl" />
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8">
+    <div className="w-full max-w-[1536px] mx-auto space-y-8 pb-12">
       {/* ── Page Header ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-6">
         <div className="flex items-center gap-4">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 text-2xl font-bold text-white shadow-md">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary text-2xl font-bold text-primary-foreground shadow-xs">
             {profile?.fullName.charAt(0).toUpperCase() ?? 'S'}
           </div>
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold text-slate-900">{profile?.fullName ?? 'Student Profile'}</h1>
+              <h1 className="text-2xl font-bold text-foreground">{profile?.fullName ?? 'Student Profile'}</h1>
               {profile?.isPlacementEligible ? (
-                <span className="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 border border-emerald-200">
-                  Placement Eligible
-                </span>
+                <Badge variant="success">Placement Eligible</Badge>
               ) : (
-                <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600">
-                  Non-placement track
-                </span>
+                <Badge variant="secondary">Non-placement track</Badge>
               )}
             </div>
-            <p className="text-sm text-slate-500 mt-0.5">
+            <p className="text-sm text-muted-foreground mt-0.5">
               {profile?.rollNumber ? `Roll No: ${profile.rollNumber}` : 'Set your academic credentials'} ·{' '}
               {profile?.department?.name ?? 'Department not set'}
             </p>
           </div>
         </div>
 
-        <button
+        <Button
           type="button"
           onClick={() => { void (handleSubmit(onSubmit))(); }}
-          disabled={updateProfileMutation.isPending}
-          className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:opacity-60 transition"
+          loading={updateProfileMutation.isPending}
+          className="gap-2 self-start sm:self-auto"
         >
-          {updateProfileMutation.isPending ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : saveSuccess ? (
-            <Check className="h-4 w-4 text-emerald-300" />
+          {saveSuccess ? (
+            <>
+              <Check className="h-4 w-4" /> Changes Saved!
+            </>
           ) : (
-            <Save className="h-4 w-4" />
+            <>
+              <Save className="h-4 w-4" /> Save Profile
+            </>
           )}
-          {saveSuccess ? 'Changes Saved!' : 'Save Profile'}
-        </button>
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* ── Left 2 Columns: Edit Form & Sections ── */}
         <div className="lg:col-span-2 space-y-6">
           {/* Navigation Tabs */}
-          <div className="flex overflow-x-auto gap-2 border-b border-slate-200 pb-2">
+          <div className="flex overflow-x-auto gap-2 border-b border-border pb-2">
             {[
               { id: 'academic', label: 'Academic Details', icon: GraduationCap },
               { id: 'about', label: 'Personal & Social', icon: User },
@@ -279,13 +288,13 @@ export function ProfilePage(): React.JSX.Element {
                 <button
                   key={tab.id}
                   onClick={() => { setActiveTab(tab.id as typeof activeTab); }}
-                  className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold whitespace-nowrap transition ${
+                  className={`inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
                     isActive
-                      ? 'bg-blue-50 text-blue-700'
-                      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                      ? 'bg-primary/10 text-primary border border-primary/20'
+                      : 'text-muted-foreground hover:bg-muted/40 hover:text-foreground'
                   }`}
                 >
-                  <Icon className={`h-4 w-4 ${isActive ? 'text-blue-600' : 'text-slate-400'}`} />
+                  <Icon className={`h-4 w-4 ${isActive ? 'text-primary' : 'text-muted-foreground'}`} />
                   {tab.label}
                 </button>
               );
@@ -297,50 +306,50 @@ export function ProfilePage(): React.JSX.Element {
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-5"
+              className="rounded-xl border border-border bg-card p-6 shadow-sm space-y-5"
             >
-              <h3 className="text-base font-semibold text-slate-900">Academic Information</h3>
-              <p className="text-xs text-slate-500">
+              <h3 className="text-base font-semibold text-foreground">Academic Information</h3>
+              <p className="text-xs text-muted-foreground">
                 Official institution enrollment data required for placement eligibility checks
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Fixed CSE Department Institutional Banner */}
-                <div className="sm:col-span-2 rounded-xl border border-blue-200 bg-blue-50/60 p-4">
+                <div className="sm:col-span-2 rounded-xl border border-primary/30 bg-primary/10 p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <GraduationCap className="h-4 w-4 text-blue-700" />
-                      <span className="text-xs font-semibold text-blue-900">Academic Department</span>
+                      <GraduationCap className="h-4 w-4 text-primary" />
+                      <span className="text-xs font-semibold text-foreground">Academic Department</span>
                     </div>
-                    <span className="text-[11px] font-semibold text-blue-700 bg-blue-100 px-2.5 py-0.5 rounded-full border border-blue-200">
+                    <span className="text-[11px] font-semibold text-primary bg-primary/20 px-2.5 py-0.5 rounded-full border border-primary/30">
                       Static Institutional Scope
                     </span>
                   </div>
-                  <p className="mt-1.5 text-sm font-bold text-slate-900">
+                  <p className="mt-1.5 text-sm font-bold text-foreground">
                     {cseDept?.name || 'Computer Science and Engineering'} ({cseDept?.code || 'CSE'})
                   </p>
-                  <p className="mt-0.5 text-xs text-slate-500">
+                  <p className="mt-0.5 text-xs text-muted-foreground">
                     Portal enrollment and career tracks are dedicated to the Computer Science & Engineering department.
                   </p>
                   <input type="hidden" {...register('departmentId')} value={cseDept?.id || profile?.departmentId || ''} />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1">
-                    Roll Number / Student ID <span className="text-red-500">*</span>
+                  <label className="block text-xs font-medium text-foreground mb-1">
+                    Roll Number / Student ID <span className="text-destructive">*</span>
                   </label>
                   <input
                     {...register('rollNumber')}
                     placeholder="e.g. 2022CSE045"
-                    className="w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded-lg border border-border bg-background px-3.5 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                   {errors.rollNumber && (
-                    <p className="mt-1 text-xs text-red-600">{errors.rollNumber.message}</p>
+                    <p className="mt-1 text-xs text-destructive">{errors.rollNumber.message}</p>
                   )}
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1">Current CGPA (0 - 10)</label>
+                  <label className="block text-xs font-medium text-foreground mb-1">Current CGPA (0 - 10)</label>
                   <input
                     type="number"
                     step="0.01"
@@ -348,18 +357,18 @@ export function ProfilePage(): React.JSX.Element {
                     max="10"
                     {...register('cgpa', { valueAsNumber: true })}
                     placeholder="e.g. 8.75"
-                    className="w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded-lg border border-border bg-background px-3.5 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                   />
-                  {errors.cgpa && <p className="mt-1 text-xs text-red-600">{errors.cgpa.message}</p>}
+                  {errors.cgpa && <p className="mt-1 text-xs text-destructive">{errors.cgpa.message}</p>}
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1">
-                    Academic Degree Course <span className="text-red-500">*</span>
+                  <label className="block text-xs font-medium text-foreground mb-1">
+                    Academic Degree Course <span className="text-destructive">*</span>
                   </label>
                   <select
                     {...register('programId')}
-                    className="w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded-lg border border-border bg-background px-3.5 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                   >
                     <option value="">-- Select Degree Course --</option>
                     {availablePrograms.map((p) => (
@@ -368,18 +377,18 @@ export function ProfilePage(): React.JSX.Element {
                       </option>
                     ))}
                   </select>
-                  {errors.programId && <p className="mt-1 text-xs text-red-600">{errors.programId.message}</p>}
+                  {errors.programId && <p className="mt-1 text-xs text-destructive">{errors.programId.message}</p>}
                 </div>
 
                 {selectedProgram && selectedProgram.streams && selectedProgram.streams.length > 0 && (
                   <div>
-                    <label className="block text-xs font-medium text-slate-700 mb-1">
+                    <label className="block text-xs font-medium text-foreground mb-1">
                       Stream / Specialization
                     </label>
                     <select
                       value={selectedStreamCode}
                       onChange={(e) => { handleStreamChange(e.target.value); }}
-                      className="w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none"
+                      className="w-full rounded-lg border border-border bg-background px-3.5 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                     >
                       <option value="">-- Select Stream / Specialization --</option>
                       {selectedProgram.streams.filter((s) => s.isActive).map((s) => (
@@ -392,12 +401,12 @@ export function ProfilePage(): React.JSX.Element {
                 )}
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1">
-                    Graduation Batch <span className="text-red-500">*</span>
+                  <label className="block text-xs font-medium text-foreground mb-1">
+                    Graduation Batch <span className="text-destructive">*</span>
                   </label>
                   <select
                     {...register('batchId')}
-                    className="w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded-lg border border-border bg-background px-3.5 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                   >
                     <option value="">-- Select Batch Year --</option>
                     {batches?.map((b) => (
@@ -406,7 +415,7 @@ export function ProfilePage(): React.JSX.Element {
                       </option>
                     ))}
                   </select>
-                  {errors.batchId && <p className="mt-1 text-xs text-red-600">{errors.batchId.message}</p>}
+                  {errors.batchId && <p className="mt-1 text-xs text-destructive">{errors.batchId.message}</p>}
                 </div>
               </div>
             </motion.div>
@@ -417,62 +426,62 @@ export function ProfilePage(): React.JSX.Element {
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-5"
+              className="rounded-xl border border-border bg-card p-6 shadow-sm space-y-5"
             >
-              <h3 className="text-base font-semibold text-slate-900">Personal & Professional Links</h3>
+              <h3 className="text-base font-semibold text-foreground">Personal & Professional Links</h3>
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1">Professional Bio</label>
+                  <label className="block text-xs font-medium text-foreground mb-1">Professional Bio</label>
                   <textarea
                     rows={4}
                     {...register('bio')}
                     placeholder="Summarize your background, interests, and engineering goals in 2-3 sentences..."
-                    className="w-full rounded-lg border border-slate-200 px-3.5 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded-lg border border-border bg-background px-3.5 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-xs font-medium text-slate-700 mb-1 flex items-center gap-1.5">
-                      <Link className="h-3.5 w-3.5 text-blue-600" />
+                    <label className="block text-xs font-medium text-foreground mb-1 flex items-center gap-1.5">
+                      <Link className="h-3.5 w-3.5 text-primary" />
                       LinkedIn Profile
                     </label>
                     <input
                       {...register('linkedinUrl')}
                       placeholder="https://linkedin.com/in/..."
-                      className="w-full rounded-lg border border-slate-200 px-3.5 py-2 text-xs text-slate-900 focus:border-blue-500 focus:outline-none"
+                      className="w-full rounded-lg border border-border bg-background px-3.5 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium text-slate-700 mb-1 flex items-center gap-1.5">
-                      <Code className="h-3.5 w-3.5 text-slate-800" />
+                    <label className="block text-xs font-medium text-foreground mb-1 flex items-center gap-1.5">
+                      <Code className="h-3.5 w-3.5 text-foreground" />
                       GitHub Profile
                     </label>
                     <input
                       {...register('githubUrl')}
                       placeholder="https://github.com/..."
-                      className="w-full rounded-lg border border-slate-200 px-3.5 py-2 text-xs text-slate-900 focus:border-blue-500 focus:outline-none"
+                      className="w-full rounded-lg border border-border bg-background px-3.5 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium text-slate-700 mb-1 flex items-center gap-1.5">
-                      <Globe className="h-3.5 w-3.5 text-emerald-600" />
+                    <label className="block text-xs font-medium text-foreground mb-1 flex items-center gap-1.5">
+                      <Globe className="h-3.5 w-3.5 text-emerald-700 dark:text-emerald-400" />
                       Portfolio Website
                     </label>
                     <input
                       {...register('portfolioUrl')}
                       placeholder="https://yourportfolio.dev"
-                      className="w-full rounded-lg border border-slate-200 px-3.5 py-2 text-xs text-slate-900 focus:border-blue-500 focus:outline-none"
+                      className="w-full rounded-lg border border-border bg-background px-3.5 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                     />
                   </div>
                 </div>
 
                 {/* Career Interests Tag Input */}
                 <div className="pt-2">
-                  <label className="block text-xs font-medium text-slate-700 mb-1">Career Interests & Target Roles</label>
+                  <label className="block text-xs font-medium text-foreground mb-1">Career Interests & Target Roles</label>
                   <div className="flex gap-2 mb-2">
                     <input
                       type="text"
@@ -485,12 +494,12 @@ export function ProfilePage(): React.JSX.Element {
                         }
                       }}
                       placeholder="e.g. Full Stack Developer, ML Engineer, Cloud Architect (Press Enter)"
-                      className="flex-1 rounded-lg border border-slate-200 px-3.5 py-2 text-xs text-slate-900 focus:border-blue-500 focus:outline-none"
+                      className="flex-1 rounded-lg border border-border bg-background px-3.5 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                     />
                     <button
                       type="button"
                       onClick={addCareerInterest}
-                      className="rounded-lg bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-200"
+                      className="rounded-lg bg-muted px-3 py-2 text-xs font-semibold text-foreground hover:bg-muted/80 cursor-pointer"
                     >
                       Add
                     </button>
@@ -499,13 +508,13 @@ export function ProfilePage(): React.JSX.Element {
                     {careerInterests.map((interest) => (
                       <span
                         key={interest}
-                        className="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 px-2.5 py-1 text-xs text-slate-700"
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-muted border border-border/60 px-2.5 py-1 text-xs text-foreground"
                       >
                         {interest}
                         <button
                           type="button"
                           onClick={() => { removeCareerInterest(interest); }}
-                          className="text-slate-400 hover:text-red-600"
+                          className="text-muted-foreground hover:text-destructive cursor-pointer"
                         >
                           ×
                         </button>
@@ -522,7 +531,7 @@ export function ProfilePage(): React.JSX.Element {
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+              className="rounded-xl border border-border bg-card p-6 shadow-sm"
             >
               <SkillsManager skills={profile?.skills || []} />
             </motion.div>
@@ -533,17 +542,17 @@ export function ProfilePage(): React.JSX.Element {
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4"
+              className="rounded-xl border border-border bg-card p-6 shadow-sm space-y-4"
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-base font-semibold text-slate-900">Featured Projects</h3>
-                  <p className="text-xs text-slate-500">Showcase technical depth, architecture, and impact</p>
+                  <h3 className="text-base font-semibold text-foreground">Featured Projects</h3>
+                  <p className="text-xs text-muted-foreground">Showcase technical depth, architecture, and impact</p>
                 </div>
                 <button
                   type="button"
                   onClick={addEmptyProject}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-100"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-primary/10 border border-primary/20 px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary/20 cursor-pointer"
                 >
                   <Plus className="h-3.5 w-3.5" />
                   Add Project
@@ -551,12 +560,12 @@ export function ProfilePage(): React.JSX.Element {
               </div>
 
               {projects.length === 0 ? (
-                <div className="rounded-xl border border-dashed border-slate-200 p-8 text-center">
-                  <p className="text-sm text-slate-500">No projects added yet.</p>
+                <div className="rounded-xl border border-dashed border-border p-8 text-center">
+                  <p className="text-sm text-muted-foreground">No projects added yet.</p>
                   <button
                     type="button"
                     onClick={addEmptyProject}
-                    className="mt-2 text-xs font-semibold text-blue-600 hover:text-blue-700"
+                    className="mt-2 text-xs font-semibold text-primary hover:underline cursor-pointer"
                   >
                     + Add your first project
                   </button>
@@ -566,12 +575,12 @@ export function ProfilePage(): React.JSX.Element {
                   {projects.map((proj, idx) => (
                     <div
                       key={idx}
-                      className="rounded-xl border border-slate-200 bg-slate-50/50 p-4 space-y-3 relative group"
+                      className="rounded-xl border border-border bg-muted/20 p-4 space-y-3 relative group"
                     >
                       <button
                         type="button"
                         onClick={() => { removeProject(idx); }}
-                        className="absolute right-3 top-3 text-slate-400 hover:text-red-600 transition"
+                        className="absolute right-3 top-3 text-muted-foreground hover:text-destructive transition cursor-pointer"
                         title="Delete project"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -579,18 +588,18 @@ export function ProfilePage(): React.JSX.Element {
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pr-8">
                         <div>
-                          <label className="block text-[11px] font-medium text-slate-700 mb-1">Project Title</label>
+                          <label className="block text-[11px] font-medium text-foreground mb-1">Project Title</label>
                           <input
                             type="text"
                             value={proj.title}
                             onChange={(e) => { updateProject(idx, 'title', e.target.value); }}
                             placeholder="e.g. Distributed Task Queue"
-                            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-blue-500"
+                            className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-xs text-foreground focus:outline-none focus:border-primary"
                           />
                         </div>
 
                         <div>
-                          <label className="block text-[11px] font-medium text-slate-700 mb-1">Technologies (comma separated)</label>
+                          <label className="block text-[11px] font-medium text-foreground mb-1">Technologies (comma separated)</label>
                           <input
                             type="text"
                             value={proj.technologies.join(', ')}
@@ -602,41 +611,41 @@ export function ProfilePage(): React.JSX.Element {
                               ); }
                             }
                             placeholder="e.g. Go, Redis, Docker, gRPC"
-                            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-blue-500"
+                            className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-xs text-foreground focus:outline-none focus:border-primary"
                           />
                         </div>
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-medium text-slate-700 mb-1">Description & Impact</label>
+                        <label className="block text-[11px] font-medium text-foreground mb-1">Description & Impact</label>
                         <textarea
                           rows={2}
                           value={proj.description}
                           onChange={(e) => { updateProject(idx, 'description', e.target.value); }}
                           placeholder="Describe the architecture, your contribution, and quantifiable metrics..."
-                          className="w-full rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-blue-500"
+                          className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-xs text-foreground focus:outline-none focus:border-primary"
                         />
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
-                          <label className="block text-[11px] font-medium text-slate-700 mb-1">Live Demo / Project URL</label>
+                          <label className="block text-[11px] font-medium text-foreground mb-1">Live Demo / Project URL</label>
                           <input
                             type="text"
                             value={proj.link || ''}
                             onChange={(e) => { updateProject(idx, 'link', e.target.value); }}
                             placeholder="https://..."
-                            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-blue-500"
+                            className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-xs text-foreground focus:outline-none focus:border-primary"
                           />
                         </div>
                         <div>
-                          <label className="block text-[11px] font-medium text-slate-700 mb-1">GitHub Repo URL</label>
+                          <label className="block text-[11px] font-medium text-foreground mb-1">GitHub Repo URL</label>
                           <input
                             type="text"
                             value={proj.githubUrl || ''}
                             onChange={(e) => { updateProject(idx, 'githubUrl', e.target.value); }}
                             placeholder="https://github.com/..."
-                            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-blue-500"
+                            className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-xs text-foreground focus:outline-none focus:border-primary"
                           />
                         </div>
                       </div>
@@ -652,17 +661,17 @@ export function ProfilePage(): React.JSX.Element {
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4"
+              className="rounded-xl border border-border bg-card p-6 shadow-sm space-y-4"
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-base font-semibold text-slate-900">Certifications & Credentials</h3>
-                  <p className="text-xs text-slate-500">Industry certifications verified by external providers</p>
+                  <h3 className="text-base font-semibold text-foreground">Certifications & Credentials</h3>
+                  <p className="text-xs text-muted-foreground">Industry certifications verified by external providers</p>
                 </div>
                 <button
                   type="button"
                   onClick={addEmptyCert}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-100"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-primary/10 border border-primary/20 px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary/20 cursor-pointer"
                 >
                   <Plus className="h-3.5 w-3.5" />
                   Add Certification
@@ -670,12 +679,12 @@ export function ProfilePage(): React.JSX.Element {
               </div>
 
               {certifications.length === 0 ? (
-                <div className="rounded-xl border border-dashed border-slate-200 p-8 text-center">
-                  <p className="text-sm text-slate-500">No certifications added yet.</p>
+                <div className="rounded-xl border border-dashed border-border p-8 text-center">
+                  <p className="text-sm text-muted-foreground">No certifications added yet.</p>
                   <button
                     type="button"
                     onClick={addEmptyCert}
-                    className="mt-2 text-xs font-semibold text-blue-600 hover:text-blue-700"
+                    className="mt-2 text-xs font-semibold text-primary hover:underline cursor-pointer"
                   >
                     + Add your first certification
                   </button>
@@ -685,12 +694,12 @@ export function ProfilePage(): React.JSX.Element {
                   {certifications.map((cert, idx) => (
                     <div
                       key={idx}
-                      className="rounded-xl border border-slate-200 bg-slate-50/50 p-4 space-y-3 relative group"
+                      className="rounded-xl border border-border bg-muted/20 p-4 space-y-3 relative group"
                     >
                       <button
                         type="button"
                         onClick={() => { removeCert(idx); }}
-                        className="absolute right-3 top-3 text-slate-400 hover:text-red-600 transition"
+                        className="absolute right-3 top-3 text-muted-foreground hover:text-destructive transition cursor-pointer"
                         title="Delete certification"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -698,47 +707,47 @@ export function ProfilePage(): React.JSX.Element {
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pr-8">
                         <div>
-                          <label className="block text-[11px] font-medium text-slate-700 mb-1">Certification Name</label>
+                          <label className="block text-[11px] font-medium text-foreground mb-1">Certification Name</label>
                           <input
                             type="text"
                             value={cert.name}
                             onChange={(e) => { updateCert(idx, 'name', e.target.value); }}
                             placeholder="e.g. AWS Certified Solutions Architect"
-                            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-blue-500"
+                            className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-xs text-foreground focus:outline-none focus:border-primary"
                           />
                         </div>
 
                         <div>
-                          <label className="block text-[11px] font-medium text-slate-700 mb-1">Issuing Organization</label>
+                          <label className="block text-[11px] font-medium text-foreground mb-1">Issuing Organization</label>
                           <input
                             type="text"
                             value={cert.issuer}
                             onChange={(e) => { updateCert(idx, 'issuer', e.target.value); }}
                             placeholder="e.g. Amazon Web Services, Google Cloud"
-                            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-blue-500"
+                            className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-xs text-foreground focus:outline-none focus:border-primary"
                           />
                         </div>
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
-                          <label className="block text-[11px] font-medium text-slate-700 mb-1">Issue Date</label>
+                          <label className="block text-[11px] font-medium text-foreground mb-1">Issue Date</label>
                           <input
                             type="month"
                             value={cert.issueDate || ''}
                             onChange={(e) => { updateCert(idx, 'issueDate', e.target.value); }}
-                            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-blue-500"
+                            className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-xs text-foreground focus:outline-none focus:border-primary"
                           />
                         </div>
 
                         <div>
-                          <label className="block text-[11px] font-medium text-slate-700 mb-1">Credential URL</label>
+                          <label className="block text-[11px] font-medium text-foreground mb-1">Credential URL</label>
                           <input
                             type="url"
                             value={cert.credentialUrl || ''}
                             onChange={(e) => { updateCert(idx, 'credentialUrl', e.target.value); }}
                             placeholder="https://..."
-                            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-900 focus:outline-none focus:border-blue-500"
+                            className="w-full rounded-lg border border-border bg-background px-3 py-1.5 text-xs text-foreground focus:outline-none focus:border-primary"
                           />
                         </div>
                       </div>

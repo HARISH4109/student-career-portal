@@ -17,6 +17,7 @@ import {
   Save,
   Trash2,
   Sparkles,
+  X,
 } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import {
@@ -200,7 +201,7 @@ export function CareerManagePage() {
           setSharedSkillIds([...sharedSkillIds, newSkill.id]);
         }
         setCustomSkillName('');
-        setCustomActionMsg(`Custom skill "${newSkill.name}" created and added!`);
+        setCustomActionMsg(`Custom skill "${newSkill.name}" created and added.`);
       } else if (stageIndex !== undefined) {
         const stage = path.stages[stageIndex];
         if (stage && !stage.skills.some((s) => s.skillId === newSkill.id)) {
@@ -210,7 +211,7 @@ export function CareerManagePage() {
           });
         }
         setCustomStageSkillName('');
-        setCustomActionMsg(`Custom skill "${newSkill.name}" added to stage!`);
+        setCustomActionMsg(`Custom skill "${newSkill.name}" added to stage.`);
       }
       setTimeout(() => {
         setCustomActionMsg('');
@@ -242,7 +243,7 @@ export function CareerManagePage() {
         setSharedCareerPathIds([...sharedCareerPathIds, newCareer.id]);
       }
       setCustomCareerTitle('');
-      setCustomActionMsg(`Custom career "${newCareer.title}" created and added!`);
+      setCustomActionMsg(`Custom career "${newCareer.title}" created and added.`);
       setTimeout(() => {
         setCustomActionMsg('');
       }, 4000);
@@ -369,7 +370,7 @@ export function CareerManagePage() {
 
       let successMsg = '';
       if (existingToUpdate.length > 0 && newToCreate.length > 0) {
-        successMsg = `Saved: ${existingToUpdate.length} existing resource(s) updated, ${newToCreate.length} new resource(s) added!`;
+        successMsg = `Saved: ${existingToUpdate.length} existing resource(s) updated, ${newToCreate.length} new resource(s) added.`;
       } else if (existingToUpdate.length > 0) {
         successMsg = `${existingToUpdate.length} resource(s) updated successfully.`;
       } else {
@@ -403,13 +404,13 @@ export function CareerManagePage() {
     <Field label={label}>
       <div className="space-y-2.5 mt-1">
         {selected.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 p-2.5 bg-slate-50 rounded-xl border border-slate-200/80 max-h-32 overflow-y-auto">
+          <div className="flex flex-wrap gap-1.5 p-2.5 bg-muted/20 rounded-xl border border-border max-h-32 overflow-y-auto">
             {selected.map((selId) => {
               const item = values?.find((v) => v.id === selId);
               return (
                 <span
                   key={selId}
-                  className="inline-flex items-center gap-1 rounded-lg bg-indigo-50 border border-indigo-200 px-2 py-0.5 text-xs font-semibold text-indigo-700"
+                  className="inline-flex items-center gap-1 rounded-lg bg-primary/10 border border-border px-2 py-0.5 text-xs font-semibold text-primary"
                 >
                   <span>{item?.name ?? item?.title ?? 'Selected'}</span>
                   <button
@@ -418,7 +419,7 @@ export function CareerManagePage() {
                       e.preventDefault();
                       change(selected.filter((id) => id !== selId));
                     }}
-                    className="hover:text-indigo-950 font-bold ml-1 text-slate-400 hover:text-slate-700"
+                    className="hover:text-foreground font-bold ml-1 text-muted-foreground transition-colors"
                     aria-label={`Remove ${item?.name ?? item?.title}`}
                   >
                     ×
@@ -444,14 +445,14 @@ export function CareerManagePage() {
             </option>
           ))}
         </select>
-        <span className="text-xs text-slate-500 block">
+        <span className="text-xs text-muted-foreground block">
           Use Ctrl or Command to select multiple items.
         </span>
 
         {/* ── Custom Add Section ── */}
         {customAddConfig && (
-          <div className="rounded-xl bg-slate-50 p-2.5 border border-slate-200/80 space-y-1.5">
-            <span className="text-xs font-semibold text-slate-700 block">
+          <div className="rounded-xl bg-muted/20 p-2.5 border border-border space-y-1.5">
+            <span className="text-xs font-semibold text-muted-foreground block">
               Not in list? Add custom:
             </span>
             <div className="flex gap-2">
@@ -471,7 +472,7 @@ export function CareerManagePage() {
               />
               <button
                 type="button"
-                className="inline-flex items-center gap-1 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 text-xs font-semibold shrink-0 shadow-sm transition"
+                className="inline-flex items-center gap-1 rounded-xl bg-primary hover:bg-primary/90 text-white px-3 py-1.5 text-xs font-semibold shrink-0 shadow-sm transition"
                 onClick={customAddConfig.onAdd}
               >
                 <Plus className="h-3.5 w-3.5" />
@@ -485,14 +486,14 @@ export function CareerManagePage() {
   );
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto pb-12">
+    <div className="space-y-6 w-full max-w-[1536px] mx-auto pb-12">
       {/* ── Page Header (Isolated from Career Paths & Learning Resources explorer) ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-5">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            <Settings2 className="h-6 w-6 text-indigo-600" /> Career Catalog Management
+          <h1 className="text-2xl font-bold text-foreground tracking-tight flex items-center gap-2">
+            <Settings2 className="h-6 w-6 text-primary" /> Career Catalog Management
           </h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-muted-foreground">
             Author and configure degree career paths, curriculum milestones, and curated learning resources.
           </p>
         </div>
@@ -513,7 +514,7 @@ export function CareerManagePage() {
                   setValidation('');
                   setViewMode('editor');
                 }}
-                className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition"
+                className="inline-flex items-center gap-2 rounded-xl bg-primary hover:bg-primary/90 px-4 py-2 text-sm font-semibold text-white shadow-sm transition"
               >
                 <Plus className="h-4 w-4" /> Create Career Path
               </button>
@@ -531,7 +532,7 @@ export function CareerManagePage() {
                   setValidation('');
                   setViewMode('editor');
                 }}
-                className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition"
+                className="inline-flex items-center gap-2 rounded-xl bg-primary hover:bg-primary/90 px-4 py-2 text-sm font-semibold text-white shadow-sm transition"
               >
                 <Plus className="h-4 w-4" /> Add Learning Resource
               </button>
@@ -543,7 +544,7 @@ export function CareerManagePage() {
                 setViewMode('list');
                 setValidation('');
               }}
-              className="inline-flex items-center gap-2 rounded-xl bg-white border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 transition"
+              className="inline-flex items-center gap-2 rounded-xl bg-card border border-border px-4 py-2 text-sm font-semibold text-muted-foreground shadow-sm hover:bg-muted/20 transition"
             >
               <ArrowLeft className="h-4 w-4" /> Back to Catalog List
             </button>
@@ -552,17 +553,18 @@ export function CareerManagePage() {
       </div>
 
       {customActionMsg && (
-        <div className="rounded-xl bg-indigo-50 border border-indigo-200 p-3 text-xs font-semibold text-indigo-900 flex items-center justify-between gap-2">
+        <div className="rounded-xl bg-primary/10 border border-border p-3 text-xs font-semibold text-foreground flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-indigo-600" />
+            <Sparkles className="h-4 w-4 text-primary" />
             <span>{customActionMsg}</span>
           </div>
           <button
             type="button"
             onClick={() => setCustomActionMsg('')}
-            className="text-indigo-400 hover:text-indigo-700 text-xs font-bold"
+            className="text-muted-foreground hover:text-foreground p-1 rounded-md transition-colors"
+            aria-label="Dismiss message"
           >
-            ✕
+            <X className="h-3.5 w-3.5" />
           </button>
         </div>
       )}
@@ -586,15 +588,15 @@ export function CareerManagePage() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <nav
               aria-label="Catalog editor"
-              className="flex flex-wrap items-center gap-1.5 rounded-2xl border border-slate-200/80 bg-white p-1.5 shadow-sm"
+              className="flex flex-wrap items-center gap-1.5 rounded-2xl border border-border bg-card p-1.5 shadow-sm"
             >
               <button
                 id="paths-tab"
                 type="button"
-                className={`inline-flex min-h-10 items-center gap-2 rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-all ${
+                className={`inline-flex min-h-10 items-center gap-2 rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-colors ${
                   editor === 'paths'
-                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
-                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                    ? 'bg-primary text-primary-foreground shadow-xs'
+                    : 'text-muted-foreground hover:bg-muted/40 hover:text-foreground'
                 }`}
                 onClick={() => {
                   setEditor('paths');
@@ -607,10 +609,10 @@ export function CareerManagePage() {
               <button
                 id="resources-tab"
                 type="button"
-                className={`inline-flex min-h-10 items-center gap-2 rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-all ${
+                className={`inline-flex min-h-10 items-center gap-2 rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-colors ${
                   editor === 'resources'
-                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
-                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                    ? 'bg-primary text-primary-foreground shadow-xs'
+                    : 'text-muted-foreground hover:bg-muted/40 hover:text-foreground'
                 }`}
                 onClick={() => {
                   setEditor('resources');
@@ -624,33 +626,33 @@ export function CareerManagePage() {
 
             {/* Filter Input */}
             <div className="relative max-w-xs w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
               <input
                 type="text"
                 placeholder={editor === 'paths' ? 'Filter career paths...' : 'Filter resources...'}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-white pl-9 pr-3 py-1.5 text-xs text-slate-800 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 shadow-xs"
+                className="w-full rounded-xl border border-border bg-card pl-9 pr-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary shadow-xs"
               />
             </div>
           </div>
 
           {/* ── Table: Career Paths ── */}
           {editor === 'paths' && (
-            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
               <table className="min-w-full divide-y divide-slate-200">
-                <thead className="bg-slate-50">
+                <thead className="bg-muted/20">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground">
                       Career Path
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground">
                       Curriculum Stages
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground">
                       Status
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    <th className="px-6 py-3 text-right text-xs font-medium text-muted-foreground">
                       Actions
                     </th>
                   </tr>
@@ -658,29 +660,29 @@ export function CareerManagePage() {
                 <tbody className="divide-y divide-slate-100">
                   {paths.isLoading ? (
                     <tr>
-                      <td colSpan={4} className="px-6 py-12 text-center text-sm text-slate-500">
+                      <td colSpan={4} className="px-6 py-12 text-center text-sm text-muted-foreground">
                         Loading career paths...
                       </td>
                     </tr>
                   ) : filteredPaths.length === 0 ? (
                     <tr>
-                      <td colSpan={4} className="px-6 py-12 text-center text-sm text-slate-500">
+                      <td colSpan={4} className="px-6 py-12 text-center text-sm text-muted-foreground">
                         No career paths found. Click &quot;+ Create Career Path&quot; to author one.
                       </td>
                     </tr>
                   ) : (
                     filteredPaths.map((p) => (
-                      <tr key={p.id} className="hover:bg-slate-50/50 transition-colors">
+                      <tr key={p.id} className="hover:bg-muted/10 transition-colors">
                         <td className="px-6 py-4">
                           <div>
-                            <p className="text-sm font-semibold text-slate-900">{p.title}</p>
-                            <p className="text-xs text-slate-500 line-clamp-1 max-w-md mt-0.5">
+                            <p className="text-sm font-semibold text-foreground">{p.title}</p>
+                            <p className="text-xs text-muted-foreground line-clamp-1 max-w-md mt-0.5">
                               {p.description || 'No description provided.'}
                             </p>
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-semibold text-indigo-700">
+                          <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
                             <Layers className="h-3 w-3" />
                             {p.stages.length} Stages
                           </span>
@@ -690,7 +692,7 @@ export function CareerManagePage() {
                             className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                               p.isActive
                                 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                                : 'bg-slate-100 text-slate-600'
+                                : 'bg-muted/40 text-muted-foreground'
                             }`}
                           >
                             {p.isActive ? 'Published' : 'Draft'}
@@ -711,7 +713,7 @@ export function CareerManagePage() {
                                 setValidation('');
                                 setViewMode('editor');
                               }}
-                              className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold transition"
+                              className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary text-xs font-semibold transition-colors"
                               title="Edit Career Path"
                             >
                               <Pencil className="h-3.5 w-3.5" />
@@ -719,7 +721,7 @@ export function CareerManagePage() {
                             </button>
                             <Link
                               to={`/dashboard/careers/${p.id}`}
-                              className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition"
+                              className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted/40 hover:text-muted-foreground transition"
                               title="Preview Curriculum"
                             >
                               <Eye className="h-4 w-4" />
@@ -736,23 +738,23 @@ export function CareerManagePage() {
 
           {/* ── Table: Learning Resources ── */}
           {editor === 'resources' && (
-            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
               <table className="min-w-full divide-y divide-slate-200">
-                <thead className="bg-slate-50">
+                <thead className="bg-muted/20">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground">
                       Resource Title
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground">
                       Type & Category
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground">
                       Difficulty
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground">
                       Status
                     </th>
-                    <th className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    <th className="px-6 py-3 text-right text-xs font-medium text-muted-foreground">
                       Actions
                     </th>
                   </tr>
@@ -760,27 +762,27 @@ export function CareerManagePage() {
                 <tbody className="divide-y divide-slate-100">
                   {resources.isLoading ? (
                     <tr>
-                      <td colSpan={5} className="px-6 py-12 text-center text-sm text-slate-500">
+                      <td colSpan={5} className="px-6 py-12 text-center text-sm text-muted-foreground">
                         Loading resources...
                       </td>
                     </tr>
                   ) : filteredResources.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="px-6 py-12 text-center text-sm text-slate-500">
+                      <td colSpan={5} className="px-6 py-12 text-center text-sm text-muted-foreground">
                         No learning resources found. Click &quot;+ Add Learning Resource&quot; to author one.
                       </td>
                     </tr>
                   ) : (
                     filteredResources.map((r) => (
-                      <tr key={r.id} className="hover:bg-slate-50/50 transition-colors">
+                      <tr key={r.id} className="hover:bg-muted/10 transition-colors">
                         <td className="px-6 py-4">
                           <div>
-                            <p className="text-sm font-semibold text-slate-900">{r.title}</p>
+                            <p className="text-sm font-semibold text-foreground">{r.title}</p>
                             <a
                               href={r.url}
                               target="_blank"
                               rel="noreferrer"
-                              className="text-xs text-indigo-600 hover:text-indigo-800 line-clamp-1 max-w-sm flex items-center gap-1 mt-0.5"
+                              className="text-xs text-primary hover:text-primary/80 line-clamp-1 max-w-sm flex items-center gap-1 mt-0.5 transition-colors"
                             >
                               {r.url} <ExternalLink className="h-2.5 w-2.5" />
                             </a>
@@ -788,14 +790,14 @@ export function CareerManagePage() {
                         </td>
                         <td className="px-6 py-4">
                           <div className="space-y-1">
-                            <span className="inline-flex rounded-full px-2 py-0.5 text-xs font-medium bg-blue-50 text-blue-700 capitalize">
+                            <span className="inline-flex rounded-full px-2 py-0.5 text-xs font-medium bg-primary/10 text-primary capitalize">
                               {r.type}
                             </span>
-                            <p className="text-xs text-slate-500">{r.category}</p>
+                            <p className="text-xs text-muted-foreground">{r.category}</p>
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <span className="text-xs font-medium text-slate-700 capitalize">
+                          <span className="text-xs font-medium text-muted-foreground capitalize">
                             {r.difficulty}
                           </span>
                         </td>
@@ -804,7 +806,7 @@ export function CareerManagePage() {
                             className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                               r.isActive
                                 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                                : 'bg-slate-100 text-slate-600'
+                                : 'bg-muted/40 text-muted-foreground'
                             }`}
                           >
                             {r.isActive ? 'Active' : 'Inactive'}
@@ -818,7 +820,7 @@ export function CareerManagePage() {
                                 handleSelectResource(r.id);
                                 setViewMode('editor');
                               }}
-                              className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold transition"
+                              className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary text-xs font-semibold transition-colors"
                               title="Edit Resource"
                             >
                               <Pencil className="h-3.5 w-3.5" />
@@ -828,7 +830,7 @@ export function CareerManagePage() {
                               href={r.url}
                               target="_blank"
                               rel="noreferrer"
-                              className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition"
+                              className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted/40 hover:text-muted-foreground transition"
                               title="Open External Resource"
                             >
                               <ExternalLink className="h-4 w-4" />
@@ -850,9 +852,9 @@ export function CareerManagePage() {
       {/* ══════════════════════════════════════════════════════════════════════ */}
       {viewMode === 'editor' && (
         <div className="space-y-6">
-          <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+          <div className="flex items-center justify-between border-b border-border pb-3">
             <div>
-              <h2 className="text-lg font-bold text-slate-900">
+              <h2 className="text-lg font-bold text-foreground">
                 {editor === 'paths'
                   ? pathId
                     ? `Editing Career Path: ${path.title || 'Untitled'}`
@@ -861,7 +863,7 @@ export function CareerManagePage() {
                     ? 'Editing Learning Resource'
                     : 'Add Learning Resources'}
               </h2>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <p className="text-xs text-muted-foreground mt-0.5">
                 {editor === 'paths'
                   ? 'Configure career path identity, published state, and milestone learning stages.'
                   : 'Link high-quality learning resources, videos, documentation, and skill associations.'}
@@ -873,7 +875,7 @@ export function CareerManagePage() {
                 setViewMode('list');
                 setValidation('');
               }}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition"
             >
               <ArrowLeft className="h-4 w-4" /> Back to Table
             </button>
@@ -885,12 +887,12 @@ export function CareerManagePage() {
               id="paths-editor"
               className={`${card} space-y-6`}
             >
-              <div className="border-b border-slate-100 pb-4 flex items-center justify-between">
+              <div className="border-b border-border pb-4 flex items-center justify-between">
                 <div>
-                  <h3 className="text-base font-bold tracking-tight text-slate-900">Career Path Details</h3>
-                  <p className="text-xs text-slate-500 mt-0.5">Author and publish curriculum roadmaps</p>
+                  <h3 className="text-base font-bold tracking-tight text-foreground">Career Path Details</h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">Author and publish curriculum roadmaps</p>
                 </div>
-                <span className="rounded-full bg-indigo-50 text-indigo-700 px-3 py-1 text-xs font-semibold">
+                <span className="rounded-full bg-primary/10 text-primary px-3 py-1 text-xs font-semibold">
                   {path.stages.length} stages configured
                 </span>
               </div>
@@ -908,10 +910,10 @@ export function CareerManagePage() {
                 </Field>
 
                 <div className="flex flex-col justify-end">
-                  <label className="flex min-h-11 items-center gap-3 font-semibold text-slate-700 cursor-pointer">
+                  <label className="flex min-h-11 items-center gap-3 font-semibold text-muted-foreground cursor-pointer">
                     <input
                       type="checkbox"
-                      className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                      className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
                       checked={path.isActive}
                       onChange={(e) => {
                         setPath({ ...path, isActive: e.target.checked });
@@ -933,32 +935,32 @@ export function CareerManagePage() {
                 />
               </Field>
 
-              <p className="text-xs text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-200">
+              <p className="text-xs text-muted-foreground bg-muted/20 p-3 rounded-xl border border-border">
                 Changes apply to new roadmaps. Existing student progress is preserved.
               </p>
 
               {/* ── Stages Configuration ── */}
-              <div className="space-y-4 pt-4 border-t border-slate-200">
+              <div className="space-y-4 pt-4 border-t border-border">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                    <Layers className="h-5 w-5 text-indigo-600" />
+                  <h3 className="text-base font-bold text-foreground flex items-center gap-2">
+                    <Layers className="h-5 w-5 text-primary" />
                     <span>Stages Breakdown</span>
                   </h3>
                 </div>
 
                 {path.stages.map((stage, i) => (
                   <fieldset
-                    className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50/50 p-5"
+                    className="space-y-4 rounded-2xl border border-border bg-muted/10 p-5"
                     key={i}
                   >
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/60 pb-3">
-                      <legend className="text-sm font-bold text-slate-900">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border/60 pb-3">
+                      <legend className="text-sm font-bold text-foreground">
                         Stage {i + 1}: {stage.title || 'Untitled stage'}
                       </legend>
                       <div className="flex flex-wrap items-center gap-1.5 self-end sm:self-auto">
                         <button
                           type="button"
-                          className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-200 hover:text-slate-800 disabled:opacity-30"
+                          className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted/60 hover:text-foreground disabled:opacity-30"
                           disabled={i === 0}
                           onClick={() => {
                             const stages = [...path.stages];
@@ -976,7 +978,7 @@ export function CareerManagePage() {
                         </button>
                         <button
                           type="button"
-                          className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-200 hover:text-slate-800 disabled:opacity-30"
+                          className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted/60 hover:text-foreground disabled:opacity-30"
                           disabled={i === path.stages.length - 1}
                           onClick={() => {
                             const stages = [...path.stages];
@@ -1017,10 +1019,10 @@ export function CareerManagePage() {
                         />
                       </Field>
                       <div className="flex items-center min-h-11">
-                        <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
+                        <label className="flex items-center gap-2 text-xs font-semibold text-muted-foreground cursor-pointer">
                           <input
                             type="checkbox"
-                            className="h-4 w-4 rounded border-slate-300 text-indigo-600"
+                            className="h-4 w-4 rounded border-border text-primary"
                             checked={stage.isActive}
                             onChange={(e) => {
                               updateStage(i, { ...stage, isActive: e.target.checked });
@@ -1043,9 +1045,9 @@ export function CareerManagePage() {
                     </Field>
 
                     {/* Stage Skills Builder */}
-                    <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-4">
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-2">
-                        <span className="text-xs font-bold text-slate-800">
+                    <div className="space-y-3 rounded-xl border border-border bg-card p-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border pb-2">
+                        <span className="text-xs font-bold text-foreground">
                           Required Skills for Stage {i + 1}
                         </span>
                         <div className="flex gap-2">
@@ -1063,7 +1065,7 @@ export function CareerManagePage() {
                           />
                           <button
                             type="button"
-                            className="inline-flex items-center gap-1 rounded-lg bg-indigo-50 text-indigo-700 px-2.5 py-1 text-xs font-semibold hover:bg-indigo-100"
+                            className="inline-flex items-center gap-1 rounded-lg bg-primary/10 text-primary px-2.5 py-1 text-xs font-semibold hover:bg-primary/20 transition-colors"
                             onClick={() => void handleCreateCustomSkill('stage', i)}
                           >
                             <Plus className="h-3 w-3" /> Add
@@ -1129,7 +1131,7 @@ export function CareerManagePage() {
 
                       <button
                         type="button"
-                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-800 pt-1"
+                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-primary/80 pt-1 transition-colors"
                         onClick={() => {
                           const firstSkill = skills.data?.data[0]?.id || '';
                           updateStage(i, {
@@ -1153,15 +1155,15 @@ export function CareerManagePage() {
                     )}
 
                     {/* Activities */}
-                    <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-4">
-                      <span className="text-xs font-bold text-slate-800 block border-b border-slate-100 pb-2">
+                    <div className="space-y-3 rounded-xl border border-border bg-card p-4">
+                      <span className="text-xs font-bold text-foreground block border-b border-border pb-2">
                         Stage Activities & Hands-on Deliverables
                       </span>
 
                       {stage.activities.map((act, aIdx) => (
-                        <div key={aIdx} className="space-y-2 p-3 rounded-xl bg-slate-50 border border-slate-200">
+                        <div key={aIdx} className="space-y-2 p-3 rounded-xl bg-muted/20 border border-border">
                           <div className="flex items-center justify-between">
-                            <span className="text-xs font-bold text-slate-700">Activity {aIdx + 1}</span>
+                            <span className="text-xs font-bold text-muted-foreground">Activity {aIdx + 1}</span>
                             <button
                               type="button"
                               className="text-rose-600 hover:bg-rose-100 p-1 rounded-md"
@@ -1206,7 +1208,7 @@ export function CareerManagePage() {
 
                       <button
                         type="button"
-                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-800"
+                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-primary/80 transition-colors"
                         onClick={() => {
                           updateStage(i, {
                             ...stage,
@@ -1233,14 +1235,14 @@ export function CareerManagePage() {
               </div>
 
               {/* Actions Footer */}
-              <div className="flex items-center justify-between pt-4 border-t border-slate-200">
+              <div className="flex items-center justify-between pt-4 border-t border-border">
                 <button
                   type="button"
                   onClick={() => {
                     setViewMode('list');
                     setValidation('');
                   }}
-                  className="text-xs font-semibold text-slate-500 hover:text-slate-800"
+                  className="text-xs font-semibold text-muted-foreground hover:text-foreground"
                 >
                   Cancel & Return to List
                 </button>
@@ -1296,20 +1298,20 @@ export function CareerManagePage() {
               id="resources-editor"
               className={`${card} space-y-6`}
             >
-              <div className="border-b border-slate-100 pb-4 flex items-center justify-between">
+              <div className="border-b border-border pb-4 flex items-center justify-between">
                 <div>
-                  <h3 className="text-base font-bold tracking-tight text-slate-900">
+                  <h3 className="text-base font-bold tracking-tight text-foreground">
                     {resourceId ? 'Edit Learning Resource' : 'Add Learning Resources'}
                   </h3>
-                  <p className="text-xs text-slate-500 mt-0.5">
+                  <p className="text-xs text-muted-foreground mt-0.5">
                     Configure resource metadata, content links, and associated skills.
                   </p>
                 </div>
               </div>
 
               {/* Shared Metadata */}
-              <div className="rounded-2xl border border-indigo-100 bg-indigo-50/30 p-5 space-y-4">
-                <span className="text-xs font-bold uppercase tracking-wider text-indigo-900 block">
+              <div className="rounded-2xl border border-border bg-primary/5 p-5 space-y-4">
+                <span className="text-xs font-semibold text-primary block">
                   Shared Resource Metadata
                 </span>
 
@@ -1340,10 +1342,10 @@ export function CareerManagePage() {
                   </Field>
 
                   <div className="flex items-center min-h-11">
-                    <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
+                    <label className="flex items-center gap-2 text-xs font-semibold text-muted-foreground cursor-pointer">
                       <input
                         type="checkbox"
-                        className="h-4 w-4 rounded border-slate-300 text-indigo-600"
+                        className="h-4 w-4 rounded border-border text-primary"
                         checked={sharedIsActive}
                         onChange={(e) => setSharedIsActive(e.target.checked)}
                       />
@@ -1353,7 +1355,7 @@ export function CareerManagePage() {
                 </div>
 
                 {/* Shared Skills & Career Paths */}
-                <div className="grid gap-4 sm:grid-cols-2 pt-2 border-t border-indigo-100">
+                <div className="grid gap-4 sm:grid-cols-2 pt-2 border-t border-border">
                   {renderOptions(
                     skills.data?.data,
                     sharedSkillIds,
@@ -1387,22 +1389,22 @@ export function CareerManagePage() {
               {/* Resource Items */}
               <div className="space-y-4 pt-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-bold text-slate-800">Resource Links & Content</span>
+                  <span className="text-sm font-bold text-foreground">Resource Links & Content</span>
                   <button
                     type="button"
                     onClick={() => {
                       setResourceItems((prev) => [...prev, emptyResourceItem('video')]);
                     }}
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-800"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-primary/80 transition-colors"
                   >
                     <Plus className="h-3.5 w-3.5" /> Add Another Link
                   </button>
                 </div>
 
                 {resourceItems.map((item, idx) => (
-                  <div key={item.id} className="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-3">
+                  <div key={item.id} className="p-4 rounded-xl border border-border bg-muted/20 space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-slate-700">Link #{idx + 1}</span>
+                      <span className="text-xs font-bold text-muted-foreground">Link #{idx + 1}</span>
                       {resourceItems.length > 1 && (
                         <button
                           type="button"
@@ -1493,14 +1495,14 @@ export function CareerManagePage() {
               </div>
 
               {/* Actions Footer */}
-              <div className="flex items-center justify-between pt-4 border-t border-slate-200">
+              <div className="flex items-center justify-between pt-4 border-t border-border">
                 <button
                   type="button"
                   onClick={() => {
                     setViewMode('list');
                     setValidation('');
                   }}
-                  className="text-xs font-semibold text-slate-500 hover:text-slate-800"
+                  className="text-xs font-semibold text-muted-foreground hover:text-foreground"
                 >
                   Cancel & Return to List
                 </button>

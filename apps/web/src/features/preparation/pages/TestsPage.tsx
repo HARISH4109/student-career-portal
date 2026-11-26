@@ -4,11 +4,11 @@ import {
   BookOpen,
   Brain,
   Briefcase,
-  CheckCircle,
+  CheckCircle2,
   Clock,
   Eye,
   EyeOff,
-  FileQuestion,
+  FileText,
   Filter,
   Lock,
   Plus,
@@ -25,6 +25,20 @@ import {
   useUpdateMockTest,
 } from '../api/preparation-api';
 import { FacultyInterviewTracksModal } from '../components/FacultyInterviewTracksModal';
+import {
+  Button,
+  Card,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  EmptyState,
+  Input,
+  SkeletonCard,
+  StatusBadge,
+} from '@/shared/components/ui';
 
 import { useAuth } from '@/features/auth/use-auth';
 
@@ -45,7 +59,7 @@ export function TestsPage(): React.JSX.Element {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState<'all' | 'active' | 'closed'>('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [testToDelete, setTestToDelete] = useState<{ id: string; title: string } | null>(null);
   const [isTracksModalOpen, setIsTracksModalOpen] = useState(false);
 
   const isStaff = user?.roles.some((r: RoleName) => r === 'PLACEMENT_FACULTY' || r === 'ADMIN');
@@ -70,65 +84,63 @@ export function TestsPage(): React.JSX.Element {
     });
   };
 
-  const handleDeleteTest = (testId: string, testTitle: string) => {
-    const confirmed = window.confirm(
-      `Are you sure you want to delete "${testTitle}" entirely?\n\nThis will permanently delete the test, all sections, questions, answer keys, and student attempts. This action cannot be undone.`,
-    );
-    if (!confirmed) return;
-
-    setDeletingId(testId);
-    deleteMutation.mutate(testId, {
-      onSettled: () => { setDeletingId(null); },
+  const handleConfirmDelete = () => {
+    if (!testToDelete) return;
+    deleteMutation.mutate(testToDelete.id, {
+      onSettled: () => {
+        setTestToDelete(null);
+      },
     });
   };
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto pb-12">
-      {/* ── Page Header ─────────────────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 pb-5">
+    <div className="space-y-6 w-full max-w-[1536px] mx-auto pb-12">
+      {/* ── Academic Page Header ─────────────────────────────────────────── */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border/80 pb-5">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            <BookOpen className="h-6 w-6 text-indigo-600" /> Placement Tests & Mock Practice
-          </h1>
-          <p className="mt-1 text-sm text-slate-500">
-            Timed evaluations, technical assessments, and instant server-graded performance analytics
+          <div className="flex items-center gap-2.5">
+            <span className="h-4 w-1 rounded-full bg-[#B9903B]" aria-hidden="true" />
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">
+              Assessments & Mock Practice
+            </h1>
+          </div>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Timed university placement assessments, technical evaluations, and scored benchmarks
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2.5">
           {isStaff ? (
             <>
-              <Link
-                to="/dashboard/preparation/tests/new"
-                className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all"
-              >
-                <Plus className="h-4 w-4" />
-                <span>Create Mock Test</span>
+              <Link to="/dashboard/preparation/tests/new">
+                <Button size="sm">
+                  <Plus className="h-4 w-4" />
+                  <span>Create Assessment</span>
+                </Button>
               </Link>
-              <button
+              <Button
                 type="button"
+                variant="outline"
+                size="sm"
                 onClick={() => { setIsTracksModalOpen(true); }}
-                className="inline-flex items-center gap-2 rounded-xl bg-white hover:bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-700 border border-slate-200 shadow-sm transition-all"
               >
-                <Briefcase className="h-4 w-4 text-indigo-600" />
-                <span>Manage Interview Tracks</span>
-              </button>
+                <Briefcase className="h-4 w-4 text-muted-foreground" />
+                <span>Interview Tracks</span>
+              </Button>
             </>
           ) : (
             <>
-              <Link
-                to="/dashboard/preparation/interviews"
-                className="inline-flex items-center gap-2 rounded-xl bg-white hover:bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-700 border border-slate-200 shadow-sm transition-all"
-              >
-                <Brain className="h-4 w-4 text-indigo-600" />
-                <span>Mock Interviews</span>
+              <Link to="/dashboard/preparation/interviews">
+                <Button variant="outline" size="sm">
+                  <Brain className="h-4 w-4 text-muted-foreground" />
+                  <span>Mock Interviews</span>
+                </Button>
               </Link>
-              <Link
-                to="/dashboard/preparation/analytics"
-                className="inline-flex items-center gap-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 px-4 py-2 text-sm font-semibold text-indigo-700 border border-indigo-200 transition-all"
-              >
-                <TrendingUp className="h-4 w-4 text-indigo-600" />
-                <span>Performance Analytics</span>
+              <Link to="/dashboard/preparation/analytics">
+                <Button variant="outline" size="sm">
+                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                  <span>Performance Analytics</span>
+                </Button>
               </Link>
             </>
           )}
@@ -136,30 +148,30 @@ export function TestsPage(): React.JSX.Element {
       </div>
 
       {/* ── Filters & Category Bar ───────────────────────────────────────── */}
-      <div className="space-y-4">
-        <div className="flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center">
+      <div className="space-y-3.5">
+        <div className="flex flex-col sm:flex-row gap-3 justify-between items-stretch sm:items-center">
           {/* Search Box */}
           <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-            <input
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
               type="text"
-              placeholder="Search tests by title or topic..."
+              placeholder="Search assessments by title or topic..."
               value={searchQuery}
               onChange={(e) => { setSearchQuery(e.target.value); }}
-              className="w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 shadow-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+              className="pl-9 h-9 text-xs"
             />
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            {/* Status Filter */}
-            <div className="flex items-center rounded-xl bg-slate-100 p-1 border border-slate-200 text-xs font-semibold">
+          <div className="flex items-center gap-3">
+            {/* Segmented Status Filter */}
+            <div className="inline-flex items-center rounded-lg bg-muted/40 p-1 border border-border/60 text-xs font-medium">
               <button
                 type="button"
                 onClick={() => { setSelectedStatus('all'); }}
-                className={`rounded-lg px-3 py-1.5 transition ${
+                className={`rounded-md px-3 py-1 transition-colors cursor-pointer ${
                   selectedStatus === 'all'
-                    ? 'bg-white text-slate-900 shadow-sm'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-card text-foreground shadow-xs font-semibold'
+                    : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
                 All
@@ -167,10 +179,10 @@ export function TestsPage(): React.JSX.Element {
               <button
                 type="button"
                 onClick={() => { setSelectedStatus('active'); }}
-                className={`rounded-lg px-3 py-1.5 transition ${
+                className={`rounded-md px-3 py-1 transition-colors cursor-pointer ${
                   selectedStatus === 'active'
-                    ? 'bg-emerald-600 text-white shadow-sm'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-card text-foreground shadow-xs font-semibold'
+                    : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
                 Active
@@ -178,25 +190,25 @@ export function TestsPage(): React.JSX.Element {
               <button
                 type="button"
                 onClick={() => { setSelectedStatus('closed'); }}
-                className={`rounded-lg px-3 py-1.5 transition ${
+                className={`rounded-md px-3 py-1 transition-colors cursor-pointer ${
                   selectedStatus === 'closed'
-                    ? 'bg-amber-600 text-white shadow-sm'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-card text-foreground shadow-xs font-semibold'
+                    : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
                 Closed
               </button>
             </div>
 
-            <div className="text-sm font-medium text-slate-500 flex items-center gap-2">
-              <Filter className="h-4 w-4 text-slate-400" />
-              <span>Showing {tests.length} tests</span>
-            </div>
+            <span className="text-xs text-muted-foreground font-mono flex items-center gap-1.5">
+              <Filter className="h-3.5 w-3.5" />
+              <span>{tests.length} tests</span>
+            </span>
           </div>
         </div>
 
-        {/* Categories Pills */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+        {/* Categories Taxonomy Filter */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
           {CATEGORIES.map((cat) => {
             const isSelected = selectedCategory === cat.key;
             return (
@@ -204,10 +216,10 @@ export function TestsPage(): React.JSX.Element {
                 key={cat.key}
                 type="button"
                 onClick={() => { setSelectedCategory(cat.key); }}
-                className={`whitespace-nowrap rounded-lg px-4 py-2 text-xs font-semibold transition-all duration-150 ${
+                className={`whitespace-nowrap rounded-md px-3 py-1.5 text-xs font-medium transition-colors duration-150 cursor-pointer ${
                   isSelected
-                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
-                    : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 hover:text-slate-900'
+                    ? 'bg-primary text-primary-foreground font-semibold shadow-xs'
+                    : 'bg-card text-muted-foreground border border-border/70 hover:bg-muted/40 hover:text-foreground'
                 }`}
               >
                 {cat.label}
@@ -217,163 +229,141 @@ export function TestsPage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* ── Tests Grid ───────────────────────────────────────────────────── */}
+      {/* ── Assessments Grid ─────────────────────────────────────────────── */}
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div
-              key={i}
-              className="h-64 rounded-2xl border border-slate-200 bg-white p-6 animate-pulse space-y-4"
-            >
-              <div className="h-5 w-24 bg-slate-200 rounded-md" />
-              <div className="h-6 w-3/4 bg-slate-200 rounded-md" />
-              <div className="h-16 w-full bg-slate-100 rounded-md" />
-              <div className="h-8 w-full bg-slate-200 rounded-xl" />
-            </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <SkeletonCard key={i} />
           ))}
         </div>
       ) : tests.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-12 text-center shadow-sm">
-          <BookOpen className="mx-auto h-12 w-12 text-slate-300" />
-          <h3 className="mt-4 text-base font-semibold text-slate-900">No mock tests found</h3>
-          <p className="mt-1 text-sm text-slate-500">
-            {searchQuery
+        <EmptyState
+          icon={BookOpen}
+          title="No assessments found"
+          description={
+            searchQuery
               ? 'Try modifying your search criteria or selecting a different category.'
-              : 'New placement practice tests will be published soon by faculty.'}
-          </p>
-        </div>
+              : 'New placement practice assessments will be published soon by faculty.'
+          }
+          {...(searchQuery || selectedCategory !== 'all'
+            ? {
+                action: {
+                  label: 'Clear Filters',
+                  onClick: () => {
+                    setSearchQuery('');
+                    setSelectedCategory('all');
+                    setSelectedStatus('all');
+                  },
+                },
+              }
+            : {})}
+        />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 items-stretch">
           {tests.map((test) => {
             const isClosed = !test.isActive;
 
             return (
-              <div
+              <Card
                 key={test.id}
-                className={`group relative flex flex-col justify-between rounded-2xl border transition-all duration-300 overflow-hidden ${
-                  !isClosed
-                    ? 'border-slate-200/90 bg-white p-6 shadow-sm hover:shadow-md hover:border-indigo-200'
-                    : 'border-slate-200/80 bg-gradient-to-br from-white/95 via-slate-50/70 to-slate-100/50 backdrop-blur-md p-6 shadow-xs'
+                className={`group flex flex-col justify-between p-5 border-border/80 transition-colors duration-150 hover:border-primary/40 ${
+                  isClosed ? 'opacity-75 bg-muted/10' : 'bg-card'
                 }`}
               >
-                {/* Glass Mirror Specular Reflection Effect for Closed Tests */}
-                {isClosed ? (
-                  <>
-                    <div className="pointer-events-none absolute -inset-full top-0 block -rotate-45 transform bg-gradient-to-r from-transparent via-white/50 to-transparent opacity-60" />
-                    <div className="pointer-events-none absolute -top-10 -right-10 h-32 w-32 rounded-full bg-amber-400/10 blur-2xl" />
-                    <div className="pointer-events-none absolute -bottom-10 -left-10 h-28 w-28 rounded-full bg-slate-300/20 blur-xl" />
-                  </>
-                ) : null}
-
-                <div className="space-y-4 relative z-10">
+                <div className="space-y-3">
                   <div className="flex items-center justify-between gap-2">
-                    <span
-                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize ${
-                        isClosed ? 'bg-slate-200/70 text-slate-700' : 'bg-indigo-50 text-indigo-700'
-                      }`}
-                    >
+                    <span className="text-[11px] font-medium text-muted-foreground capitalize">
                       {test.category.replace('_', ' ')}
                     </span>
-                    {test.isActive ? (
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 border border-emerald-200 shadow-2xs">
-                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                        <span>Active</span>
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50/90 px-2.5 py-0.5 text-xs font-semibold text-amber-800 border border-amber-200 backdrop-blur-sm shadow-2xs">
-                        <Lock className="h-3 w-3 text-amber-600" />
-                        <span>Closed</span>
-                      </span>
-                    )}
+                    <StatusBadge status={test.isActive ? 'active' : 'closed'} />
                   </div>
 
                   <div>
                     <h3
-                      className={`text-lg font-bold transition-colors ${
-                        isClosed ? 'text-slate-800' : 'text-slate-900 group-hover:text-indigo-600'
+                      title={test.title}
+                      className={`text-base font-semibold transition-colors line-clamp-1 ${
+                        isClosed ? 'text-muted-foreground' : 'text-card-foreground group-hover:text-primary'
                       }`}
                     >
                       {test.title}
                     </h3>
-                    {test.description ? (
-                      <p className="mt-1.5 text-xs text-slate-500 line-clamp-2 leading-relaxed">
-                        {test.description}
-                      </p>
-                    ) : null}
+                    <p className="mt-1 text-xs text-muted-foreground line-clamp-2 leading-relaxed min-h-[32px]">
+                      {test.description || 'Standard university placement practice assessment.'}
+                    </p>
                   </div>
 
-                  {/* Metadata Chips */}
-                  <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 text-xs text-slate-600">
-                    <div className="flex items-center gap-1.5">
-                      <Clock className="h-3.5 w-3.5 text-slate-400" />
-                      <span>{test.durationMinutes} mins</span>
+                  {/* Structured Dossier Telemetry Box */}
+                  <div className="rounded-lg bg-muted/30 border border-border/50 p-2.5 grid grid-cols-2 gap-2 text-xs">
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                      <div>
+                        <span className="font-mono text-foreground font-semibold tabular-nums">{test.durationMinutes}</span>
+                        <span className="text-[11px] text-muted-foreground ml-1">mins</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1.5">
-                      <Award className="h-3.5 w-3.5 text-slate-400" />
-                      <span>{test.totalMarks} Marks</span>
+                    <div className="flex items-center gap-2">
+                      <Award className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                      <div>
+                        <span className="font-mono text-foreground font-semibold tabular-nums">{test.totalMarks}</span>
+                        <span className="text-[11px] text-muted-foreground ml-1">marks</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1.5">
-                      <CheckCircle className="h-3.5 w-3.5 text-emerald-500" />
-                      <span>Pass: {test.passingMarks}</span>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                      <div>
+                        <span className="text-[11px] text-muted-foreground mr-1">Pass:</span>
+                        <span className="font-mono text-foreground font-semibold tabular-nums">{test.passingMarks}</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1.5">
-                      <FileQuestion className="h-3.5 w-3.5 text-slate-400" />
-                      <span>{test.questionsCount} Questions</span>
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                      <div>
+                        <span className="font-mono text-foreground font-semibold tabular-nums">{test.questionsCount}</span>
+                        <span className="text-[11px] text-muted-foreground ml-1">questions</span>
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Card Actions */}
-                <div className="mt-6 pt-4 border-t border-slate-100 space-y-2 relative z-10">
+                <div className="mt-4 pt-3.5 border-t border-border/60 space-y-2">
                   <div className="flex items-center gap-2">
                     {!isStaff ? (
                       test.isActive ? (
-                        <button
-                          type="button"
+                        <Button
+                          className="w-full text-xs h-9"
                           onClick={() => { void navigate(`/dashboard/preparation/tests/${test.id}/take`); }}
-                          className="flex-1 rounded-xl bg-indigo-600 px-4 py-2.5 text-center text-xs font-semibold text-white shadow-sm hover:bg-indigo-700 transition"
                         >
-                          Start Test
-                        </button>
+                          Start Assessment
+                        </Button>
                       ) : (
-                        <div className="flex flex-col gap-1.5 w-full">
-                          <div className="flex items-center justify-center gap-2 rounded-xl bg-slate-100/90 border border-slate-200/90 py-2.5 text-center text-xs font-semibold text-slate-500 backdrop-blur-sm shadow-inner cursor-not-allowed select-none">
-                            <Lock className="h-3.5 w-3.5 text-slate-400" />
-                            <span>Access Closed</span>
-                          </div>
-                          <p className="text-[11px] text-center text-slate-400 font-medium">
-                            Closed by faculty • Not accepting attempts
-                          </p>
+                        <div className="flex items-center justify-center gap-2 rounded-lg bg-muted/40 border border-border/60 py-2 w-full text-center text-xs font-medium text-muted-foreground select-none">
+                          <Lock className="h-3.5 w-3.5" />
+                          <span>Assessment Closed</span>
                         </div>
                       )
                     ) : (
-                      <Link
-                        to={`/dashboard/preparation/tests/${test.id}/edit`}
-                        className="flex-1 rounded-xl bg-indigo-600 px-4 py-2.5 text-center text-xs font-semibold text-white shadow-sm hover:bg-indigo-700 transition"
-                      >
-                        Manage & Edit Test
+                      <Link to={`/dashboard/preparation/tests/${test.id}/edit`} className="w-full">
+                        <Button variant="outline" className="w-full text-xs h-9">
+                          Manage Assessment
+                        </Button>
                       </Link>
                     )}
                   </div>
 
-                  {/* Faculty Quick Controls: Status Toggle & Delete Option */}
+                  {/* Faculty Quick Controls */}
                   {isStaff ? (
-                    <div className="flex items-center justify-between pt-2 border-t border-dashed border-slate-200 text-xs">
+                    <div className="flex items-center justify-between pt-1 text-xs">
                       <button
                         type="button"
                         onClick={() => { handleToggleStatus(test.id, test.isActive); }}
                         disabled={updateMutation.isPending}
-                        className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 font-medium transition ${
-                          test.isActive
-                            ? 'text-amber-700 hover:bg-amber-50 hover:text-amber-800'
-                            : 'text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800'
-                        }`}
-                        title={test.isActive ? 'Hide from students' : 'Make visible to students'}
+                        className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                       >
                         {test.isActive ? (
                           <>
                             <EyeOff className="h-3.5 w-3.5" />
-                            <span>Close Test</span>
+                            <span>Close</span>
                           </>
                         ) : (
                           <>
@@ -385,10 +375,9 @@ export function TestsPage(): React.JSX.Element {
 
                       <button
                         type="button"
-                        onClick={() => { handleDeleteTest(test.id, test.title); }}
-                        disabled={deleteMutation.isPending && deletingId === test.id}
-                        className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 font-medium text-red-600 hover:bg-red-50 hover:text-red-700 transition"
-                        title="Delete this test entirely"
+                        onClick={() => { setTestToDelete({ id: test.id, title: test.title }); }}
+                        disabled={deleteMutation.isPending && deleteMutation.variables === test.id}
+                        className="inline-flex items-center gap-1.5 text-xs text-destructive hover:text-destructive/80 transition-colors cursor-pointer"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                         <span>Delete</span>
@@ -396,11 +385,45 @@ export function TestsPage(): React.JSX.Element {
                     </div>
                   ) : null}
                 </div>
-              </div>
+              </Card>
             );
           })}
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={Boolean(testToDelete)}
+        onOpenChange={(open) => {
+          if (!open) setTestToDelete(null);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Assessment</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to permanently delete &quot;{testToDelete?.title}&quot;?
+              This will remove all questions, sections, answer keys, and student attempts. This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => { setTestToDelete(null); }}
+              disabled={deleteMutation.isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleConfirmDelete}
+              loading={deleteMutation.isPending}
+            >
+              Delete Assessment
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Faculty Interview Tracks Management Modal */}
       <FacultyInterviewTracksModal

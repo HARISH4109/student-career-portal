@@ -24,15 +24,13 @@ import {
 import { CreateOpportunityForm } from '@/features/opportunities/components/CreateOpportunityForm';
 import { DraftReviewQueue } from '@/features/opportunities/components/DraftReviewQueue';
 import { OpportunityFilters } from '@/features/opportunities/components/OpportunityFilters';
-
-const STATUS_BADGES: Record<string, { className: string; label: string }> = {
-  draft: { className: 'bg-slate-100 text-slate-600', label: 'Draft' },
-  pending_review: { className: 'bg-amber-100 text-amber-700', label: 'Pending Review' },
-  published: { className: 'bg-emerald-100 text-emerald-700', label: 'Published' },
-  closed: { className: 'bg-red-100 text-red-700', label: 'Closed' },
-  expired: { className: 'bg-slate-100 text-slate-500', label: 'Expired' },
-  rejected: { className: 'bg-red-100 text-red-600', label: 'Rejected' },
-};
+import {
+  Badge,
+  Button,
+  Card,
+  EmptyState,
+  StatusBadge,
+} from '@/shared/components/ui';
 
 export function ManageOpportunitiesPage(): React.JSX.Element {
   const navigate = useNavigate();
@@ -104,64 +102,67 @@ export function ManageOpportunitiesPage(): React.JSX.Element {
   };
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto pb-12">
+    <div className="space-y-6 w-full max-w-[1536px] mx-auto pb-12">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-5">
         <div className="flex items-center gap-3">
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => { void (navigate('/dashboard/opportunities')); }}
-            className="rounded-xl p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
             title="Back to Opportunities"
           >
             <ArrowLeft className="h-5 w-5" />
-          </button>
+          </Button>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-              <Briefcase className="h-6 w-6 text-blue-600" /> Manage Opportunities
+            <h1 className="text-2xl font-bold text-foreground tracking-tight flex items-center gap-2">
+              <Briefcase className="h-6 w-6 text-primary" /> Manage Opportunities
             </h1>
-            <p className="mt-1 text-sm text-slate-500">Create, edit, and publish campus placement opportunities</p>
+            <p className="mt-1 text-sm text-muted-foreground">Create, edit, and publish campus placement opportunities</p>
           </div>
         </div>
-        <button
+        <Button
           onClick={() => { setShowCreateForm(true); }}
-          className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:bg-blue-700"
+          className="gap-2"
         >
           <Plus className="h-4 w-4" />
           <span>Create Opportunity</span>
-        </button>
+        </Button>
       </div>
 
       {(deleteMutation.error || statusMutation.error) && (
-        <div className="flex items-center justify-between rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        <div className="flex items-center justify-between rounded-xl border border-destructive/20 bg-destructive/10 p-4 text-sm text-destructive">
           <span>
             {
               (deleteMutation.error ?? statusMutation.error)?.message ||
               'An error occurred.'}
           </span>
-          <button
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => {
               deleteMutation.reset();
               statusMutation.reset();
             }}
-            className="text-xs font-semibold text-red-800 hover:underline"
+            className="text-xs font-semibold text-destructive underline"
           >
             Dismiss
-          </button>
+          </Button>
         </div>
       )}
 
       {/* Main Tabs: Published Opportunities vs AI Ingestion Queue */}
       <nav
         aria-label="Manage opportunities sections"
-        className="flex flex-wrap items-center gap-1.5 rounded-2xl border border-slate-200/80 bg-white p-1.5 shadow-sm"
+        className="flex flex-wrap items-center gap-1.5 rounded-2xl border border-border/80 bg-card p-1.5 shadow-xs"
       >
         <button
           type="button"
           onClick={() => { setMainTab('published'); }}
-          className={`inline-flex min-h-10 items-center gap-2 rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-all ${
+          className={`inline-flex min-h-10 items-center gap-2 rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-colors cursor-pointer ${
             mainTab === 'published'
-              ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
-              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              ? 'bg-primary text-primary-foreground shadow-xs'
+              : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
           }`}
         >
           <Briefcase className="h-4 w-4 shrink-0" />
@@ -171,18 +172,18 @@ export function ManageOpportunitiesPage(): React.JSX.Element {
         <button
           type="button"
           onClick={() => { setMainTab('drafts'); }}
-          className={`inline-flex min-h-10 items-center gap-2 rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-all ${
+          className={`inline-flex min-h-10 items-center gap-2 rounded-xl px-4 py-2 text-xs sm:text-sm font-semibold transition-colors cursor-pointer ${
             mainTab === 'drafts'
-              ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
-              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              ? 'bg-primary text-primary-foreground shadow-xs'
+              : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
           }`}
         >
           <Sparkles className="h-4 w-4 shrink-0" />
           <span>AI Agent Extraction & Ingestion</span>
           {pendingDraftsCount > 0 && (
             <span
-              className={`rounded-full px-2 py-0.5 text-xs font-bold ${
-                mainTab === 'drafts' ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-800'
+              className={`rounded-full px-2 py-0.5 text-xs font-bold font-mono ${
+                mainTab === 'drafts' ? 'bg-primary-foreground/20 text-primary-foreground' : 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300'
               }`}
             >
               {pendingDraftsCount} pending
@@ -201,85 +202,80 @@ export function ManageOpportunitiesPage(): React.JSX.Element {
       {/* Table */}
       {isLoading ? (
         <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       ) : error ? (
-        <div className="rounded-xl border border-red-200 bg-red-50 p-8 text-center">
-          <p className="text-red-700">Failed to load opportunities</p>
+        <div className="rounded-xl border border-destructive/20 bg-destructive/10 p-8 text-center">
+          <p className="text-destructive font-semibold">Failed to load opportunities</p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        <Card className="overflow-hidden p-0 shadow-xs border-border">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-slate-200">
-              <thead className="bg-slate-50">
+            <table className="min-w-full divide-y divide-border">
+              <thead className="bg-muted/40">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <th className="px-6 py-3.5 text-left text-xs font-semibold tracking-normal text-muted-foreground">
                     Opportunity
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <th className="px-6 py-3.5 text-left text-xs font-semibold tracking-normal text-muted-foreground">
                     Type
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <th className="px-6 py-3.5 text-left text-xs font-semibold tracking-normal text-muted-foreground">
                     Status
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <th className="px-6 py-3.5 text-left text-xs font-semibold tracking-normal text-muted-foreground">
                     Deadline
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <th className="px-6 py-3.5 text-left text-xs font-semibold tracking-normal text-muted-foreground">
                     Apps
                   </th>
-                  <th className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <th className="px-6 py-3.5 text-right text-xs font-semibold tracking-normal text-muted-foreground">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-border/60 bg-card">
                 {opportunities.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-12 text-center text-sm text-slate-500">
-                      No opportunities found. Create your first one!
+                    <td colSpan={6} className="px-6 py-12 text-center text-sm text-muted-foreground">
+                      <EmptyState
+                        icon={Briefcase}
+                        title="No opportunities found"
+                        description="Try modifying your filters or create a new campus placement opportunity."
+                        action={{
+                          label: 'Create Opportunity',
+                          onClick: () => { setShowCreateForm(true); },
+                        }}
+                      />
                     </td>
                   </tr>
                 ) : (
                   opportunities.map((opp) => {
-                    const badge = STATUS_BADGES[opp.status] ?? {
-                      className: 'bg-slate-100 text-slate-600',
-                      label: opp.status,
-                    };
                     const deadline = opp.applicationDeadline
                       ? new Date(opp.applicationDeadline)
                       : null;
                     return (
-                      <tr key={opp.id} className="hover:bg-slate-50/50 transition-colors">
+                      <tr key={opp.id} className="hover:bg-accent/40 transition-colors">
                         <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div>
-                              <p className="text-sm font-semibold text-slate-900">{opp.title}</p>
-                              <p className="text-xs text-slate-500">
-                                {opp.company?.name ?? 'Company'}
-                              </p>
-                            </div>
+                          <div>
+                            <p className="text-sm font-semibold text-foreground">{opp.title}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {opp.company?.name ?? 'Company'}
+                            </p>
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <span
-                            className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
-                              opp.type === 'job'
-                                ? 'bg-blue-50 text-blue-700'
-                                : 'bg-violet-50 text-violet-700'
-                            }`}
+                          <Badge
+                            variant={opp.type === 'job' ? 'default' : 'secondary'}
+                            className="capitalize"
                           >
                             {opp.type === 'job' ? 'Job' : 'Internship'}
-                          </span>
+                          </Badge>
                         </td>
                         <td className="px-6 py-4">
-                          <span
-                            className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${badge.className}`}
-                          >
-                            {badge.label}
-                          </span>
+                          <StatusBadge status={opp.status} />
                         </td>
-                        <td className="px-6 py-4 text-sm text-slate-500">
+                        <td className="px-6 py-4 text-xs font-mono text-muted-foreground">
                           {deadline
                             ? deadline.toLocaleDateString('en-IN', {
                                 day: 'numeric',
@@ -288,49 +284,55 @@ export function ManageOpportunitiesPage(): React.JSX.Element {
                               })
                             : '—'}
                         </td>
-                        <td className="px-6 py-4 text-sm font-medium text-slate-700">
+                        <td className="px-6 py-4 text-sm font-mono font-medium text-foreground">
                           {opp.applicationCount}
                         </td>
                         <td className="px-6 py-4 text-right">
                           <div className="flex items-center justify-end gap-1">
-                            <button
-                              onClick={() =>
-                                { void (navigate(`/dashboard/opportunities/${opp.id}`)); }
-                              }
-                              className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => { void (navigate(`/dashboard/opportunities/${opp.id}`)); }}
                               title="View Details"
                             >
                               <Eye className="h-4 w-4" />
-                            </button>
-                            <button
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
                               onClick={() => { setEditingOpportunity(opp); }}
-                              className="rounded-lg p-2 text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition-colors"
                               title="Edit Opportunity"
                             >
                               <Pencil className="h-4 w-4" />
-                            </button>
+                            </Button>
                             {opp.status === 'draft' && (
-                              <button
+                              <Button
+                                variant="ghost"
+                                size="icon"
                                 onClick={() => { handleStatusChange(opp.id, 'published'); }}
                                 disabled={statusMutation.isPending}
-                                className="rounded-lg p-2 text-emerald-500 hover:bg-emerald-50 transition-colors"
+                                className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
                                 title="Publish"
                               >
                                 <CheckCircle className="h-4 w-4" />
-                              </button>
+                              </Button>
                             )}
                             {opp.status === 'published' && (
-                              <button
+                              <Button
+                                variant="ghost"
+                                size="icon"
                                 onClick={() => { handleStatusChange(opp.id, 'closed'); }}
                                 disabled={statusMutation.isPending}
-                                className="rounded-lg p-2 text-red-500 hover:bg-red-50 transition-colors"
+                                className="text-destructive hover:text-destructive hover:bg-destructive/10"
                                 title="Close"
                               >
                                 <XCircle className="h-4 w-4" />
-                              </button>
+                              </Button>
                             )}
                             {(opp.status === 'closed' || opp.status === 'expired') && (
-                              <button
+                              <Button
+                                variant="ghost"
+                                size="icon"
                                 onClick={() => {
                                   const isDeadlinePast = opp.applicationDeadline && new Date(opp.applicationDeadline).getTime() <= Date.now();
                                   if (isDeadlinePast) {
@@ -342,20 +344,22 @@ export function ManageOpportunitiesPage(): React.JSX.Element {
                                   handleStatusChange(opp.id, 'published');
                                 }}
                                 disabled={statusMutation.isPending}
-                                className="rounded-lg p-2 text-emerald-600 hover:bg-emerald-50 transition-colors"
+                                className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
                                 title="Go Live (Activate)"
                               >
                                 <Play className="h-4 w-4" />
-                              </button>
+                              </Button>
                             )}
-                            <button
-                                onClick={() => { handleDelete(opp.id, opp.title); }}
-                                disabled={deleteMutation.isPending}
-                                className="rounded-lg p-2 text-rose-500 hover:bg-rose-50 transition-colors"
-                                title="Delete Opportunity"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => { handleDelete(opp.id, opp.title); }}
+                              disabled={deleteMutation.isPending}
+                              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                              title="Delete Opportunity"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
                           </div>
                         </td>
                       </tr>
@@ -368,39 +372,39 @@ export function ManageOpportunitiesPage(): React.JSX.Element {
 
           {/* Pagination */}
           {meta && meta.totalPages > 1 && (
-            <div className="flex items-center justify-between border-t border-slate-100 px-6 py-3">
-              <p className="text-xs text-slate-500">
+            <div className="flex items-center justify-between border-t border-border px-6 py-3">
+              <p className="text-xs text-muted-foreground font-mono">
                 {meta.totalItems} total opportunities
               </p>
               <div className="flex items-center gap-2">
-                <button
-                  onClick={() =>
-                    { setFilters((f) => ({ ...f, page: Math.max(1, (f.page ?? 1) - 1) })); }
-                  }
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => { setFilters((f) => ({ ...f, page: Math.max(1, (f.page ?? 1) - 1) })); }}
                   disabled={filters.page === 1}
-                  className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   Previous
-                </button>
-                <span className="text-xs text-slate-500">
+                </Button>
+                <span className="text-xs text-muted-foreground font-mono">
                   {meta.page} / {meta.totalPages}
                 </span>
-                <button
-                  onClick={() =>
-                    { setFilters((f) => ({
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setFilters((f) => ({
                       ...f,
                       page: Math.min(meta.totalPages, (f.page ?? 1) + 1),
-                    })); }
-                  }
+                    }));
+                  }}
                   disabled={filters.page === meta.totalPages}
-                  className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   Next
-                </button>
+                </Button>
               </div>
             </div>
           )}
-        </div>
+        </Card>
       )}
       </>
       )}

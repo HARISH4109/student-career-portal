@@ -1,3 +1,5 @@
+import { db, schema } from '@career-portal/db';
+import { eq } from 'drizzle-orm';
 import type { Server as SocketIOServer } from 'socket.io';
 import { logger } from './logger';
 import { supabaseAdmin } from './supabase';
@@ -21,6 +23,14 @@ export function initSocketServer(io: SocketIOServer): void {
       const { data, error } = await supabaseAdmin.auth.getUser(rawToken);
       if (error || !data.user) {
         return next(new Error('Invalid authentication token'));
+      }
+
+      const appUser = await db.query.users.findFirst({
+        where: eq(schema.users.id, data.user.id),
+        columns: { isActive: true },
+      });
+      if (!appUser || !appUser.isActive) {
+        return next(new Error('User account is deactivated'));
       }
 
       socket.data.userId = data.user.id;

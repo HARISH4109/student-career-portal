@@ -16,10 +16,14 @@ import { requestContextStorage } from '@/shared/context/request-context';
  *   back via the `X-Request-Id` response header (for client debugging).
  * - Establishes AsyncLocalStorage context for automatic audit & log correlation.
  */
+const SAFE_REQUEST_ID_RE = /^[a-zA-Z0-9_-]{1,64}$/;
+
 export function requestId(req: Request, res: Response, next: NextFunction): void {
+  const rawHeader = req.headers['x-request-id'];
   const id =
-    (typeof req.headers['x-request-id'] === 'string' && req.headers['x-request-id']) ||
-    crypto.randomUUID();
+    typeof rawHeader === 'string' && SAFE_REQUEST_ID_RE.test(rawHeader)
+      ? rawHeader
+      : crypto.randomUUID();
 
   // Attach for pino-http's `genReqId` and any downstream code
   (req as Request & { id: string }).id = id;

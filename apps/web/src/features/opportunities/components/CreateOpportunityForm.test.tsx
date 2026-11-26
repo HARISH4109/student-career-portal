@@ -153,7 +153,7 @@ describe('CreateOpportunityForm', () => {
     fireEvent.change(locationInput, { target: { value: 'Bangalore' } });
 
     // Switch to Paid compensation (exact button)
-    const paidButton = screen.getByRole('button', { name: /💰 Paid/i });
+    const paidButton = screen.getByRole('button', { name: /^Paid$/i });
     fireEvent.click(paidButton);
 
     const salaryMinInput = screen.getByPlaceholderText('e.g. 600000');

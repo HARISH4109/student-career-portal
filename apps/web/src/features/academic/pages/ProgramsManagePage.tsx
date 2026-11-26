@@ -204,14 +204,14 @@ export function ProgramsManagePage(): React.JSX.Element {
   };
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto pb-12">
+    <div className="space-y-6 w-full max-w-[1536px] mx-auto pb-12">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-5">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            <GraduationCap className="h-6 w-6 text-blue-600" /> Academic Programs & Streams
+          <h1 className="text-2xl font-bold text-foreground tracking-tight flex items-center gap-2">
+            <GraduationCap className="h-6 w-6 text-primary" /> Academic Programs & Streams
           </h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-muted-foreground">
             Administrator Console — Configure departmental degree programs (B.Tech, M.Tech, MCA,
             B.Sc, M.Sc) and specialization streams
           </p>
@@ -219,22 +219,22 @@ export function ProgramsManagePage(): React.JSX.Element {
 
         <button
           onClick={openAddProgram}
-          className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-xl shadow-sm transition-all self-start sm:self-auto"
+          className="inline-flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-sm rounded-lg shadow-sm transition-colors self-start sm:self-auto cursor-pointer"
         >
           <Plus className="h-4 w-4" /> Add Degree Program
         </button>
       </div>
 
       {/* Institutional Department Context Banner */}
-      <div className="rounded-2xl border border-blue-200 bg-blue-50/50 p-4 flex items-center gap-3">
-        <div className="p-2.5 bg-blue-100 text-blue-700 rounded-xl">
+      <div className="rounded-xl border border-border bg-card p-4 flex items-center gap-3">
+        <div className="p-2.5 bg-primary/10 text-primary rounded-lg">
           <Layers className="h-5 w-5" />
         </div>
         <div>
-          <span className="text-xs font-semibold text-blue-800 uppercase tracking-wider">
+          <span className="text-xs font-medium text-primary">
             Department Scope
           </span>
-          <p className="text-sm font-bold text-slate-900">
+          <p className="text-sm font-bold text-foreground">
             Computer Science & Engineering (CSE)
           </p>
         </div>
@@ -242,14 +242,14 @@ export function ProgramsManagePage(): React.JSX.Element {
 
       {/* Program List */}
       {isLoading ? (
-        <div className="p-16 text-center text-slate-400 text-sm">
+        <div className="p-16 text-center text-muted-foreground text-sm">
           Loading departmental programs…
         </div>
       ) : programs.length === 0 ? (
-        <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center">
-          <GraduationCap className="mx-auto h-12 w-12 text-slate-300 stroke-[1.5]" />
-          <h3 className="mt-3 text-base font-bold text-slate-800">No programs configured</h3>
-          <p className="mt-1 text-sm text-slate-500">
+        <div className="rounded-xl border border-border bg-card p-12 text-center">
+          <GraduationCap className="mx-auto h-12 w-12 text-muted-foreground stroke-[1.5]" />
+          <h3 className="mt-3 text-base font-bold text-foreground">No programs configured</h3>
+          <p className="mt-1 text-sm text-muted-foreground">
             Add degree programs to start configuring academic tracks.
           </p>
         </div>
@@ -258,30 +258,30 @@ export function ProgramsManagePage(): React.JSX.Element {
           {programs.map((program) => (
             <div
               key={program.id}
-              className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4"
+              className="rounded-xl border border-border bg-card p-6 shadow-sm space-y-4"
             >
               {/* Program Header */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-4">
                 <div className="flex items-start gap-3">
-                  <div className="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl mt-0.5">
+                  <div className="p-2.5 bg-primary/10 text-primary rounded-lg mt-0.5">
                     <FolderTree className="h-5 w-5" />
                   </div>
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h2 className="text-base font-bold text-slate-900">{program.name}</h2>
-                      <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-100 text-indigo-800">
+                      <h2 className="text-base font-bold text-foreground">{program.name}</h2>
+                      <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-primary/15 text-primary border border-primary/20">
                         {program.degreeLevel}
                       </span>
-                      <span className="text-xs font-medium text-slate-500">
+                      <span className="text-xs font-mono text-muted-foreground">
                         • {program.durationYears} Years Duration
                       </span>
                       {!program.isActive && (
-                        <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">
+                        <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800/50">
                           Archived
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-slate-400 mt-0.5">
+                    <p className="text-xs text-muted-foreground mt-0.5 font-mono">
                       {program.streams?.length || 0} Specialization Streams Configured
                     </p>
                   </div>
@@ -290,13 +290,13 @@ export function ProgramsManagePage(): React.JSX.Element {
                 <div className="flex items-center gap-2 self-end sm:self-auto">
                   <button
                     onClick={() => { openAddStream(program); }}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-xs font-semibold text-slate-700 transition"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-muted/30 hover:bg-muted text-xs font-semibold text-foreground transition cursor-pointer"
                   >
-                    <Plus className="h-3.5 w-3.5 text-blue-600" /> Add Stream
+                    <Plus className="h-3.5 w-3.5 text-primary" /> Add Stream
                   </button>
                   <button
                     onClick={() => { openEditProgram(program); }}
-                    className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition"
+                    className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted/40 rounded-lg transition cursor-pointer"
                     title="Edit program"
                   >
                     <Edit2 className="h-4 w-4" />
@@ -311,7 +311,7 @@ export function ProgramsManagePage(): React.JSX.Element {
                         deleteProgramMutation.mutate(program.id);
                       }
                     }}
-                    className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                    className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition cursor-pointer"
                     title="Drop program"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -321,11 +321,11 @@ export function ProgramsManagePage(): React.JSX.Element {
 
               {/* Streams List */}
               <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2.5">
+                <p className="text-xs font-medium text-muted-foreground mb-2.5">
                   Specialization Streams & Pathways
                 </p>
                 {(!program.streams || program.streams.length === 0) ? (
-                  <p className="text-xs text-slate-400 italic bg-slate-50 px-4 py-3 rounded-xl border border-dashed border-slate-200">
+                  <p className="text-xs text-muted-foreground italic bg-muted/20 px-4 py-3 rounded-lg border border-dashed border-border">
                     No individual streams added yet. Students enrolling in this program will study the general core curriculum.
                   </p>
                 ) : (
@@ -333,18 +333,18 @@ export function ProgramsManagePage(): React.JSX.Element {
                     {program.streams.map((stream) => (
                       <div
                         key={stream.id}
-                        className="rounded-xl border border-slate-200 bg-slate-50/70 p-3 flex items-center justify-between hover:bg-slate-50 transition"
+                        className="rounded-lg border border-border bg-muted/20 p-3 flex items-center justify-between hover:bg-muted/30 transition"
                       >
                         <div className="min-w-0 pr-2">
-                          <p className="text-xs font-bold text-slate-800 truncate">{stream.name}</p>
-                          <span className="inline-block mt-0.5 text-[10px] font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">
+                          <p className="text-xs font-bold text-foreground truncate">{stream.name}</p>
+                          <span className="inline-block mt-0.5 text-[10px] font-mono font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded border border-primary/20">
                             {stream.code}
                           </span>
                         </div>
                         <div className="flex items-center gap-1 shrink-0">
                           <button
                             onClick={() => { openEditStream(program, stream); }}
-                            className="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 rounded"
+                            className="p-1 text-muted-foreground hover:text-foreground hover:bg-muted/40 rounded cursor-pointer"
                             title="Edit stream"
                           >
                             <Edit2 className="h-3.5 w-3.5" />
@@ -357,7 +357,7 @@ export function ProgramsManagePage(): React.JSX.Element {
                                 deleteStreamMutation.mutate(stream.id);
                               }
                             }}
-                            className="p-1 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded"
+                            className="p-1 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded cursor-pointer"
                             title="Drop stream"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
@@ -375,22 +375,22 @@ export function ProgramsManagePage(): React.JSX.Element {
 
       {/* Program Create/Edit Modal */}
       {isProgramModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 className="text-base font-bold text-slate-900">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-xl bg-card border border-border p-6 shadow-xl space-y-4">
+            <div className="flex items-center justify-between border-b border-border pb-3">
+              <h3 className="text-base font-bold text-foreground">
                 {programToEdit ? 'Edit Degree Program' : 'Add Degree Program'}
               </h3>
               <button
                 onClick={() => { setIsProgramModalOpen(false); }}
-                className="text-slate-400 hover:text-slate-600"
+                className="text-muted-foreground hover:text-foreground cursor-pointer"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             {progError && (
-              <div className="flex items-center gap-2 p-3 text-xs text-red-700 bg-red-50 rounded-xl border border-red-200">
+              <div className="flex items-center gap-2 p-3 text-xs text-rose-700 dark:text-rose-300 bg-rose-500/10 rounded-lg border border-rose-500/20">
                 <AlertCircle className="h-4 w-4 shrink-0" />
                 <span>{progError}</span>
               </div>
@@ -398,27 +398,27 @@ export function ProgramsManagePage(): React.JSX.Element {
 
             <form onSubmit={handleProgramSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1">
-                  Program Name <span className="text-red-500">*</span>
+                <label className="block text-xs font-medium text-muted-foreground mb-1">
+                  Program Name <span className="text-rose-700 dark:text-rose-400">*</span>
                 </label>
                 <input
                   type="text"
                   value={progName}
                   onChange={(e) => { setProgName(e.target.value); }}
                   placeholder="e.g. Master of Computer Applications (MCA)"
-                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none"
+                  className="w-full rounded-lg border border-border bg-background px-3.5 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1">
-                    Degree Level <span className="text-red-500">*</span>
+                  <label className="block text-xs font-medium text-muted-foreground mb-1">
+                    Degree Level <span className="text-rose-700 dark:text-rose-400">*</span>
                   </label>
                   <select
                     value={progDegree}
                     onChange={(e) => { setProgDegree(e.target.value); }}
-                    className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
                   >
                     {DEGREE_OPTIONS.map((deg) => (
                       <option key={deg} value={deg}>
@@ -429,7 +429,7 @@ export function ProgramsManagePage(): React.JSX.Element {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1">
+                  <label className="block text-xs font-medium text-muted-foreground mb-1">
                     Duration (Years)
                   </label>
                   <input
@@ -438,23 +438,23 @@ export function ProgramsManagePage(): React.JSX.Element {
                     max="6"
                     value={progDuration}
                     onChange={(e) => { setProgDuration(parseInt(e.target.value, 10) || 4); }}
-                    className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded-lg border border-border bg-background px-3.5 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
                   />
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-border">
                 <button
                   type="button"
                   onClick={() => { setIsProgramModalOpen(false); }}
-                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition"
+                  className="px-4 py-2 text-xs font-semibold text-muted-foreground hover:bg-muted/40 rounded-lg transition cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={createProgramMutation.isPending || updateProgramMutation.isPending}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl transition disabled:opacity-60"
+                  className="px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-semibold rounded-lg transition disabled:opacity-60 cursor-pointer"
                 >
                   {createProgramMutation.isPending || updateProgramMutation.isPending
                     ? 'Saving…'
@@ -470,25 +470,25 @@ export function ProgramsManagePage(): React.JSX.Element {
 
       {/* Stream Create/Edit Modal */}
       {isStreamModalOpen && targetProgram && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-xl bg-card border border-border p-6 shadow-xl space-y-4">
+            <div className="flex items-center justify-between border-b border-border pb-3">
               <div>
-                <h3 className="text-base font-bold text-slate-900">
+                <h3 className="text-base font-bold text-foreground">
                   {streamToEdit ? 'Edit Specialization Stream' : 'Add Specialization Stream'}
                 </h3>
-                <p className="text-xs text-slate-500 mt-0.5">{targetProgram.name}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{targetProgram.name}</p>
               </div>
               <button
                 onClick={() => { setIsStreamModalOpen(false); }}
-                className="text-slate-400 hover:text-slate-600"
+                className="text-muted-foreground hover:text-foreground cursor-pointer"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             {streamError && (
-              <div className="flex items-center gap-2 p-3 text-xs text-red-700 bg-red-50 rounded-xl border border-red-200">
+              <div className="flex items-center gap-2 p-3 text-xs text-rose-700 dark:text-rose-300 bg-rose-500/10 rounded-lg border border-rose-500/20">
                 <AlertCircle className="h-4 w-4 shrink-0" />
                 <span>{streamError}</span>
               </div>
@@ -496,43 +496,43 @@ export function ProgramsManagePage(): React.JSX.Element {
 
             <form onSubmit={handleStreamSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1">
-                  Stream / Specialization Name <span className="text-red-500">*</span>
+                <label className="block text-xs font-medium text-muted-foreground mb-1">
+                  Stream / Specialization Name <span className="text-rose-700 dark:text-rose-400">*</span>
                 </label>
                 <input
                   type="text"
                   value={streamName}
                   onChange={(e) => { setStreamName(e.target.value); }}
                   placeholder="e.g. Artificial Intelligence & Data Science"
-                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-sm text-slate-900 focus:border-blue-500 focus:outline-none"
+                  className="w-full rounded-lg border border-border bg-background px-3.5 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1">
-                  Stream Code / Abbreviation <span className="text-red-500">*</span>
+                <label className="block text-xs font-medium text-muted-foreground mb-1">
+                  Stream Code / Abbreviation <span className="text-rose-700 dark:text-rose-400">*</span>
                 </label>
                 <input
                   type="text"
                   value={streamCode}
                   onChange={(e) => { setStreamCode(e.target.value); }}
                   placeholder="e.g. AI-DS or DA"
-                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-sm text-slate-900 uppercase focus:border-blue-500 focus:outline-none"
+                  className="w-full rounded-lg border border-border bg-background px-3.5 py-2 text-sm text-foreground uppercase focus:border-primary focus:outline-none"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-border">
                 <button
                   type="button"
                   onClick={() => { setIsStreamModalOpen(false); }}
-                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition"
+                  className="px-4 py-2 text-xs font-semibold text-muted-foreground hover:bg-muted/40 rounded-lg transition cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={createStreamMutation.isPending || updateStreamMutation.isPending}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl transition disabled:opacity-60"
+                  className="px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-semibold rounded-lg transition disabled:opacity-60 cursor-pointer"
                 >
                   {createStreamMutation.isPending || updateStreamMutation.isPending
                     ? 'Saving…'

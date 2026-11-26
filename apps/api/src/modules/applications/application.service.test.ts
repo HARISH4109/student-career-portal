@@ -102,7 +102,37 @@ describe('ApplicationService - updateStudentSelfStatus', () => {
     ).rejects.toThrow(ValidationError);
   });
 
-  it('successfully updates status and returns mapped response', async () => {
+  it('throws ForbiddenError when a student attempts to self-assign selected or interview', async () => {
+    appRepoMock.findById.mockResolvedValue({
+      id: applicationId,
+      studentId: studentProfileId,
+      opportunityId,
+      status: 'applied',
+    } as never);
+
+    appRepoMock.findStudentProfileByUserId.mockResolvedValue({
+      id: studentProfileId,
+      userId: studentUserId,
+    } as never);
+
+    await expect(
+      service.updateStudentSelfStatus(
+        applicationId,
+        { status: 'selected', remarks: 'Self-selected' },
+        mockStudentUser,
+      ),
+    ).rejects.toThrow(ForbiddenError);
+
+    await expect(
+      service.updateStudentSelfStatus(
+        applicationId,
+        { status: 'interview', remarks: 'Got interview call' },
+        mockStudentUser,
+      ),
+    ).rejects.toThrow(ForbiddenError);
+  });
+
+  it('successfully withdraws a non-terminal application and returns mapped response', async () => {
     const existingApp = {
       id: applicationId,
       studentId: studentProfileId,
@@ -133,14 +163,14 @@ describe('ApplicationService - updateStudentSelfStatus', () => {
 
     const updatedApp = {
       ...existingApp,
-      status: 'interview',
+      status: 'withdrawn',
       statusHistory: [
         {
           id: randomUUID(),
-          status: 'interview',
+          status: 'withdrawn',
           changedBy: studentUserId,
           changedByUser: { fullName: 'CSE Student' },
-          remarks: 'Round 1 technical scheduled',
+          remarks: 'Accepted another offer',
           changedAt: new Date(),
         },
       ],
@@ -157,18 +187,18 @@ describe('ApplicationService - updateStudentSelfStatus', () => {
 
     const result = await service.updateStudentSelfStatus(
       applicationId,
-      { status: 'interview', remarks: 'Round 1 technical scheduled' },
+      { status: 'withdrawn', remarks: 'Accepted another offer' },
       mockStudentUser,
     );
 
     expect(appRepoMock.updateStudentApplicationStatus).toHaveBeenCalledWith(
       applicationId,
-      'interview',
+      'withdrawn',
       studentUserId,
-      'Round 1 technical scheduled',
+      'Accepted another offer',
     );
-    expect(result.status).toBe('interview');
+    expect(result.status).toBe('withdrawn');
     expect(result.statusHistory).toHaveLength(1);
-    expect(result.statusHistory[0]?.remarks).toBe('Round 1 technical scheduled');
+    expect(result.statusHistory[0]?.remarks).toBe('Accepted another offer');
   });
 });

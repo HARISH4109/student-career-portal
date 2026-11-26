@@ -9,7 +9,7 @@ COPY apps/web/package.json ./apps/web/package.json
 COPY apps/api/package.json ./apps/api/package.json
 COPY packages/db/package.json ./packages/db/package.json
 COPY packages/shared-types/package.json ./packages/shared-types/package.json
-RUN npm ci
+RUN npm ci --ignore-scripts && mkdir -p /app/apps/web/node_modules
 
 FROM base AS build
 ARG VITE_API_BASE_URL
@@ -19,9 +19,11 @@ ARG VITE_SOCKET_URL
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL \
     VITE_SUPABASE_URL=$VITE_SUPABASE_URL \
     VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY \
-    VITE_SOCKET_URL=$VITE_SOCKET_URL
-COPY --from=deps /app/node_modules ./node_modules
+    VITE_SOCKET_URL=$VITE_SOCKET_URL \
+    NODE_OPTIONS="--max-old-space-size=4096"
 COPY . .
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/apps/web/node_modules ./apps/web/node_modules
 RUN npm run build -w packages/shared-types && npm run build -w apps/web
 
 # ── Runtime: static files served by Nginx ──────────────────────────────

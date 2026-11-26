@@ -8,7 +8,9 @@ import {
   AlertTriangle,
   Briefcase,
   Check,
+  CheckCircle2,
   GraduationCap,
+  Info,
   Loader2,
   Pencil,
   Play,
@@ -367,18 +369,18 @@ export function CreateOpportunityForm({
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
 
       {/* Modal Card */}
-      <div className="relative max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
+      <div className="relative max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-card border border-border shadow-2xl">
         {/* Header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-100 bg-white px-6 py-4">
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-card px-6 py-4">
           <div className="flex items-center gap-2.5">
-            <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${isEditing ? 'bg-amber-50 text-amber-600' : 'bg-blue-50 text-blue-600'}`}>
+            <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${isEditing ? 'bg-amber-50 text-amber-600' : 'bg-primary/10 text-primary'}`}>
               {isEditing ? <Pencil className="h-5 w-5" /> : <Briefcase className="h-5 w-5" />}
             </div>
             <div>
-              <h2 className="text-lg font-bold text-slate-900">
+              <h2 className="text-lg font-bold text-foreground">
                 {isEditing ? `Edit Opportunity: ${opportunity?.title ?? ''}` : 'Post New Opportunity'}
               </h2>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-muted-foreground">
                 {isEditing
                   ? 'Update job details, criteria, deadlines or compensation'
                   : 'Create a job or internship placement posting'}
@@ -387,7 +389,7 @@ export function CreateOpportunityForm({
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+            className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted/40 hover:text-muted-foreground transition-colors"
           >
             <X className="h-5 w-5" />
           </button>
@@ -420,14 +422,14 @@ export function CreateOpportunityForm({
 
           {/* Basic Details Section */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-500">
+            <h3 className="text-sm font-semibold tracking-normal text-muted-foreground">
               1. Basic Information
             </h3>
 
             {/* Title & Type */}
             <div className="grid gap-4 sm:grid-cols-3">
               <div className="sm:col-span-2">
-                <label className="mb-1 block text-xs font-semibold text-slate-700">
+                <label className="mb-1 block text-xs font-semibold text-muted-foreground">
                   Opportunity Title <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -436,21 +438,21 @@ export function CreateOpportunityForm({
                   value={title}
                   onChange={(e) => { setTitle(e.target.value); }}
                   placeholder="e.g. Associate Software Engineer, Data Science Intern"
-                  className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2 text-sm focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-border bg-background px-3.5 py-2 text-sm focus:border-primary focus:bg-card focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
 
               <div>
-                <label className="mb-1 block text-xs font-semibold text-slate-700">
+                <label className="mb-1 block text-xs font-semibold text-muted-foreground">
                   Opportunity Type <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={type}
                   onChange={(e) => { setType(e.target.value as 'job' | 'internship'); }}
-                  className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2 text-sm focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-border bg-background px-3.5 py-2 text-sm focus:border-primary focus:bg-card focus:outline-none focus:ring-2 focus:ring-primary"
                 >
-                  <option value="job">💼 Job</option>
-                  <option value="internship">🎓 Internship</option>
+                  <option value="job">Job</option>
+                  <option value="internship">Internship</option>
                 </select>
               </div>
             </div>
@@ -458,7 +460,7 @@ export function CreateOpportunityForm({
             {/* Company Selection / Input */}
             <div>
               <div className="mb-1 flex items-center justify-between">
-                <label className="text-xs font-semibold text-slate-700">
+                <label className="text-xs font-semibold text-muted-foreground">
                   Company / Organization <span className="text-red-500">*</span>
                 </label>
                 <div className="flex gap-2 text-xs">
@@ -467,8 +469,8 @@ export function CreateOpportunityForm({
                     onClick={() => { setCompanyMode('existing'); }}
                     className={`font-medium ${
                       companyMode === 'existing'
-                        ? 'text-blue-600 underline'
-                        : 'text-slate-400 hover:text-slate-600'
+                        ? 'text-primary underline'
+                        : 'text-muted-foreground hover:text-muted-foreground'
                     }`}
                   >
                     Select existing
@@ -479,8 +481,8 @@ export function CreateOpportunityForm({
                     onClick={() => { setCompanyMode('new'); }}
                     className={`font-medium ${
                       companyMode === 'new'
-                        ? 'text-blue-600 underline'
-                        : 'text-slate-400 hover:text-slate-600'
+                        ? 'text-primary underline'
+                        : 'text-muted-foreground hover:text-muted-foreground'
                     }`}
                   >
                     + Add new
@@ -493,7 +495,7 @@ export function CreateOpportunityForm({
                   required
                   value={companyId}
                   onChange={(e) => { setCompanyId(e.target.value); }}
-                  className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2 text-sm focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-border bg-background px-3.5 py-2 text-sm focus:border-primary focus:bg-card focus:outline-none focus:ring-2 focus:ring-primary"
                 >
                   <option value="">-- Choose Company --</option>
                   {opportunity?.company && !companies.some((c) => c.id === opportunity.companyId) && (
@@ -514,14 +516,14 @@ export function CreateOpportunityForm({
                   value={companyName}
                   onChange={(e) => { setCompanyName(e.target.value); }}
                   placeholder="Enter new company name (e.g. Google, Microsoft, Startup Inc.)"
-                  className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2 text-sm focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-border bg-background px-3.5 py-2 text-sm focus:border-primary focus:bg-card focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               )}
             </div>
 
             {/* Description */}
             <div>
-              <label className="mb-1 block text-xs font-semibold text-slate-700">
+              <label className="mb-1 block text-xs font-semibold text-muted-foreground">
                 Job / Internship Description <span className="text-red-500">*</span>
               </label>
               <textarea
@@ -530,45 +532,45 @@ export function CreateOpportunityForm({
                 value={description}
                 onChange={(e) => { setDescription(e.target.value); }}
                 placeholder="Provide role responsibilities, team overview, perks, selection process..."
-                className="w-full rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-border bg-background p-3 text-sm focus:border-primary focus:bg-card focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
           </div>
 
           {/* Work Mode & Compensation */}
-          <div className="space-y-4 border-t border-slate-100 pt-4">
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-500">
+          <div className="space-y-4 border-t border-border pt-4">
+            <h3 className="text-sm font-semibold tracking-normal text-muted-foreground">
               2. Work Mode, Location & Compensation
             </h3>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label className="mb-1 block text-xs font-semibold text-slate-700">Work Mode</label>
+                <label className="mb-1 block text-xs font-semibold text-muted-foreground">Work Mode</label>
                 <select
                   value={workMode}
                   onChange={(e) => { setWorkMode(e.target.value as 'onsite' | 'remote' | 'hybrid'); }}
-                  className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2 text-sm focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-border bg-background px-3.5 py-2 text-sm focus:border-primary focus:bg-card focus:outline-none focus:ring-2 focus:ring-primary"
                 >
-                  <option value="onsite">🏢 On-site</option>
-                  <option value="remote">🏠 Remote</option>
-                  <option value="hybrid">🔄 Hybrid</option>
+                  <option value="onsite">On-site</option>
+                  <option value="remote">Remote</option>
+                  <option value="hybrid">Hybrid</option>
                 </select>
               </div>
 
               <div>
-                <label className="mb-1 block text-xs font-semibold text-slate-700">Location</label>
+                <label className="mb-1 block text-xs font-semibold text-muted-foreground">Location</label>
                 <input
                   type="text"
                   value={location}
                   onChange={(e) => { setLocation(e.target.value); }}
                   placeholder="e.g. Bangalore, Mumbai, Remote - India"
-                  className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2 text-sm focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-border bg-background px-3.5 py-2 text-sm focus:border-primary focus:bg-card focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
 
               {/* Compensation Mode Selector */}
               <div className="sm:col-span-2">
-                <label className="mb-1.5 block text-xs font-semibold text-slate-700">
+                <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">
                   Compensation / {type === 'job' ? 'Salary' : 'Stipend'}
                 </label>
                 <div className="grid grid-cols-3 gap-2">
@@ -579,13 +581,13 @@ export function CreateOpportunityForm({
                       if (salaryMin === '0') setSalaryMin('');
                       if (salaryMax === '0') setSalaryMax('');
                     }}
-                    className={`flex items-center justify-center gap-1.5 rounded-lg border py-2 text-xs font-medium transition-all ${
+                    className={`flex items-center justify-center gap-1.5 rounded-lg border py-2 text-xs font-medium transition-colors ${
                       compensationType === 'paid'
-                        ? 'border-blue-600 bg-blue-50 text-blue-700 shadow-sm ring-1 ring-blue-600'
-                        : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+                        ? 'border-primary bg-primary/10 text-primary shadow-sm ring-1 ring-primary'
+                        : 'border-border bg-card text-muted-foreground hover:border-border hover:bg-background'
                     }`}
                   >
-                    <span>💰</span> Paid
+                    Paid
                   </button>
                   <button
                     type="button"
@@ -594,13 +596,13 @@ export function CreateOpportunityForm({
                       setSalaryMin('0');
                       setSalaryMax('0');
                     }}
-                    className={`flex items-center justify-center gap-1.5 rounded-lg border py-2 text-xs font-medium transition-all ${
+                    className={`flex items-center justify-center gap-1.5 rounded-lg border py-2 text-xs font-medium transition-colors ${
                       compensationType === 'unpaid'
-                        ? 'border-emerald-600 bg-emerald-50 text-emerald-700 shadow-sm ring-1 ring-emerald-600'
-                        : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+                        ? 'border-emerald-600 bg-emerald-50 text-emerald-700 shadow-xs ring-1 ring-emerald-600'
+                        : 'border-border bg-card text-muted-foreground hover:border-border hover:bg-background'
                     }`}
                   >
-                    <span>🎁</span> Unpaid
+                    Unpaid
                   </button>
                   <button
                     type="button"
@@ -609,13 +611,13 @@ export function CreateOpportunityForm({
                       setSalaryMin('');
                       setSalaryMax('');
                     }}
-                    className={`flex items-center justify-center gap-1.5 rounded-lg border py-2 text-xs font-medium transition-all ${
+                    className={`flex items-center justify-center gap-1.5 rounded-lg border py-2 text-xs font-medium transition-colors ${
                       compensationType === 'not_disclosed'
-                        ? 'border-amber-600 bg-amber-50 text-amber-700 shadow-sm ring-1 ring-amber-600'
-                        : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+                        ? 'border-amber-600 bg-amber-50 text-amber-700 shadow-xs ring-1 ring-amber-600'
+                        : 'border-border bg-card text-muted-foreground hover:border-border hover:bg-background'
                     }`}
                   >
-                    <span>⚪</span> Not Provided
+                    Not Provided
                   </button>
                 </div>
               </div>
@@ -624,7 +626,7 @@ export function CreateOpportunityForm({
               {compensationType === 'paid' ? (
                 <>
                   <div>
-                    <label className="mb-1 block text-xs font-semibold text-slate-700">
+                    <label className="mb-1 block text-xs font-semibold text-muted-foreground">
                       {type === 'job' ? 'Min Salary (₹ / Annual)' : 'Min Stipend (₹ / Monthly)'}
                     </label>
                     <input
@@ -633,12 +635,12 @@ export function CreateOpportunityForm({
                       value={salaryMin}
                       onChange={(e) => { setSalaryMin(e.target.value); }}
                       placeholder="e.g. 600000"
-                      className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2 text-sm focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100"
+                      className="w-full rounded-lg border border-border bg-background px-3.5 py-2 text-sm focus:border-primary focus:bg-card focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
 
                   <div>
-                    <label className="mb-1 block text-xs font-semibold text-slate-700">
+                    <label className="mb-1 block text-xs font-semibold text-muted-foreground">
                       {type === 'job' ? 'Max Salary (₹ / Annual)' : 'Max Stipend (₹ / Monthly)'}
                     </label>
                     <input
@@ -647,14 +649,14 @@ export function CreateOpportunityForm({
                       value={salaryMax}
                       onChange={(e) => { setSalaryMax(e.target.value); }}
                       placeholder="e.g. 1200000"
-                      className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2 text-sm focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100"
+                      className="w-full rounded-lg border border-border bg-background px-3.5 py-2 text-sm focus:border-primary focus:bg-card focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
                 </>
               ) : compensationType === 'unpaid' ? (
                 <div className="sm:col-span-2 flex items-center justify-between rounded-lg border border-emerald-200 bg-emerald-50/80 p-3 text-xs text-emerald-800">
                   <div className="flex items-center gap-2">
-                    <span className="text-base">🎁</span>
+                    <CheckCircle2 className="h-4 w-4 text-emerald-700" />
                     <div>
                       <span className="font-semibold">Marked as Unpaid Opportunity</span>
                       <p className="text-[11px] text-emerald-700/80">
@@ -673,7 +675,7 @@ export function CreateOpportunityForm({
               ) : (
                 <div className="sm:col-span-2 flex items-center justify-between rounded-lg border border-amber-200 bg-amber-50/80 p-3 text-xs text-amber-800">
                   <div className="flex items-center gap-2">
-                    <span className="text-base">ℹ️</span>
+                    <Info className="h-4 w-4 shrink-0 text-amber-700" />
                     <div>
                       <span className="font-semibold">Salary Not Disclosed / Not Provided</span>
                       <p className="text-[11px] text-amber-700/80">
@@ -692,19 +694,19 @@ export function CreateOpportunityForm({
               )}
 
               <div className="sm:col-span-2">
-                <label className="mb-1 block text-xs font-semibold text-slate-700">
+                <label className="mb-1 block text-xs font-semibold text-muted-foreground">
                   Application Deadline
                 </label>
                 <input
                   type="datetime-local"
                   value={applicationDeadline}
                   onChange={(e) => { setApplicationDeadline(e.target.value); }}
-                  className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2 text-sm focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-border bg-background px-3.5 py-2 text-sm focus:border-primary focus:bg-card focus:outline-none focus:ring-2 focus:ring-primary"
                 />
               </div>
 
               <div>
-                <label className="mb-1 block text-xs font-semibold text-slate-700">
+                <label className="mb-1 block text-xs font-semibold text-muted-foreground">
                   External Apply Link / Portal URL
                 </label>
                 <input
@@ -712,15 +714,15 @@ export function CreateOpportunityForm({
                   value={applyUrl}
                   onChange={(e) => { setApplyUrl(e.target.value); }}
                   placeholder="https://company.com/careers/job-123"
-                  className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2 text-sm focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-border bg-background px-3.5 py-2 text-sm focus:border-primary focus:bg-card focus:outline-none focus:ring-2 focus:ring-primary"
                 />
-                <p className="mt-1 text-[11px] text-slate-400">
+                <p className="mt-1 text-[11px] text-muted-foreground">
                   Optional URL for external portal application
                 </p>
               </div>
 
               <div>
-                <label className="mb-1 block text-xs font-semibold text-slate-700">
+                <label className="mb-1 block text-xs font-semibold text-muted-foreground">
                   Application / HR Contact Email
                 </label>
                 <input
@@ -728,9 +730,9 @@ export function CreateOpportunityForm({
                   value={applicationEmail}
                   onChange={(e) => { setApplicationEmail(e.target.value); }}
                   placeholder="careers@company.com"
-                  className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2 text-sm focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100"
+                  className="w-full rounded-lg border border-border bg-background px-3.5 py-2 text-sm focus:border-primary focus:bg-card focus:outline-none focus:ring-2 focus:ring-primary"
                 />
-                <p className="mt-1 text-[11px] text-slate-400">
+                <p className="mt-1 text-[11px] text-muted-foreground">
                   Optional email for students to submit resumes directly
                 </p>
               </div>
@@ -738,8 +740,8 @@ export function CreateOpportunityForm({
           </div>
 
           {/* Skills Section */}
-          <div className="space-y-3 border-t border-slate-100 pt-4">
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-500">
+          <div className="space-y-3 border-t border-border pt-4">
+            <h3 className="text-sm font-semibold tracking-normal text-muted-foreground">
               3. Required / Desired Skills
             </h3>
 
@@ -753,15 +755,15 @@ export function CreateOpportunityForm({
                       key={sk.skillId}
                       className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium ${
                         sk.isRequired
-                          ? 'bg-blue-50 text-blue-700 ring-1 ring-blue-200'
-                          : 'bg-slate-100 text-slate-600'
+                          ? 'bg-primary/10 text-primary ring-1 ring-primary/20'
+                          : 'bg-muted/40 text-muted-foreground'
                       }`}
                     >
                       <span>{sObj?.name || 'Skill'}</span>
                       <button
                         type="button"
                         onClick={() => { handleToggleSkillRequired(sk.skillId); }}
-                        className="text-[10px] uppercase font-bold text-slate-400 hover:text-slate-600"
+                        className="text-[10px] uppercase font-bold text-muted-foreground hover:text-muted-foreground"
                         title="Toggle Required / Nice-to-have"
                       >
                         ({sk.isRequired ? 'Required' : 'Optional'})
@@ -769,7 +771,7 @@ export function CreateOpportunityForm({
                       <button
                         type="button"
                         onClick={() => { handleRemoveSkill(sk.skillId); }}
-                        className="ml-1 text-slate-400 hover:text-red-500"
+                        className="ml-1 text-muted-foreground hover:text-red-500"
                       >
                         <X className="h-3 w-3" />
                       </button>
@@ -786,19 +788,19 @@ export function CreateOpportunityForm({
                 value={skillSearch}
                 onChange={(e) => { setSkillSearch(e.target.value); }}
                 placeholder="Search and add skills (e.g. React, Python, SQL)..."
-                className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2 text-sm focus:border-blue-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-lg border border-border bg-background px-3.5 py-2 text-sm focus:border-primary focus:bg-card focus:outline-none focus:ring-2 focus:ring-primary"
               />
               {filteredCatalog.length > 0 && (
-                <div className="absolute left-0 right-0 top-full z-20 mt-1 max-h-40 overflow-y-auto rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
+                <div className="absolute left-0 right-0 top-full z-20 mt-1 max-h-40 overflow-y-auto rounded-lg border border-border bg-card py-1 shadow-lg">
                   {filteredCatalog.slice(0, 8).map((sk) => (
                     <button
                       key={sk.id}
                       type="button"
                       onClick={() => { handleAddSkill(sk.id); }}
-                      className="flex w-full items-center justify-between px-3 py-1.5 text-left text-xs hover:bg-slate-50"
+                      className="flex w-full items-center justify-between px-3 py-1.5 text-left text-xs hover:bg-background"
                     >
-                      <span className="font-medium text-slate-800">{sk.name}</span>
-                      <span className="text-[10px] text-slate-400">{sk.category}</span>
+                      <span className="font-medium text-foreground">{sk.name}</span>
+                      <span className="text-[10px] text-muted-foreground">{sk.category}</span>
                     </button>
                   ))}
                 </div>
@@ -807,12 +809,12 @@ export function CreateOpportunityForm({
           </div>
 
           {/* Eligibility Criteria Section */}
-          <div className="space-y-4 border-t border-slate-100 pt-4">
+          <div className="space-y-4 border-t border-border pt-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-500">
+              <h3 className="text-sm font-semibold tracking-normal text-muted-foreground">
                 4. Eligibility Criteria (Server-Enforced)
               </h3>
-              <span className="text-xs text-slate-400">
+              <span className="text-xs text-muted-foreground">
                 {eligibilityList.length === 0 ? 'Open to all departments & batches' : `${String(eligibilityList.length)} criteria defined`}
               </span>
             </div>
@@ -826,24 +828,24 @@ export function CreateOpportunityForm({
                   return (
                     <div
                       key={idx}
-                      className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2 text-xs text-slate-700"
+                      className="flex items-center justify-between rounded-lg border border-border bg-background px-3.5 py-2 text-xs text-muted-foreground"
                     >
                       <div className="flex flex-wrap items-center gap-2">
-                        <GraduationCap className="h-4 w-4 text-slate-400" />
+                        <GraduationCap className="h-4 w-4 text-muted-foreground" />
                         <span className="font-semibold">{dept?.name || 'All Departments'}</span>
                         <span className="text-slate-300">•</span>
                         <span>{batch ? `Batch ${String(batch.graduationYear)}` : 'All Batches'}</span>
                         {crit.minCgpa !== undefined && (
                           <>
                             <span className="text-slate-300">•</span>
-                            <span className="font-medium text-blue-700">Min CGPA: {crit.minCgpa}</span>
+                            <span className="font-medium text-primary">Min CGPA: {crit.minCgpa}</span>
                           </>
                         )}
                       </div>
                       <button
                         type="button"
                         onClick={() => { handleRemoveEligibility(idx); }}
-                        className="text-slate-400 hover:text-red-500"
+                        className="text-muted-foreground hover:text-red-500"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
@@ -854,18 +856,18 @@ export function CreateOpportunityForm({
             )}
 
             {/* Add Eligibility Control Box */}
-            <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/50 p-3.5 space-y-3">
-              <p className="text-xs font-semibold text-slate-600">Add an eligible combination:</p>
+            <div className="rounded-xl border border-dashed border-border bg-muted/10 p-3.5 space-y-3">
+              <p className="text-xs font-semibold text-muted-foreground">Add an eligible combination:</p>
               <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
                 <div>
-                  <label className="block text-[11px] font-medium text-slate-500">Department</label>
+                  <label className="block text-[11px] font-medium text-muted-foreground">Department</label>
                   <select
                     value={currentDeptId}
                     onChange={(e) => {
                       setCurrentDeptId(e.target.value);
                       setCurrentProgramId('');
                     }}
-                    className="w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-xs"
+                    className="w-full rounded-md border border-border bg-card px-2 py-1.5 text-xs"
                   >
                     <option value="">All Departments</option>
                     {departments.map((d) => (
@@ -877,12 +879,12 @@ export function CreateOpportunityForm({
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-medium text-slate-500">Program</label>
+                  <label className="block text-[11px] font-medium text-muted-foreground">Program</label>
                   <select
                     value={currentProgramId}
                     onChange={(e) => { setCurrentProgramId(e.target.value); }}
                     disabled={!currentDeptId}
-                    className="w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-xs disabled:bg-slate-100"
+                    className="w-full rounded-md border border-border bg-card px-2 py-1.5 text-xs disabled:bg-muted/40"
                   >
                     <option value="">All Programs</option>
                     {programsForDept.map((p) => (
@@ -894,11 +896,11 @@ export function CreateOpportunityForm({
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-medium text-slate-500">Batch</label>
+                  <label className="block text-[11px] font-medium text-muted-foreground">Batch</label>
                   <select
                     value={currentBatchId}
                     onChange={(e) => { setCurrentBatchId(e.target.value); }}
-                    className="w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-xs"
+                    className="w-full rounded-md border border-border bg-card px-2 py-1.5 text-xs"
                   >
                     <option value="">All Batches</option>
                     {batches.map((b) => (
@@ -910,7 +912,7 @@ export function CreateOpportunityForm({
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-medium text-slate-500">Min CGPA</label>
+                  <label className="block text-[11px] font-medium text-muted-foreground">Min CGPA</label>
                   <input
                     type="number"
                     step="0.01"
@@ -919,7 +921,7 @@ export function CreateOpportunityForm({
                     value={currentMinCgpa}
                     onChange={(e) => { setCurrentMinCgpa(e.target.value); }}
                     placeholder="e.g. 7.5"
-                    className="w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-xs"
+                    className="w-full rounded-md border border-border bg-card px-2 py-1.5 text-xs"
                   />
                 </div>
               </div>
@@ -928,7 +930,7 @@ export function CreateOpportunityForm({
                 <button
                   type="button"
                   onClick={handleAddEligibility}
-                  className="inline-flex items-center gap-1 rounded-md bg-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-300 transition-colors"
+                  className="inline-flex items-center gap-1 rounded-md bg-slate-200 px-3 py-1 text-xs font-semibold text-muted-foreground hover:bg-slate-300 transition-colors"
                 >
                   <Plus className="h-3 w-3" />
                   Add Combination
@@ -946,11 +948,11 @@ export function CreateOpportunityForm({
           )}
 
           {/* Form Actions Footer */}
-          <div className="sticky bottom-0 -mx-6 -mb-6 flex items-center justify-end gap-3 border-t border-slate-100 bg-white px-6 py-4 shadow-lg">
+          <div className="sticky bottom-0 -mx-6 -mb-6 flex items-center justify-end gap-3 border-t border-border bg-card px-6 py-4 shadow-lg">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
+              className="rounded-lg border border-border px-4 py-2 text-sm font-semibold text-muted-foreground hover:bg-background transition-colors"
             >
               Cancel
             </button>
@@ -966,7 +968,7 @@ export function CreateOpportunityForm({
                   }
                   void handleSaveAndPublish();
                 }}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50 transition-all shadow-sm"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50 transition-colors shadow-sm"
                 title="Save changes and immediately activate/publish this opportunity"
               >
                 {isActivating ? (
@@ -981,7 +983,7 @@ export function CreateOpportunityForm({
             <button
               type="submit"
               disabled={createMutation.isPending || updateMutation.isPending || isActivating}
-              className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50 transition-all shadow-sm"
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors shadow-sm"
             >
               {createMutation.isPending || updateMutation.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -998,16 +1000,16 @@ export function CreateOpportunityForm({
       {showPublishPrompt && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowPublishPrompt(false)} />
-          <div className="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl animate-in fade-in zoom-in-95">
+          <div className="relative w-full max-w-md rounded-2xl bg-card p-6 shadow-2xl animate-in fade-in zoom-in-95">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 mb-4">
               <Sparkles className="h-6 w-6" />
             </div>
-            <h3 className="text-lg font-bold text-slate-900 mb-2">
+            <h3 className="text-lg font-bold text-foreground mb-2">
               Publish & Go Live with New Deadline?
             </h3>
-            <p className="text-sm text-slate-600 mb-6 leading-relaxed">
+            <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
               You updated the deadline for this expired opportunity to{' '}
-              <strong className="text-slate-900 font-semibold">
+              <strong className="text-foreground font-semibold">
                 {applicationDeadline ? new Date(applicationDeadline).toLocaleString() : 'a valid date'}
               </strong>
               . Would you like to publish it now so students can view and apply immediately?
@@ -1017,7 +1019,7 @@ export function CreateOpportunityForm({
                 type="button"
                 disabled={isActivating || updateMutation.isPending || statusMutation.isPending}
                 onClick={() => void handleSaveAndPublish()}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 shadow-md transition-all disabled:opacity-50"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 shadow-md transition-colors disabled:opacity-50"
               >
                 {isActivating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4 fill-current" />}
                 Save Changes & Go Live (Publish)
@@ -1026,7 +1028,7 @@ export function CreateOpportunityForm({
                 type="button"
                 disabled={isActivating || updateMutation.isPending}
                 onClick={() => void handleSaveOnly()}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-all"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 py-2 text-sm font-semibold text-muted-foreground hover:bg-background transition-colors"
               >
                 <Check className="h-4 w-4" />
                 Save Changes Only (Remain Expired)
@@ -1034,7 +1036,7 @@ export function CreateOpportunityForm({
               <button
                 type="button"
                 onClick={() => setShowPublishPrompt(false)}
-                className="w-full text-center text-xs font-medium text-slate-400 hover:text-slate-600 py-1 transition-colors"
+                className="w-full text-center text-xs font-medium text-muted-foreground hover:text-muted-foreground py-1 transition-colors"
               >
                 Keep Editing
               </button>

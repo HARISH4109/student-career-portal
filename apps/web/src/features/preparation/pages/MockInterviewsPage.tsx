@@ -3,18 +3,16 @@ import {
   AlertCircle,
   ArrowLeft,
   Award,
-  BookOpen,
-  Brain,
   Briefcase,
-  CheckCircle,
+  CheckCircle2,
   Clock,
   Eye,
+  FileText,
   HelpCircle,
   History,
-  Loader2,
+  Play,
   RefreshCw,
   Send,
-  Sparkles,
   Trash2,
   TrendingUp,
 } from 'lucide-react';
@@ -28,6 +26,14 @@ import {
   useScheduleMockInterview,
   useSubmitAIInterviewAnswers,
 } from '../api/preparation-api';
+import {
+  Badge,
+  Button,
+  Card,
+  EmptyState,
+  SkeletonCard,
+  Textarea,
+} from '@/shared/components/ui';
 
 const TARGET_ROLES = [
   'Full Stack Software Engineer',
@@ -125,20 +131,20 @@ export function MockInterviewsPage(): React.JSX.Element {
     if (score === null || score === undefined) return null;
     if (score >= 75) {
       return (
-        <span className="rounded-xl bg-emerald-50 px-3.5 py-1.5 font-mono text-xs font-bold text-emerald-700 border border-emerald-200">
+        <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900/50 font-mono tabular-nums">
           Score: {score}/100
         </span>
       );
     }
     if (score >= 50) {
       return (
-        <span className="rounded-xl bg-indigo-50 px-3.5 py-1.5 font-mono text-xs font-bold text-indigo-700 border border-indigo-200">
+        <span className="inline-flex items-center gap-1 rounded-md bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary border border-primary/20 font-mono tabular-nums">
           Score: {score}/100
         </span>
       );
     }
     return (
-      <span className="rounded-xl bg-amber-50 px-3.5 py-1.5 font-mono text-xs font-bold text-amber-700 border border-amber-200">
+      <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 dark:bg-amber-950/40 px-2.5 py-1 text-xs font-semibold text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-900/50 font-mono tabular-nums">
         Score: {score}/100
       </span>
     );
@@ -168,86 +174,86 @@ export function MockInterviewsPage(): React.JSX.Element {
             <button
               type="button"
               onClick={onBack}
-              className="inline-flex items-center gap-2 text-xs font-semibold text-slate-600 hover:text-slate-900 transition"
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
             >
-              <ArrowLeft className="h-4 w-4" />
+              <ArrowLeft className="h-3.5 w-3.5" />
               <span>Back to Past Evaluations</span>
             </button>
-            <span className="text-xs font-semibold text-slate-400">
-              Session from {new Date(interview.scheduledAt).toLocaleDateString()}
+            <span className="text-xs text-muted-foreground font-mono">
+              Session: {new Date(interview.scheduledAt).toLocaleDateString()}
             </span>
           </div>
         ) : null}
 
-        {/* ── Summary Hero Banner ── */}
-        <div className="overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 p-8 text-white shadow-xl border border-indigo-900/40">
+        {/* ── Summary Transcript Header ── */}
+        <div className="rounded-xl bg-card p-6 md:p-8 text-foreground shadow-xs border border-border/80">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-2">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-semibold text-emerald-300 border border-emerald-500/30">
-                <CheckCircle className="h-3.5 w-3.5" />
-                <span>Evaluation Completed</span>
+              <span className="inline-flex items-center gap-1.5 rounded-md bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-0.5 text-xs font-medium text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-900/50">
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                <span>Evaluation Complete</span>
               </span>
-              <h2 className="text-2xl md:text-3xl font-bold text-white">
+              <h2 className="text-xl md:text-2xl font-bold text-foreground tracking-tight">
                 {interview.targetRole} Assessment Report
               </h2>
-              <p className="text-xs md:text-sm text-slate-300 max-w-2xl leading-relaxed">
+              <p className="text-xs md:text-sm text-muted-foreground max-w-2xl leading-relaxed">
                 {feedback?.summary}
               </p>
             </div>
 
-            <div className="flex items-center gap-4 bg-white/10 backdrop-blur-md p-5 rounded-2xl border border-white/10">
+            <div className="flex items-center gap-4 bg-muted/30 p-4 rounded-xl border border-border/60">
               <div className="text-center">
-                <span className="text-4xl font-extrabold text-white">
+                <span className="text-3xl font-bold text-foreground font-mono tabular-nums">
                   {interview.overallScore ?? 0}
                 </span>
-                <span className="text-xs text-slate-400">/100</span>
-                <p className="text-xs font-semibold text-indigo-300 mt-0.5">Overall Score</p>
+                <span className="text-xs text-muted-foreground font-mono">/100</span>
+                <p className="text-[11px] font-medium text-muted-foreground mt-0.5">Overall Score</p>
               </div>
             </div>
           </div>
 
           {/* Score breakdown metrics */}
-          <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6 border-t border-white/10">
-            <div className="rounded-xl bg-white/5 p-4 border border-white/10 space-y-1">
-              <div className="flex justify-between items-center">
-                <p className="text-xs text-slate-400">Technical Depth</p>
-                <p className="text-lg font-bold text-indigo-300">
+          <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3.5 pt-5 border-t border-border/60">
+            <div className="rounded-lg bg-muted/20 p-3.5 border border-border/50 space-y-1.5">
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-muted-foreground font-medium">Technical Depth</span>
+                <span className="font-mono font-semibold tabular-nums text-foreground">
                   {feedback?.technicalScore ?? 0}%
-                </p>
+                </span>
               </div>
-              <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
+              <div className="h-1.5 w-full rounded-full bg-muted/60 overflow-hidden">
                 <div
-                  className="h-full rounded-full bg-indigo-400 transition-all duration-500"
+                  className="h-full rounded-full bg-primary transition-[width] duration-300"
                   style={{ width: `${feedback?.technicalScore ?? 0}%` }}
                 />
               </div>
             </div>
 
-            <div className="rounded-xl bg-white/5 p-4 border border-white/10 space-y-1">
-              <div className="flex justify-between items-center">
-                <p className="text-xs text-slate-400">Communication & STAR</p>
-                <p className="text-lg font-bold text-emerald-300">
+            <div className="rounded-lg bg-muted/20 p-3.5 border border-border/50 space-y-1.5">
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-muted-foreground font-medium">Communication & STAR</span>
+                <span className="font-mono font-semibold tabular-nums text-foreground">
                   {feedback?.communicationScore ?? 0}%
-                </p>
+                </span>
               </div>
-              <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
+              <div className="h-1.5 w-full rounded-full bg-muted/60 overflow-hidden">
                 <div
-                  className="h-full rounded-full bg-emerald-400 transition-all duration-500"
+                  className="h-full rounded-full bg-emerald-600 dark:bg-emerald-500 transition-[width] duration-300"
                   style={{ width: `${feedback?.communicationScore ?? 0}%` }}
                 />
               </div>
             </div>
 
-            <div className="rounded-xl bg-white/5 p-4 border border-white/10 space-y-1">
-              <div className="flex justify-between items-center">
-                <p className="text-xs text-slate-400">Problem Solving & Relevance</p>
-                <p className="text-lg font-bold text-amber-300">
+            <div className="rounded-lg bg-muted/20 p-3.5 border border-border/50 space-y-1.5">
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-muted-foreground font-medium">Problem Solving & Relevance</span>
+                <span className="font-mono font-semibold tabular-nums text-foreground">
                   {feedback?.problemSolvingScore ?? 0}%
-                </p>
+                </span>
               </div>
-              <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
+              <div className="h-1.5 w-full rounded-full bg-muted/60 overflow-hidden">
                 <div
-                  className="h-full rounded-full bg-amber-400 transition-all duration-500"
+                  className="h-full rounded-full bg-amber-500 dark:bg-amber-400 transition-[width] duration-300"
                   style={{ width: `${feedback?.problemSolvingScore ?? 0}%` }}
                 />
               </div>
@@ -256,61 +262,54 @@ export function MockInterviewsPage(): React.JSX.Element {
         </div>
 
         {/* ── Strengths & Improvements ── */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-3">
-            <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-              <Award className="h-4 w-4 text-emerald-600" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <Card className="p-5 space-y-3 border-border/80">
+            <h3 className="text-xs font-semibold text-foreground flex items-center gap-2">
+              <Award className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
               <span>Key Strengths</span>
             </h3>
             {feedback?.strengths && feedback.strengths.length > 0 ? (
-              <ul className="space-y-2 text-xs text-slate-700">
+              <ul className="space-y-2 text-xs text-muted-foreground">
                 {feedback.strengths.map((str, idx) => (
                   <li key={idx} className="flex items-start gap-2">
-                    <CheckCircle className="h-3.5 w-3.5 text-emerald-500 shrink-0 mt-0.5" />
-                    <span>{str}</span>
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                    <span className="leading-relaxed">{str}</span>
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="text-xs text-slate-500 italic">
-                Provide structured, in-depth responses with concrete examples to unlock highlighted strengths.
+              <p className="text-xs text-muted-foreground italic">
+                Provide structured, in-depth responses with concrete examples to reveal highlighted strengths.
               </p>
             )}
-          </div>
+          </Card>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-3">
-            <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+          <Card className="p-5 space-y-3 border-border/80">
+            <h3 className="text-xs font-semibold text-foreground flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-amber-500" />
               <span>Areas for Improvement</span>
             </h3>
             {feedback?.improvements && feedback.improvements.length > 0 ? (
-              <ul className="space-y-2 text-xs text-slate-700">
+              <ul className="space-y-2 text-xs text-muted-foreground">
                 {feedback.improvements.map((imp, idx) => (
                   <li key={idx} className="flex items-start gap-2">
                     <AlertCircle className="h-3.5 w-3.5 text-amber-500 shrink-0 mt-0.5" />
-                    <span>{imp}</span>
+                    <span className="leading-relaxed">{imp}</span>
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="text-xs text-emerald-600 font-medium">
-                Outstanding performance! All evaluated dimensions met high benchmark criteria.
+              <p className="text-xs text-emerald-700 dark:text-emerald-300 font-medium">
+                All evaluated dimensions met high benchmark criteria.
               </p>
             )}
-          </div>
+          </Card>
         </div>
 
         {/* ── Detailed Question-by-Question Review ── */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-              <BookOpen className="h-4 w-4 text-indigo-600" />
-              <span>Question-by-Question Response Review</span>
-            </h3>
-            <span className="text-xs text-slate-500">{questionsList.length} Questions Evaluated</span>
-          </div>
-
-          <div className="space-y-4">
+        <div className="space-y-3">
+          <h3 className="text-sm font-semibold text-foreground">Evaluated Responses</h3>
+          <div className="space-y-3">
             {questionsList.map((q, idx) => {
               const studentAnswer = answersMap.get(q.id) || 'Not answered.';
               const isUnanswered =
@@ -320,28 +319,28 @@ export function MockInterviewsPage(): React.JSX.Element {
               const pa = perAnswerMap.get(q.id);
 
               return (
-                <div
+                <Card
                   key={q.id || idx}
-                  className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-3"
+                  className="p-5 space-y-3 border-border/80"
                 >
-                  <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-3">
-                    <span className="text-xs font-bold text-indigo-700 uppercase tracking-wider">
+                  <div className="flex items-center justify-between gap-2 border-b border-border/60 pb-2.5">
+                    <span className="font-mono text-xs font-medium text-muted-foreground">
                       Question {idx + 1}
                     </span>
                     <div className="flex items-center gap-2">
                       {isUnanswered ? (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 px-2.5 py-0.5 text-[11px] font-semibold text-rose-700 border border-rose-200">
+                        <span className="rounded-md bg-destructive/10 px-2 py-0.5 text-[11px] font-medium text-destructive">
                           Unanswered (0 pts)
                         </span>
                       ) : pa ? (
-                        <div className="flex items-center gap-2 text-[11px]">
-                          <span className="rounded-md bg-slate-100 px-2 py-0.5 text-slate-600 font-medium">
+                        <div className="flex items-center gap-2 text-[11px] font-mono">
+                          <span className="rounded-md bg-muted px-2 py-0.5 text-muted-foreground font-medium">
                             {pa.wordCount} words
                           </span>
-                          <span className="rounded-md bg-indigo-50 px-2 py-0.5 text-indigo-700 font-medium">
+                          <span className="rounded-md bg-primary/10 px-2 py-0.5 text-primary font-medium">
                             Relevance: {pa.relevance}%
                           </span>
-                          <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-emerald-700 font-medium">
+                          <span className="rounded-md bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 text-emerald-700 dark:text-emerald-300 font-medium border border-emerald-200 dark:border-emerald-900/40">
                             Depth: {pa.depth}%
                           </span>
                         </div>
@@ -349,78 +348,81 @@ export function MockInterviewsPage(): React.JSX.Element {
                     </div>
                   </div>
 
-                  <p className="text-sm font-semibold text-slate-900 leading-relaxed">
+                  <p className="text-sm font-medium text-foreground leading-relaxed">
                     {q.questionText}
                   </p>
 
-                  <div className="space-y-1.5 pt-1">
-                    <p className="text-xs font-semibold text-slate-500">Your Submitted Answer:</p>
+                  <div className="space-y-1 pt-1">
+                    <span className="text-[11px] font-medium text-muted-foreground">Submitted Response:</span>
                     <div
-                      className={`rounded-xl p-4 text-xs leading-relaxed border ${
+                      className={`rounded-lg p-3 text-xs leading-relaxed border ${
                         isUnanswered
-                          ? 'bg-rose-50/40 border-rose-100 text-rose-700 italic'
-                          : 'bg-slate-50 border-slate-100 text-slate-800'
+                          ? 'bg-destructive/5 border-destructive/20 text-destructive italic'
+                          : 'bg-muted/30 border-border/60 text-foreground'
                       }`}
                     >
                       {studentAnswer}
                     </div>
                   </div>
-                </div>
+                </Card>
               );
             })}
           </div>
         </div>
 
         {/* ── Footer Actions ── */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-200">
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-border/80">
           {onBack ? (
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="sm"
               onClick={onBack}
-              className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
             >
               Back to Evaluations List
-            </button>
+            </Button>
           ) : (
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="sm"
               onClick={() => {
                 setActiveInterview(null);
                 setActiveTab('history');
               }}
-              className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
             >
               View in Past History
-            </button>
+            </Button>
           )}
 
           <div className="flex items-center gap-3">
             {onBack ? (
-              <button
+              <Button
                 type="button"
+                size="sm"
                 onClick={() => {
                   setSelectedRole(interview.targetRole || TARGET_ROLES[0] || 'Full Stack Software Engineer');
                   setViewingPastInterview(null);
                   setActiveInterview(null);
                   setActiveTab('simulate');
                 }}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-semibold text-white shadow-sm hover:bg-indigo-700 transition"
+                className="gap-1.5"
               >
                 <RefreshCw className="h-3.5 w-3.5" />
                 <span>Practice this Role Again</span>
-              </button>
+              </Button>
             ) : isFreshSubmission ? (
-              <button
+              <Button
                 type="button"
+                size="sm"
                 onClick={() => {
                   setActiveInterview(null);
                   setAnswers({});
                   setCurrentQuestionIndex(0);
                 }}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-indigo-700 transition"
               >
                 <span>Start New Mock Interview</span>
-              </button>
+              </Button>
             ) : null}
           </div>
         </div>
@@ -429,41 +431,43 @@ export function MockInterviewsPage(): React.JSX.Element {
   };
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto pb-12">
-      {/* ── Page Header ─────────────────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 pb-5">
+    <div className="space-y-6 w-full max-w-[1536px] mx-auto pb-12">
+      {/* ── Academic Page Header ─────────────────────────────────────────── */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border/80 pb-5">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            <Brain className="h-6 w-6 text-indigo-600" /> AI Mock Interviews
-          </h1>
-          <p className="mt-1 text-sm text-slate-500">
-            Simulate realistic technical and behavioral interviews with instant AI scoring and actionable feedback
+          <div className="flex items-center gap-2.5">
+            <span className="h-4 w-1 rounded-full bg-[#B9903B]" aria-hidden="true" />
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">
+              Mock Interview Simulations
+            </h1>
+          </div>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Role-specific interview simulations with evaluated telemetry for communication and technical depth
           </p>
         </div>
 
-        <Link
-          to="/dashboard/preparation"
-          className="inline-flex items-center gap-2 rounded-xl bg-white hover:bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-700 border border-slate-200 shadow-sm transition-all"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          <span>Back to Tests</span>
+        <Link to="/dashboard/preparation">
+          <Button variant="outline" size="sm" className="gap-1.5">
+            <ArrowLeft className="h-3.5 w-3.5" />
+            <span>Back to Assessments</span>
+          </Button>
         </Link>
       </div>
 
-      {/* ── Inner Tab switch ────────────────────────────────────────────── */}
+      {/* ── Segmented Tab Switcher ───────────────────────────────────────── */}
       <div className="flex items-center justify-between pt-1">
-        <div className="flex items-center gap-2 rounded-xl bg-slate-100 p-1 border border-slate-200">
+        <div className="inline-flex items-center rounded-lg bg-muted/40 p-1 border border-border/60 text-xs font-medium">
           <button
             type="button"
             onClick={() => {
               setActiveTab('simulate');
               setViewingPastInterview(null);
             }}
-            className={`flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-xs font-semibold transition ${
-              activeTab === 'simulate' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+            className={`flex items-center gap-2 rounded-md px-3 py-1 transition-colors cursor-pointer ${
+              activeTab === 'simulate' ? 'bg-card text-foreground shadow-xs font-semibold' : 'text-muted-foreground hover:text-foreground'
             }`}
           >
-            <Sparkles className="h-3.5 w-3.5 text-indigo-600" />
+            <FileText className="h-3.5 w-3.5 text-muted-foreground" />
             <span>Practice Session</span>
           </button>
 
@@ -472,11 +476,11 @@ export function MockInterviewsPage(): React.JSX.Element {
             onClick={() => {
               setActiveTab('history');
             }}
-            className={`flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-xs font-semibold transition ${
-              activeTab === 'history' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+            className={`flex items-center gap-2 rounded-md px-3 py-1 transition-colors cursor-pointer ${
+              activeTab === 'history' ? 'bg-card text-foreground shadow-xs font-semibold' : 'text-muted-foreground hover:text-foreground'
             }`}
           >
-            <History className="h-3.5 w-3.5 text-slate-500" />
+            <History className="h-3.5 w-3.5 text-muted-foreground" />
             <span>Past Evaluations ({pastInterviews.length})</span>
           </button>
         </div>
@@ -485,63 +489,63 @@ export function MockInterviewsPage(): React.JSX.Element {
       {activeTab === 'simulate' ? (
         <>
           {!activeInterview ? (
-            /* ── Setup & Launch Simulation ── */
-            <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm space-y-6">
+            /* ── Simulation Configuration & Launcher ── */
+            <Card className="p-6 md:p-8 space-y-6 border-border/80">
               <div className="max-w-2xl space-y-2">
-                <div className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700">
-                  <Briefcase className="h-3.5 w-3.5" />
-                  <span>Interactive Placement Preparation</span>
-                </div>
-                <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900">
-                  Role-Specific Mock Interview
-                </h1>
-                <p className="text-sm text-slate-600 leading-relaxed">
-                  Select your target job profile to generate realistic behavioral and technical interview questions. Submit structured responses to receive instantaneous scoring on communication, technical clarity, and problem solving.
+                <span className="text-xs font-medium text-muted-foreground">
+                  Role-Specific Interview Configuration
+                </span>
+                <h2 className="text-xl sm:text-2xl font-bold text-card-foreground tracking-tight">
+                  Select Target Job Track
+                </h2>
+                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                  Choose a faculty-curated placement track or select a standard industry role to generate relevant technical and behavioral questions.
                 </p>
               </div>
 
-              <div className="space-y-5 pt-2">
+              <div className="space-y-5 pt-1">
                 {facultyTracks.length > 0 && (
                   <div className="space-y-2.5">
                     <div className="flex items-center gap-2">
-                      <label className="block text-xs font-bold text-slate-900">Faculty-Curated Placement Tracks</label>
-                      <span className="rounded-full bg-purple-50 text-purple-700 px-2 py-0.5 text-[10px] font-semibold border border-purple-200">
+                      <label className="block text-xs font-semibold text-card-foreground">
+                        Faculty-Curated Placement Tracks
+                      </label>
+                      <Badge variant="outline" className="text-[10px]">
                         Campus Drive Curated
-                      </span>
+                      </Badge>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       {facultyTracks.map((track) => {
                         const isSelected = selectedTemplateId === track.id;
                         return (
-                          <button
+                          <div
                             key={track.id}
-                            type="button"
                             onClick={() => {
                               setSelectedRole(track.roleTitle);
                               setSelectedTemplateId(track.id);
                             }}
-                            className={`flex flex-col rounded-xl border p-4 text-left transition relative ${
+                            className={`flex flex-col justify-between min-h-[92px] rounded-xl border p-4 text-left transition-colors cursor-pointer ${
                               isSelected
-                                ? 'border-purple-600 bg-purple-50/50 shadow-sm ring-1 ring-purple-600/30'
-                                : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                                ? 'border-primary bg-card ring-1 ring-primary/40 shadow-xs'
+                                : 'border-border/70 bg-card hover:border-border hover:bg-muted/20'
                             }`}
                           >
                             <div className="flex items-start justify-between gap-2 w-full">
                               <div>
-                                <span className="text-sm font-semibold text-slate-900">{track.roleTitle}</span>
-                                {track.description ? (
-                                  <p className="text-xs text-slate-500 mt-0.5 line-clamp-1">{track.description}</p>
-                                ) : null}
+                                <span className="text-sm font-semibold text-card-foreground line-clamp-1">{track.roleTitle}</span>
+                                <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
+                                  {track.description || 'Placement specific assessment questions'}
+                                </p>
                               </div>
                               {isSelected ? (
-                                <CheckCircle className="h-5 w-5 text-purple-600 shrink-0" />
+                                <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
                               ) : null}
                             </div>
-                            <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+                            <div className="mt-2.5 pt-2 border-t border-border/60 flex items-center justify-between text-[11px] text-muted-foreground font-mono">
                               <span>{track.questions.length} Custom Questions</span>
                               <span>By {track.creatorName || 'Faculty'}</span>
                             </div>
-                          </button>
+                          </div>
                         );
                       })}
                     </div>
@@ -549,145 +553,132 @@ export function MockInterviewsPage(): React.JSX.Element {
                 )}
 
                 <div className="space-y-2.5">
-                  <label className="block text-xs font-bold text-slate-700">Standard Industry Roles</label>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <label className="block text-xs font-semibold text-card-foreground">
+                    Standard Industry Roles
+                  </label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
                     {TARGET_ROLES.map((role) => {
                       const isSelected = selectedTemplateId === null && selectedRole === role;
                       return (
-                        <button
+                        <div
                           key={role}
-                          type="button"
                           onClick={() => {
                             setSelectedRole(role);
                             setSelectedTemplateId(null);
                           }}
-                          className={`flex items-center justify-between rounded-xl border p-4 text-left transition ${
+                          className={`flex items-center justify-between min-h-[52px] rounded-xl border px-4 py-2.5 text-left transition-colors cursor-pointer ${
                             isSelected
-                              ? 'border-indigo-600 bg-indigo-50/50 shadow-sm'
-                              : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                              ? 'border-primary bg-card ring-1 ring-primary/40 shadow-xs'
+                              : 'border-border/70 bg-card hover:border-border hover:bg-muted/20'
                           }`}
                         >
-                          <span className="text-sm font-semibold text-slate-800">{role}</span>
+                          <span className="text-xs sm:text-sm font-medium text-card-foreground">{role}</span>
                           {isSelected ? (
-                            <CheckCircle className="h-5 w-5 text-indigo-600 shrink-0" />
+                            <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
                           ) : null}
-                        </button>
+                        </div>
                       );
                     })}
                   </div>
                 </div>
 
-                <div className="pt-4">
-                  <button
+                <div className="pt-2">
+                  <Button
                     type="button"
                     disabled={scheduleMutation.isPending}
+                    loading={scheduleMutation.isPending}
                     onClick={handleStartSimulation}
-                    className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-6 py-3 text-sm font-bold text-white shadow-md shadow-indigo-600/25 hover:bg-indigo-700 transition"
+                    className="gap-2 text-xs"
                   >
-                    {scheduleMutation.isPending ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        <span>Generating Interview Questions...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="h-4 w-4" />
-                        <span>Begin Mock Interview</span>
-                      </>
-                    )}
-                  </button>
+                    <Play className="h-3.5 w-3.5" />
+                    <span>Begin Simulation</span>
+                  </Button>
                 </div>
               </div>
-            </div>
+            </Card>
           ) : isCompleted ? (
             /* ── Simulation Completed Evaluation Result ── */
             renderEvaluationReport(activeInterview, undefined, true)
           ) : (
             /* ── Active Interview Q&A Session ── */
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 md:p-8 shadow-sm space-y-6">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+            <Card className="p-6 md:p-8 space-y-6 border-border/80">
+              <div className="flex items-center justify-between border-b border-border/60 pb-3.5">
                 <div>
-                  <span className="text-xs font-semibold text-indigo-600">
+                  <span className="text-xs font-medium text-muted-foreground">
                     Target Role: {activeInterview.targetRole}
                   </span>
-                  <h2 className="text-lg font-bold text-slate-900">
+                  <h2 className="text-base font-semibold text-card-foreground">
                     Question {currentQuestionIndex + 1} of {questions.length}
                   </h2>
                 </div>
-                <span className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700 capitalize">
+                <Badge variant="secondary" className="capitalize text-xs font-medium">
                   {currentQ?.category || 'Technical'}
-                </span>
+                </Badge>
               </div>
 
               {currentQ ? (
                 <div className="space-y-4">
-                  <div className="rounded-xl bg-slate-50 p-4 border border-slate-100 text-sm md:text-base font-semibold text-slate-900">
+                  <div className="rounded-lg bg-muted/30 p-4 border border-border/60 text-sm font-medium text-card-foreground leading-relaxed">
                     {currentQ.questionText}
                   </div>
 
                   <div className="space-y-2">
-                    <div className="flex items-center justify-between text-xs text-slate-500">
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
                       <span>Your Response (Recommend STAR format)</span>
-                      <span>{(answers[currentQ.id] || '').length} characters</span>
+                      <span className="font-mono tabular-nums">{(answers[currentQ.id] || '').length} characters</span>
                     </div>
-                    <textarea
+                    <Textarea
                       rows={6}
                       value={answers[currentQ.id] || ''}
                       onChange={(e) => { handleAnswerChange(currentQ.id, e.target.value); }}
-                      placeholder="Outline your technical approach, specific tools, challenges encountered, and quantifiable outcomes..."
-                      className="w-full rounded-xl border border-slate-200 p-4 text-sm text-slate-800 placeholder-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                      placeholder="Outline your approach, tools used, challenges encountered, and quantifiable outcomes..."
+                      className="text-xs sm:text-sm"
                     />
                   </div>
 
-                  <div className="rounded-xl bg-indigo-50/60 p-3 text-xs text-indigo-900 border border-indigo-100 flex items-start gap-2">
-                    <HelpCircle className="h-4 w-4 text-indigo-500 shrink-0 mt-0.5" />
+                  <div className="rounded-lg bg-muted/20 p-3 text-xs text-muted-foreground border border-border/50 flex items-start gap-2">
+                    <HelpCircle className="h-3.5 w-3.5 text-muted-foreground shrink-0 mt-0.5" />
                     <span>
-                      Tip: Articulate the Situation, Task, Actions you took, and final Results. Include concrete metrics where applicable.
+                      Guideline: Detail the Situation, Task, Actions you took, and final Results. Include concrete metrics where applicable.
                     </span>
                   </div>
                 </div>
               ) : null}
 
-              <div className="flex items-center justify-between pt-4 border-t border-slate-100">
-                <button
+              <div className="flex items-center justify-between pt-4 border-t border-border/60">
+                <Button
                   type="button"
+                  variant="outline"
+                  size="sm"
                   disabled={currentQuestionIndex === 0}
                   onClick={() => { setCurrentQuestionIndex((prev) => Math.max(0, prev - 1)); }}
-                  className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-40"
                 >
                   Previous
-                </button>
+                </Button>
 
                 {currentQuestionIndex === questions.length - 1 ? (
-                  <button
+                  <Button
                     type="button"
+                    size="sm"
                     disabled={submitAnswersMutation.isPending}
+                    loading={submitAnswersMutation.isPending}
                     onClick={handleSubmitInterview}
-                    className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-emerald-700 disabled:opacity-60"
+                    className="gap-2"
                   >
-                    {submitAnswersMutation.isPending ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        <span>Evaluating Responses...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Send className="h-4 w-4" />
-                        <span>Submit for Evaluation</span>
-                      </>
-                    )}
-                  </button>
+                    <Send className="h-3.5 w-3.5" />
+                    <span>Submit for Evaluation</span>
+                  </Button>
                 ) : (
-                  <button
+                  <Button
                     type="button"
+                    size="sm"
                     onClick={() => { setCurrentQuestionIndex((prev) => Math.min(questions.length - 1, prev + 1)); }}
-                    className="rounded-xl bg-indigo-600 px-5 py-2 text-xs font-bold text-white hover:bg-indigo-700"
                   >
                     Next Question
-                  </button>
+                  </Button>
                 )}
               </div>
-            </div>
+            </Card>
           )}
         </>
       ) : (
@@ -698,56 +689,56 @@ export function MockInterviewsPage(): React.JSX.Element {
               setViewingPastInterview(null);
             })
           ) : historyLoading ? (
-            <div className="py-12 text-center text-sm text-slate-500">Loading evaluation history...</div>
-          ) : pastInterviews.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center space-y-3">
-              <Briefcase className="mx-auto h-10 w-10 text-slate-300" />
-              <h3 className="text-base font-semibold text-slate-800">No interview records found</h3>
-              <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                Practice interview simulations to evaluate your technical and behavioral responses.
-              </p>
-              <button
-                type="button"
-                onClick={() => { setActiveTab('simulate'); }}
-                className="mt-2 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-indigo-700 transition"
-              >
-                <span>Start Your First Interview</span>
-              </button>
-            </div>
-          ) : (
             <div className="space-y-4">
-              <div className="flex items-center justify-between pb-2">
+              <SkeletonCard />
+              <SkeletonCard />
+            </div>
+          ) : pastInterviews.length === 0 ? (
+            <EmptyState
+              icon={Briefcase}
+              title="No interview records found"
+              description="Complete interview simulations to evaluate your responses across technical depth and communication."
+              action={{
+                label: 'Start Your First Interview',
+                onClick: () => {
+                  setActiveTab('simulate');
+                },
+              }}
+            />
+          ) : (
+            <div className="space-y-3.5">
+              <div className="flex items-center justify-between pb-1">
                 <div>
-                  <h2 className="text-lg font-bold text-slate-900">Past Interview Evaluations</h2>
-                  <p className="text-xs text-slate-500">
-                    Review your comprehensive feedback reports or remove past records.
+                  <h2 className="text-base font-semibold text-foreground">Past Interview Evaluations</h2>
+                  <p className="text-xs text-muted-foreground">
+                    Review your comprehensive feedback transcripts or remove past records.
                   </p>
                 </div>
-                <span className="text-xs font-semibold text-slate-500">
+                <span className="text-xs font-mono text-muted-foreground">
                   {pastInterviews.length} {pastInterviews.length === 1 ? 'Record' : 'Records'}
                 </span>
               </div>
 
               {pastInterviews.map((iv) => (
-                <div
+                <Card
                   key={iv.id}
-                  className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4 hover:border-indigo-200 transition-all"
+                  className="p-5 space-y-3 border-border/80"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <h3 className="text-base font-bold text-slate-900">{iv.targetRole}</h3>
-                        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600 capitalize">
+                        <h3 className="text-sm font-semibold text-card-foreground">{iv.targetRole}</h3>
+                        <span className="capitalize text-[11px] font-medium text-muted-foreground">
                           {iv.type} Practice
                         </span>
                       </div>
-                      <div className="flex items-center gap-3 text-xs text-slate-500">
+                      <div className="flex items-center gap-3 text-xs text-muted-foreground font-mono">
                         <span className="flex items-center gap-1">
-                          <Clock className="h-3.5 w-3.5 text-slate-400" />
+                          <Clock className="h-3 w-3 text-muted-foreground" />
                           <span>{new Date(iv.scheduledAt).toLocaleDateString()}</span>
                         </span>
                         <span>•</span>
-                        <span>Status: <strong className="capitalize text-slate-700">{iv.status}</strong></span>
+                        <span>Status: <strong className="capitalize text-foreground font-normal">{iv.status}</strong></span>
                       </div>
                     </div>
 
@@ -757,58 +748,63 @@ export function MockInterviewsPage(): React.JSX.Element {
                   </div>
 
                   {iv.feedback?.summary ? (
-                    <p className="text-xs text-slate-600 bg-slate-50/80 p-3.5 rounded-xl border border-slate-100 leading-relaxed">
+                    <p className="text-xs text-muted-foreground bg-muted/20 p-3 rounded-lg border border-border/50 leading-relaxed">
                       {iv.feedback.summary}
                     </p>
                   ) : null}
 
                   {/* Actions Bar */}
-                  <div className="flex items-center justify-between pt-3 border-t border-slate-100 text-xs">
+                  <div className="flex items-center justify-between pt-2.5 border-t border-border/60 text-xs">
                     {iv.status === 'completed' && iv.feedback ? (
-                      <button
+                      <Button
                         type="button"
+                        variant="outline"
+                        size="sm"
                         onClick={() => { setViewingPastInterview(iv); }}
-                        className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-50 px-3 py-1.5 font-semibold text-indigo-700 hover:bg-indigo-100 transition"
+                        className="gap-1.5 text-xs h-8"
                       >
-                        <Eye className="h-3.5 w-3.5" />
-                        <span>View Evaluation Report</span>
-                      </button>
+                        <Eye className="h-3.5 w-3.5 text-muted-foreground" />
+                        <span>View Transcript</span>
+                      </Button>
                     ) : (
-                      <span className="text-xs text-slate-400 italic">Interview in progress / not evaluated</span>
+                      <span className="text-xs text-muted-foreground italic">Interview in progress / not evaluated</span>
                     )}
 
                     {deleteConfirmId === iv.id ? (
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-rose-600 font-medium">Delete record?</span>
-                        <button
+                        <span className="text-xs text-destructive font-medium">Delete record?</span>
+                        <Button
                           type="button"
+                          variant="destructive"
+                          size="sm"
                           disabled={deleteMutation.isPending}
+                          loading={deleteMutation.isPending}
                           onClick={() => { handleDelete(iv.id); }}
-                          className="rounded-lg bg-rose-600 px-2.5 py-1 text-xs font-semibold text-white hover:bg-rose-700 transition"
                         >
                           Confirm
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           type="button"
+                          variant="outline"
+                          size="sm"
                           onClick={() => { setDeleteConfirmId(null); }}
-                          className="rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-100 transition"
                         >
                           Cancel
-                        </button>
+                        </Button>
                       </div>
                     ) : (
                       <button
                         type="button"
                         onClick={() => { setDeleteConfirmId(iv.id); }}
-                        className="inline-flex items-center gap-1 text-slate-400 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50 transition"
-                        title="Delete past evaluation"
+                        className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-destructive transition-colors cursor-pointer"
+                        title="Delete evaluation record"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                         <span>Delete</span>
                       </button>
                     )}
                   </div>
-                </div>
+                </Card>
               ))}
             </div>
           )}

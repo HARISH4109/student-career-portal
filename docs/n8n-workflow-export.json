@@ -1,0 +1,643 @@
+{
+  "name": "Job, Internship & Placement Extractor",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "job-extraction",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "05d1dfc9-c0e1-40f0-9d2b-013adf74ddbb",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        256
+      ],
+      "webhookId": "56a48e48-d0cc-4ccb-9547-58acc7117921"
+    },
+    {
+      "parameters": {
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "58e3c15e-48bb-41d6-b40e-808643d2f779",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        2160,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {
+          "download": true,
+          "imageSize": "large"
+        }
+      },
+      "id": "bb149b26-8dbc-4a19-9a91-3715a8af26b6",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        0,
+        16
+      ],
+      "webhookId": "837889fc-93b8-4fac-b73a-37f440a78d3e",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// 1. Telegram text (if from Telegram)\nconst telegramText = $json.message?.text || $json.message?.caption || '';\n\n// 2. Identify source type and image data\nconst sourceType = $json.body?.sourceType || $json.sourceType || '';\nconst isImageSource = sourceType === 'image';\n\n// Extract Base64 string if present across various formats\nlet base64Candidate =\n  $json.body?.imageBase64 ||\n  $json.imageBase64 ||\n  $json.body?.file?.data ||\n  ($json.body?.dataUrl?.includes('base64,') ? $json.body.dataUrl.split('base64,')[1] : null) ||\n  ($json.body?.content?.includes('base64,') ? $json.body.content.split('base64,')[1] : null) ||\n  ($json.content?.includes('base64,') ? $json.content.split('base64,')[1] : null);\n\nif (base64Candidate && typeof base64Candidate === 'string' && base64Candidate.includes('base64,')) {\n  base64Candidate = base64Candidate.split('base64,')[1];\n}\n\n// Convert Webhook base64 image to n8n $binary.data so the AI Agent receives the image binary!\nlet binaryData = $binary || {};\nif (base64Candidate && this.helpers?.prepareBinaryData) {\n  const mimeType = $json.body?.mimeType || $json.body?.file?.mimeType || $json.mimeType || 'image/jpeg';\n  const fileName = $json.body?.fileName || $json.body?.file?.name || $json.fileName || 'poster.jpg';\n  try {\n    binaryData = {\n      data: await this.helpers.prepareBinaryData(\n        Buffer.from(base64Candidate, 'base64'),\n        fileName,\n        mimeType\n      )\n    };\n  } catch (err) {\n    // If conversion fails, keep whatever binaryData we had\n  }\n}\n\nconst hasImage = Boolean(binaryData?.data || $binary?.data || isImageSource || base64Candidate);\n\n// Extract text from webhook without polluting it with raw base64 data!\nlet webhookText = $json.body?.text || $json.body?.prompt || $json.body?.description || $json.text || '';\nif (webhookText.includes('base64,') || webhookText.startsWith('data:image/')) {\n  webhookText = '';\n}\nconst rawContent = $json.body?.content || $json.content || '';\nif (rawContent && !rawContent.includes('base64,') && !rawContent.startsWith('data:image/')) {\n  if (!webhookText) webhookText = rawContent;\n}\n\nconst telegramChatId = $json.message?.chat?.id ? String($json.message.chat.id) : '';\n\n// URL detection - ONLY if it's NOT an image!\nlet isUrl = false;\nlet extractedUrl = '';\nif (!hasImage && !isImageSource) {\n  const explicitUrl = $json.body?.url || $json.url || '';\n  const textToScan = explicitUrl || webhookText || telegramText || '';\n  const urlMatch = String(textToScan).match(/https?:\\/\\/[^\\s<>\"{}|]+[^\\\\s<>\"{}|.,;:?!]/i);\n  if (urlMatch) {\n    extractedUrl = urlMatch[0];\n    isUrl = Boolean(\n      explicitUrl ||\n      textToScan.trim().startsWith('http://') ||\n      textToScan.trim().startsWith('https://') ||\n      textToScan.trim().length <= 200\n    );\n  }\n}\n\n// Construct clean prompt text for the AI node\nlet rawInput = '';\nif (hasImage || isImageSource) {\n  rawInput =\n    telegramText ||\n    webhookText ||\n    'Attached recruitment poster / flyer image. Please thoroughly inspect the poster image, headings, company name, roles, batch years, eligible branches, CGPA cutoffs, stipends/salaries, apply links, and contact emails.';\n} else if (isUrl) {\n  rawInput = extractedUrl;\n} else {\n  rawInput = telegramText || webhookText || 'Job opportunity';\n}\n\nreturn {\n  json: {\n    extracted_input: rawInput,\n    extracted_url: extractedUrl,\n    is_url: isUrl,\n    has_image: Boolean(hasImage || isImageSource),\n    telegram_chat_id: telegramChatId,\n    source: telegramChatId ? 'telegram' : 'web_app',\n    image_base64: base64Candidate || undefined\n  },\n  binary: binaryData\n};"
+      },
+      "id": "75dc3b90-9fd2-410e-a3ea-8c4db03fb686",
+      "name": "Prepare Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"title\": {\n      \"type\": \"string\",\n      \"description\": \"Job or internship title (e.g. 'Software Engineer', 'Data Analyst Intern')\"\n    },\n    \"companyName\": {\n      \"type\": \"string\",\n      \"description\": \"Name of the hiring company (e.g. 'Infosys', 'Google', 'Microsoft')\"\n    },\n    \"type\": {\n      \"type\": \"string\",\n      \"enum\": [\"job\", \"internship\"],\n      \"description\": \"Must be exactly 'job' for full-time jobs or 'internship' for internships/training\"\n    },\n    \"description\": {\n      \"type\": \"string\",\n      \"description\": \"Full job/internship description including role overview, responsibilities, and perks\"\n    },\n    \"workMode\": {\n      \"type\": \"string\",\n      \"enum\": [\"onsite\", \"remote\", \"hybrid\"],\n      \"description\": \"Must be exactly 'onsite', 'remote', or 'hybrid'\"\n    },\n    \"location\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Location or city (e.g. 'Bangalore', 'PAN India'). If remote or unspecified, return null\"\n    },\n    \"salaryMin\": {\n      \"type\": [\"number\", \"string\", \"null\"],\n      \"description\": \"Minimum compensation/stipend in INR. If unpaid, return 0 or 'Unpaid'. If compensation is not disclosed or not specified, return null or 'Not Provided'.\"\n    },\n    \"salaryMax\": {\n      \"type\": [\"number\", \"string\", \"null\"],\n      \"description\": \"Maximum compensation/stipend in INR. If unpaid, return 0 or 'Unpaid'. If compensation is not disclosed or not specified, return null or 'Not Provided'.\"\n    },\n    \"applicationDeadline\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Application deadline in ISO format YYYY-MM-DD (e.g. '2026-10-15'). If not specified, return null\"\n    },\n    \"applyUrl\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"Direct application URL, portal link, Google Form, Unstop, or careers page link. If not found, return null\"\n    },\n    \"applicationEmail\": {\n      \"type\": [\"string\", \"null\"],\n      \"description\": \"HR or application contact email address. If not found, return null\"\n    },\n    \"skills\": {\n      \"type\": \"array\",\n      \"items\": { \"type\": \"string\" },\n      \"description\": \"List of technical and soft skills required (e.g. ['Java', 'Python', 'DBMS'])\"\n    },\n    \"eligibility\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"minCgpa\": {\n          \"type\": [\"number\", \"null\"],\n          \"description\": \"Minimum CGPA cut-off (e.g. 7.5). If none specified, return null\"\n        },\n        \"departmentCodes\": {\n          \"type\": \"array\",\n          \"items\": {\n            \"type\": \"string\",\n            \"enum\": [\"CSE\", \"IT\", \"ECE\", \"AI-DS\", \"EEE\", \"ME\", \"CE\"]\n          },\n          \"description\": \"Eligible department codes (CSE, IT, ECE, AI-DS, EEE, ME, CE). If open to all or not specified, return []\"\n        },\n        \"allowedBatches\": {\n          \"type\": \"array\",\n          \"items\": { \"type\": \"integer\" },\n          \"description\": \"Eligible graduation years (e.g. [2024, 2025, 2026]). If not specified, return []\"\n        },\n        \"description\": {\n          \"type\": [\"string\", \"null\"],\n          \"description\": \"Descriptive eligibility summary. Fill this in especially when structured fields (departmentCodes, allowedBatches, minCgpa) are empty or not strictly defined (e.g. 'Open to all engineering streams, 0 active backlogs'). Return null if all criteria are fully captured in structured fields.\"\n        }\n      },\n      \"required\": [\"departmentCodes\", \"allowedBatches\"]\n    },\n    \"confidenceScore\": {\n      \"type\": [\"integer\", \"null\"],\n      \"description\": \"AI confidence score between 0 and 100\"\n    }\n  },\n  \"required\": [\"title\", \"companyName\", \"type\", \"description\", \"workMode\", \"skills\"]\n}"
+      },
+      "id": "de761695-3308-47fe-9058-74a8f508f38f",
+      "name": "Structured Job Details Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1088,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "leftValue": "={{ $json.is_url }}",
+              "operator": {
+                "operation": "equals",
+                "type": "boolean"
+              },
+              "rightValue": true
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          }
+        },
+        "options": {}
+      },
+      "id": "4d0e2b19-e1d6-485e-874b-ec9bfe66a553",
+      "name": "Is URL Input?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        384,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.extracted_url }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "Accept",
+              "value": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8"
+            },
+            {
+              "name": "Accept-Language",
+              "value": "en-US,en;q=0.9"
+            }
+          ]
+        },
+        "options": {
+          "redirect": {
+            "redirect": {
+              "maxRedirects": 0
+            }
+          },
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "text"
+            }
+          },
+          "timeout": 20000
+        }
+      },
+      "id": "d78d26be-c193-434d-ab0d-2c5f8e827e6e",
+      "name": "Fetch Webpage",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        560,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const prep = $('Prepare Input').item?.json || {};\nconst rawHtml = typeof $json.data === 'string' ? $json.data : JSON.stringify($json.data || '');\nconst sourceUrl = prep.extracted_url || prep.extracted_input || '';\nconst userText = prep.extracted_input || '';\n\n// Fallback if fetch failed or returned error data\nif (!rawHtml || rawHtml === '\"\"' || rawHtml.includes('ENOTFOUND') || rawHtml.includes('ECONNREFUSED') || rawHtml.includes('ETIMEDOUT')) {\n  return {\n    json: {\n      extracted_input: userText || sourceUrl,\n      source_url: sourceUrl,\n      telegram_chat_id: prep.telegram_chat_id || '',\n      source: prep.source || 'web_app'\n    }\n  };\n}\n\n// 1. Check if authwall / login required (private LinkedIn post or cold join without post data)\nconst isAuthwall = (rawHtml.includes('d_registration-cold-join') || rawHtml.includes('Sign Up | LinkedIn') || rawHtml.includes('Join LinkedIn now')) &&\n  !rawHtml.includes('SocialMediaPosting') && !rawHtml.includes('JobPosting') && !rawHtml.includes('articleBody');\n\nlet cleanedContent = '';\n\nif (isAuthwall) {\n  cleanedContent = `[AUTHENTICATION REQUIRED] This LinkedIn post/link (${sourceUrl}) is private or behind a member login wall. Public content could not be read without signing in. Please paste the job posting text directly or upload a screenshot/poster image.`;\n} else {\n  // 2. Extract JSON-LD structured data (SocialMediaPosting, JobPosting, etc.)\n  const jsonLdMatches = [...rawHtml.matchAll(/<script[^>]*type=[\\\"']application\\/ld\\+json[\\\"'][^>]*>([\\s\\S]*?)<\\/script>/gi)];\n  let structuredDataText = '';\n  for (const m of jsonLdMatches) {\n    try {\n      const parsed = JSON.parse(m[1].trim());\n      const articleBody = parsed.articleBody || parsed.description || parsed.text;\n      const headline = parsed.headline || parsed.title;\n      const company = parsed.hiringOrganization?.name || parsed.author?.name;\n      if (articleBody || headline) {\n        structuredDataText += `\\n--- STRUCTURED POST CONTENT ---\\n`;\n        if (headline) structuredDataText += `Headline: ${headline}\\n`;\n        if (company) structuredDataText += `Company / Author: ${company}\\n`;\n        if (articleBody) structuredDataText += `Content:\\n${articleBody}\\n`;\n      }\n    } catch (e) {}\n  }\n\n  // 3. Extract OpenGraph and standard Meta Tags\n  const ogTitleMatch = rawHtml.match(/<meta[^>]*(?:property=[\\\"']og:title[\\\"']|name=[\\\"']twitter:title[\\\"'])[^>]*content=[\\\"']([\\s\\S]*?)[\\\"'][^>]*>/i);\n  const ogDescMatch = rawHtml.match(/<meta[^>]*(?:property=[\\\"']og:description[\\\"']|name=[\\\"']description[\\\"']|name=[\\\"']twitter:description[\\\"'])[^>]*content=[\\\"']([\\s\\S]*?)[\\\"'][^>]*>/i);\n  const titleMatch = rawHtml.match(/<title[^>]*>([\\s\\S]*?)<\\/title>/i);\n\n  const metaTitle = ogTitleMatch ? ogTitleMatch[1].trim() : (titleMatch ? titleMatch[1].trim() : '');\n  const metaDesc = ogDescMatch ? ogDescMatch[1].trim() : '';\n\n  // 4. Extract Main Body text (strip scripts, styles, forms, svgs)\n  let bodyText = rawHtml\n    .replace(/<script\\b[^<]*(?:(?!<\\/script>)<[^<]*)*<\\/script>/gi, ' ')\n    .replace(/<style\\b[^<]*(?:(?!<\\/style>)<[^<]*)*<\\/style>/gi, ' ')\n    .replace(/<svg\\b[^<]*(?:(?!<\\/svg>)<[^<]*)*<\\/svg>/gi, ' ')\n    .replace(/<form\\b[^<]*(?:(?!<\\/form>)<[^<]*)*<\\/form>/gi, ' ')\n    .replace(/<nav\\b[^<]*(?:(?!<\\/nav>)<[^<]*)*<\\/nav>/gi, ' ')\n    .replace(/<header\\b[^<]*(?:(?!<\\/header>)<[^<]*)*<\\/header>/gi, ' ')\n    .replace(/<footer\\b[^<]*(?:(?!<\\/footer>)<[^<]*)*<\\/footer>/gi, ' ')\n    .replace(/<[^>]+>/g, ' ')\n    .replace(/&nbsp;/g, ' ')\n    .replace(/&amp;/g, '&')\n    .replace(/&quot;/g, '\"')\n    .replace(/&#39;/g, \"'\")\n    .replace(/\\s+/g, ' ')\n    .trim();\n\n  bodyText = bodyText.replace(/Agree & Join LinkedIn.*?Cookie Policy\\./gi, '');\n  bodyText = bodyText.replace(/Sign in.*?Join now/gi, '');\n\n  let combined = `SOURCE URL: ${sourceUrl}\\n`;\n  if (metaTitle && !metaTitle.includes('Sign Up')) combined += `PAGE TITLE: ${metaTitle}\\n`;\n  if (structuredDataText) combined += `${structuredDataText}\\n`;\n  if (metaDesc && !structuredDataText.includes(metaDesc.slice(0, 50)) && !metaDesc.includes('500 million+ members')) {\n    combined += `META DESCRIPTION:\\n${metaDesc}\\n`;\n  }\n  if (!structuredDataText && !metaDesc) {\n    combined += `BODY CONTENT:\\n${bodyText.slice(0, 4000)}\\n`;\n  }\n\n  cleanedContent = combined;\n}\n\nif (userText && userText !== sourceUrl && userText.length > sourceUrl.length) {\n  cleanedContent = `USER NOTE: ${userText}\\n\\n${cleanedContent}`;\n}\n\nreturn {\n  json: {\n    extracted_input: cleanedContent,\n    source_url: sourceUrl,\n    telegram_chat_id: prep.telegram_chat_id || '',\n    source: prep.source || 'web_app'\n  }\n};"
+      },
+      "id": "75dc8c0a-77a7-4f96-996e-b17e20cce693",
+      "name": "Parse & Clean Webpage",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        752,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Extract structured job/internship/placement details from the provided input (poster image, URL, or text):\n\n{{ $json.extracted_input }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are an elite Opportunity Extraction Agent. Your job is to extract structured job or internship details from poster images, recruitment flyers, job portal URLs, or text snippets into a strict JSON contract.\n\nCRITICAL INSTRUCTIONS & CONTRACT CONSTRAINTS:\n1. title: string (required) — Job or internship title.\n2. companyName: string (required) — Name of the hiring company. NEVER use \"LinkedIn\", \"Google\", \"Facebook\" or the hosting social network as company name unless they are genuinely the employer hiring.\n3. type: string (required) — MUST BE EXACTLY \"job\" (for full-time/placement) OR \"internship\" (for internship/summer training).\n4. description: string (required) — Full comprehensive description of the role, responsibilities, and details. Always end with a \"How to Apply:\" section mentioning the apply link or submit email.\n5. workMode: string (required) — MUST BE EXACTLY \"onsite\", \"remote\", or \"hybrid\".\n6. location: string or null — City/location (e.g. \"Bangalore, India\", \"Hyderabad\", or null if not mentioned).\n7. salaryMin: number or null — Minimum salary/stipend in INR (annual for jobs e.g. 2200000, monthly for internships e.g. 100000; null if not specified). Must be a number, not string.\n8. salaryMax: number or null — Maximum salary/stipend in INR (annual for jobs e.g. 3500000, monthly for internships e.g. 125000; null if not specified). Must be a number, not string.\n9. applicationDeadline: string or null — ISO date format \"YYYY-MM-DD\" or \"YYYY-MM-DDTHH:mm:ssZ\" (e.g. \"2026-10-15\"), or null if not specified.\n10. applyUrl: string or null — Direct application link, Google Form, registration link, or company careers portal URL. Look carefully in posters, flyers, post body, footer, and links. If the input itself is a job/internship post URL and no separate internal link is specified, use that post URL. If not found, set to null.\n11. applicationEmail: string or null — Submitting email address where applicants should send their resume/CV or inquiries (e.g. \"hr@company.com\", \"careers@...\", \"jobs@...\", \"recruitment@...\"). Look carefully in poster text, flyer footers, captions, and contact info. If not found, set to null.\n12. skills: array of strings — Extracted skill names. Standard names preferred: JavaScript, TypeScript, Python, Java, C++, C#, Go, Rust, SQL, HTML/CSS, React, Next.js, Vue.js, Angular, Tailwind CSS, Redux Toolkit, Node.js, Express.js, FastAPI, Django, Spring Boot, PostgreSQL, MySQL, MongoDB, Redis, Docker, Kubernetes, AWS, Google Cloud Platform, Microsoft Azure, CI/CD Pipelines, Linux, Git & GitHub, Machine Learning, Deep Learning, PyTorch, TensorFlow, Pandas & NumPy, Data Structures & Algorithms, System Design, REST APIs, GraphQL, Microservices. Empty array [] if none.\n13. eligibility: object:\n    * minCgpa: number or null — Minimum CGPA on 0-10 scale (e.g. 7.5), or null.\n    * departmentCodes: array of strings — Eligible department codes. Use ONLY: \"CSE\", \"IT\", \"ECE\", \"AI-DS\", \"EEE\", \"ME\", \"CE\". Map branch names (CS -> CSE, IT -> IT, Electronics -> ECE, AIDS -> AI-DS, Mechanical -> ME, Civil -> CE). Empty array [] if not specified or open to all.\n    * allowedBatches: array of numbers — Eligible graduation years (e.g. [2025, 2026]). Must be numbers, not strings. Empty array [] if not specified.\n    * description: string or null — Fallback descriptive eligibility text when structured fields (minCgpa, departmentCodes, allowedBatches) are all empty/null. MUST be null when structured fields are populated.\n14. confidenceScore: number (0-100) — Confidence level in extraction quality.\n\nPOSTER / IMAGE FLYER INSTRUCTIONS:\n- If a poster image, recruitment flyer, or screenshot is attached:\n  * Inspect all visual headlines, company branding/logos, role titles, batch years (e.g. 2024, 2025, 2026), eligible departments/branches, CGPA cutoffs, stipends/salaries, application links/QR code text, and contact email addresses.\n  * Extract all details thoroughly and populate all schema fields.\n  * NEVER return the login required fallback when an image or flyer is provided.\n\nSPECIAL URL & AUTH-WALL HANDLING:\n- ONLY if the input is a web URL that indicates it is behind a private login wall (e.g. contains \"[AUTHENTICATION REQUIRED]\"):\n  * title: \"Login Required to View Opportunity\"\n  * companyName: \"Unknown\"\n  * type: \"job\"\n  * description: \"This post is private or behind a login wall and could not be accessed publicly. Please paste the job post text directly or upload a screenshot/poster image.\"\n  * workMode: \"onsite\"\n  * location: null\n  * salaryMin: null\n  * salaryMax: null\n  * applicationDeadline: null\n  * applyUrl: null\n  * applicationEmail: null\n  * skills: []\n  * eligibility: { minCgpa: null, departmentCodes: [], allowedBatches: [], description: \"Could not access private post content without login.\" }\n  * confidenceScore: 0\n\nRULES:\n- Always use null (never empty strings or \"N/A\") for missing scalar fields.\n- Always use [] for empty arrays.\n- Salary values are in INR — annual for jobs, monthly for internships.",
+          "passthroughBinaryImages": true,
+          "passthroughBinaryPdfs": true
+        }
+      },
+      "id": "0e899126-debe-47a6-b9f6-15dec36f89de",
+      "name": "Job Extraction Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        944,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const raw = $json.output || $json;\n\nlet prepNode = {};\ntry {\n  if ($('Parse & Clean Webpage').isExecuted) {\n    prepNode = $('Parse & Clean Webpage').first().json || {};\n  }\n} catch (e) {}\nif (!prepNode || !prepNode.extracted_input) {\n  try {\n    prepNode = $('Prepare Input').first().json || {};\n  } catch (e) {}\n}\n\n// 1. title (string, required)\nconst title = String(raw.title || raw.job_title || 'Opportunity Announcement').trim();\n\n// 2. companyName (string, required)\nconst companyName = String(raw.companyName || raw.company_name || 'Hiring Organization').trim();\n\n// 3. type (must be exactly: \"job\" or \"internship\")\nlet type = String(raw.type || raw.opportunity_type || '').toLowerCase();\nif (type.includes('intern')) {\n  type = 'internship';\n} else {\n  type = 'job';\n}\n\n// Helper to parse compensation / stipend (handles numbers, strings like \"Unpaid\", 0, \"Not Provided\")\nfunction parseSalary(val) {\n  if (val === null || val === undefined || val === '') return null;\n  if (typeof val === 'number') return isNaN(val) ? null : val;\n  const s = String(val).trim().toLowerCase();\n  if (s.includes('unpaid') || s === '0' || s === 'nil' || s === 'free' || s === 'none') return 0;\n  if (s.includes('not provided') || s.includes('not specified') || s === 'null' || s === 'n/a') return null;\n  const cleaned = s.replace(/[^0-9.]/g, '');\n  if (!cleaned) return null;\n  const num = parseFloat(cleaned);\n  return isNaN(num) ? null : num;\n}\n\n// 4. applyUrl\nlet applyUrl = raw.applyUrl || raw.applicationLink || raw.application_link || raw.apply_link || null;\nif (applyUrl && typeof applyUrl === 'string') {\n  applyUrl = applyUrl.trim();\n  if (['not specified', 'null', 'n/a', 'none', ''].includes(applyUrl.toLowerCase())) {\n    applyUrl = null;\n  }\n} else {\n  applyUrl = null;\n}\n\n// Fallback for applyUrl: if URL was input or found in prepNode\nif (!applyUrl && (prepNode.source_url || prepNode.extracted_url)) {\n  applyUrl = prepNode.source_url || prepNode.extracted_url;\n}\n\n// Additional regex search for URL in text if still null\nif (!applyUrl) {\n  const textToScan = (prepNode.extracted_input || '') + ' ' + (raw.description || '');\n  const urlMatch = textToScan.match(/https?:\\/\\/[^\\s<>\"{}|\\\\^`]+[^\\s<>\"{}|\\\\^`.,;:?!]/i);\n  if (urlMatch) {\n    applyUrl = urlMatch[0];\n  }\n}\n\n// 5. applicationEmail (submitting email)\nlet applicationEmail = raw.applicationEmail || raw.contactEmail || raw.email || raw.application_email || raw.submittingEmail || null;\nif (applicationEmail && typeof applicationEmail === 'string') {\n  applicationEmail = applicationEmail.trim();\n  if (['not specified', 'null', 'n/a', 'none', ''].includes(applicationEmail.toLowerCase())) {\n    applicationEmail = null;\n  }\n} else {\n  applicationEmail = null;\n}\n\n// Fallback regex search for email in input and description\nif (!applicationEmail) {\n  const textToScan = (prepNode.extracted_input || '') + ' ' + (raw.description || '');\n  const emailMatch = textToScan.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}/);\n  if (emailMatch) {\n    applicationEmail = emailMatch[0];\n  }\n}\n\n// 6. description (string, required)\nlet description = String(raw.description || raw.summary_highlights || `${title} at ${companyName}`).trim();\n// Ensure application link / email is included in description if available\nif ((applyUrl || applicationEmail) && !description.toLowerCase().includes('how to apply') && !description.toLowerCase().includes('apply link') && !description.toLowerCase().includes('submit email')) {\n  let applyBlock = '\\n\\nHow to Apply:';\n  if (applyUrl) applyBlock += `\\n• Apply Link: ${applyUrl}`;\n  if (applicationEmail) applyBlock += `\\n• Submit Email: ${applicationEmail}`;\n  description += applyBlock;\n}\n\n// 7. workMode (must be exactly: \"onsite\", \"remote\", or \"hybrid\")\nlet workMode = String(raw.workMode || raw.location_and_mode || '').toLowerCase();\nif (workMode.includes('remote') || workMode.includes('home')) {\n  workMode = 'remote';\n} else if (workMode.includes('hybrid')) {\n  workMode = 'hybrid';\n} else {\n  workMode = 'onsite';\n}\n\n// 8. location (string or null)\nlet location = raw.location !== undefined ? raw.location : (raw.location_and_mode || null);\nif (location && typeof location === 'string') {\n  location = location.trim();\n  if (['not specified', 'null', 'n/a', 'none', ''].includes(location.toLowerCase())) {\n    location = null;\n  }\n} else if (!location) {\n  location = null;\n}\n\n// 9 & 10. salaryMin and salaryMax (number, 0 for unpaid, or null)\nlet salaryMin = parseSalary(raw.salaryMin);\nlet salaryMax = parseSalary(raw.salaryMax);\n\n// Fallback for general salary/stipend string if salaryMin/Max are null\nconst generalSalary = raw.salary || raw.stipend || raw.compensation;\nif (typeof generalSalary === 'string' && salaryMin === null && salaryMax === null) {\n  const sLower = generalSalary.toLowerCase();\n  if (sLower.includes('unpaid') || sLower === '0' || sLower === 'free') {\n    salaryMin = 0;\n    salaryMax = 0;\n  }\n}\n\nif (salaryMin !== null && salaryMax !== null && salaryMin > salaryMax) {\n  const temp = salaryMin;\n  salaryMin = salaryMax;\n  salaryMax = temp;\n}\n\n// 11. applicationDeadline (string in ISO date format \"YYYY-MM-DD\" or null)\nlet applicationDeadline = raw.applicationDeadline || raw.application_deadline || null;\nif (applicationDeadline && typeof applicationDeadline === 'string') {\n  applicationDeadline = applicationDeadline.trim();\n  if (['not specified', 'null', 'n/a', 'none', ''].includes(applicationDeadline.toLowerCase())) {\n    applicationDeadline = null;\n  } else {\n    const dateMatch = applicationDeadline.match(/\\d{4}-\\d{2}-\\d{2}/);\n    if (dateMatch) {\n      applicationDeadline = dateMatch[0];\n    }\n  }\n} else if (!applicationDeadline) {\n  applicationDeadline = null;\n}\n\n// 12. skills (array of strings)\nlet skills = [];\nif (Array.isArray(raw.skills)) {\n  skills = raw.skills.map(s => String(s).trim()).filter(Boolean);\n} else if (typeof raw.skills === 'string' && raw.skills.trim()) {\n  skills = raw.skills.split(',').map(s => s.trim()).filter(Boolean);\n} else if (typeof raw.key_skills === 'string' && raw.key_skills.trim()) {\n  skills = raw.key_skills.split(',').map(s => s.trim()).filter(Boolean);\n}\n\n// 13. eligibility\nconst rawElig = raw.eligibility || {};\nlet minCgpa = null;\nconst rawCgpa = rawElig.minCgpa !== undefined ? rawElig.minCgpa : raw.minCgpa;\nif (rawCgpa !== null && rawCgpa !== undefined && rawCgpa !== '') {\n  const n = typeof rawCgpa === 'number' ? rawCgpa : parseFloat(String(rawCgpa).replace(/[^0-9.]/g, ''));\n  if (!isNaN(n) && n >= 0 && n <= 10) minCgpa = n;\n}\n\nconst validDepts = ['CSE', 'IT', 'ECE', 'AI-DS', 'EEE', 'ME', 'CE'];\nconst rawDepts = rawElig.departmentCodes || raw.departmentCodes || [];\nlet departmentCodes = [];\nif (Array.isArray(rawDepts)) {\n  departmentCodes = rawDepts.map(d => {\n    const s = String(d).toUpperCase().trim();\n    if (['CSE', 'CS', 'COMPUTER SCIENCE', 'COMP SCI', 'COMPUTERS'].includes(s)) return 'CSE';\n    if (['IT', 'INFORMATION TECHNOLOGY'].includes(s)) return 'IT';\n    if (['ECE', 'ELECTRONICS', 'ELECTRONICS & COMMUNICATION', 'ELECTRONICS AND COMMUNICATION', 'ENTC'].includes(s)) return 'ECE';\n    if (['AI-DS', 'AI/DS', 'AIDS', 'AI & DS', 'ARTIFICIAL INTELLIGENCE', 'DATA SCIENCE', 'AI'].includes(s)) return 'AI-DS';\n    if (['EEE', 'ELECTRICAL', 'ELECTRICAL & ELECTRONICS', 'ELECTRICAL AND ELECTRONICS'].includes(s)) return 'EEE';\n    if (['ME', 'MECH', 'MECHANICAL', 'MECHANICAL ENGINEERING'].includes(s)) return 'ME';\n    if (['CE', 'CIVIL', 'CIVIL ENGINEERING'].includes(s)) return 'CE';\n    return s;\n  }).filter(d => validDepts.includes(d));\n}\ndepartmentCodes = Array.from(new Set(departmentCodes));\n\nlet allowedBatches = [];\nconst rawBatches = rawElig.allowedBatches || raw.allowedBatches || [];\nif (Array.isArray(rawBatches)) {\n  allowedBatches = rawBatches.map(b => parseInt(String(b).replace(/[^0-9]/g, ''), 10))\n    .filter(b => !isNaN(b) && b >= 2020 && b <= 2035);\n}\nallowedBatches = Array.from(new Set(allowedBatches)).sort((a, b) => a - b);\n\nlet eligibilityDescription = rawElig.description !== undefined ? rawElig.description : (raw.eligibility_criteria || null);\nif (eligibilityDescription && typeof eligibilityDescription === 'string') {\n  eligibilityDescription = eligibilityDescription.trim();\n  if (['null', 'n/a', 'none', ''].includes(eligibilityDescription.toLowerCase())) {\n    eligibilityDescription = null;\n  }\n} else if (!eligibilityDescription) {\n  eligibilityDescription = null;\n}\n\nif (minCgpa !== null || departmentCodes.length > 0 || allowedBatches.length > 0) {\n  eligibilityDescription = null;\n} else if (!eligibilityDescription) {\n  const textToScan = raw.description || prepNode.extracted_input || '';\n  const match = textToScan.match(/(?:open to|eligib\\w*|branches?|semester|qualification)[^.]*?(?:\\.|$)/i);\n  if (match) {\n    eligibilityDescription = match[0].trim();\n  }\n}\n\n// 14. confidenceScore (integer 0-100 or null)\nlet confidenceScore = null;\nif (raw.confidenceScore !== null && raw.confidenceScore !== undefined) {\n  const cs = typeof raw.confidenceScore === 'number' ? raw.confidenceScore : parseInt(String(raw.confidenceScore).replace(/[^0-9]/g, ''), 10);\n  if (!isNaN(cs)) confidenceScore = Math.max(0, Math.min(100, Math.round(cs)));\n}\nif (confidenceScore === null) confidenceScore = 85;\n\n// Final output JSON object conforming strictly to contract\nconst contractOutput = {\n  title: title,\n  companyName: companyName,\n  type: type,\n  description: description,\n  workMode: workMode,\n  location: location,\n  salaryMin: salaryMin,\n  salaryMax: salaryMax,\n  applicationDeadline: applicationDeadline,\n  applyUrl: applyUrl,\n  applicationEmail: applicationEmail,\n  skills: skills,\n  eligibility: {\n    minCgpa: minCgpa,\n    departmentCodes: departmentCodes,\n    allowedBatches: allowedBatches,\n    description: eligibilityDescription\n  },\n  confidenceScore: confidenceScore\n};\n\nconst telegramChatId = prepNode.telegram_chat_id || $json.telegram_chat_id || '';\nconst isTelegram = Boolean(telegramChatId);\nconst applicationLink = applyUrl || (applicationEmail ? `mailto:${applicationEmail}` : '') || prepNode.source_url || prepNode.extracted_url || '';\n\n// Format salary display\nlet salaryText = 'Not Disclosed';\nif (salaryMin === 0 && (salaryMax === 0 || salaryMax === null)) {\n  salaryText = 'Unpaid';\n} else if (salaryMin !== null && salaryMax !== null) {\n  salaryText = `₹${salaryMin.toLocaleString('en-IN')} - ₹${salaryMax.toLocaleString('en-IN')} INR`;\n} else if (salaryMin !== null) {\n  salaryText = `From ₹${salaryMin.toLocaleString('en-IN')} INR`;\n} else if (salaryMax !== null) {\n  salaryText = `Up to ₹${salaryMax.toLocaleString('en-IN')} INR`;\n}\n\n// Format eligibility display\nlet eligText = '';\nif (minCgpa !== null) eligText += `• <b>Min CGPA:</b> ${minCgpa}\\n`;\nif (departmentCodes.length > 0) eligText += `• <b>Departments:</b> ${departmentCodes.join(', ')}\\n`;\nif (allowedBatches.length > 0) eligText += `• <b>Eligible Batches:</b> ${allowedBatches.join(', ')}\\n`;\nif (eligibilityDescription) eligText += `• <b>Details:</b> ${eligibilityDescription}\\n`;\nif (!eligText) eligText = '• Open to all eligible applicants\\n';\n\nlet applySection = '';\nif (applyUrl) applySection += `🔗 <b>Apply Link:</b> ${applyUrl}\\n`;\nif (applicationEmail) applySection += `📩 <b>Submit Email:</b> ${applicationEmail}\\n`;\n\nconst telegramMessage = `🎯 <b>${companyName.toUpperCase()} - ${title}</b>\\n\\n━━━━━━━━━━━━━━━━━━━━━\\n🏷️ <b>Type:</b> ${type.toUpperCase()}\\n💼 <b>Work Mode:</b> ${workMode.toUpperCase()}${location ? ` (${location})` : ''}\\n💰 <b>Compensation:</b> ${salaryText}\\n⏰ <b>Deadline:</b> ${applicationDeadline || 'Not Specified'}\\n🎯 <b>AI Confidence:</b> ${confidenceScore}%\\n\\n🎓 <b>Eligibility:</b>\\n${eligText}\\n🛠️ <b>Required Skills:</b>\\n${skills.length > 0 ? skills.join(', ') : 'Not Specified'}\\n\\n${applySection}📝 <b>Description:</b>\\n${description}\\n━━━━━━━━━━━━━━━━━━━━━\\n<i>✅ Auto-extracted & Stored in Portal Database</i>`;\n\nreturn {\n  json: {\n    ...contractOutput,\n    contractOutput: contractOutput,\n    source: prepNode.source || (isTelegram ? 'telegram' : 'web_app'),\n    telegram_chat_id: telegramChatId,\n    telegram_message: telegramMessage,\n    application_link: applicationLink\n  }\n};"
+      },
+      "id": "fe975feb-d371-48bf-a370-d25478e631d8",
+      "name": "Format Details & Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1280,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "cachedResultName": "job_opportunities",
+          "mode": "id",
+          "value": "eISRKWk4TI39Ko14"
+        },
+        "columns": {
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false,
+          "mappingMode": "defineBelow",
+          "matchingColumns": [],
+          "schema": [
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "company_name",
+              "id": "company_name",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "job_title",
+              "id": "job_title",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "opportunity_type",
+              "id": "opportunity_type",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "eligibility_criteria",
+              "id": "eligibility_criteria",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "stipend_or_salary",
+              "id": "stipend_or_salary",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "location_and_mode",
+              "id": "location_and_mode",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "application_deadline",
+              "id": "application_deadline",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "application_link",
+              "id": "application_link",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "key_skills",
+              "id": "key_skills",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "selection_process",
+              "id": "selection_process",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "summary_highlights",
+              "id": "summary_highlights",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "status",
+              "id": "status",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            },
+            {
+              "defaultMatch": false,
+              "display": true,
+              "displayName": "source",
+              "id": "source",
+              "readOnly": false,
+              "removed": false,
+              "required": false,
+              "type": "string"
+            }
+          ],
+          "value": {
+            "application_deadline": "={{ $json.applicationDeadline ?? '' }}",
+            "application_link": "={{ $json.application_link ?? $json.applyUrl ?? ($json.applicationEmail ? 'mailto:' + $json.applicationEmail : '') ?? '' }}",
+            "company_name": "={{ $json.companyName }}",
+            "eligibility_criteria": "={{ 'CGPA: ' + ($json.eligibility?.minCgpa ?? 'N/A') + ' | Batches: ' + ($json.eligibility?.allowedBatches || []).join(',') + ' | Depts: ' + ($json.eligibility?.departmentCodes || []).join(',') }}",
+            "job_title": "={{ $json.title }}",
+            "key_skills": "={{ ($json.skills || []).join(', ') }}",
+            "location_and_mode": "={{ $json.workMode + ($json.location ? ' - ' + $json.location : '') }}",
+            "opportunity_type": "={{ $json.type }}",
+            "selection_process": "={{ $json.selection_process ?? 'Standard Assessment & Interviews' }}",
+            "source": "={{ $json.source }}",
+            "status": "Pending Review",
+            "stipend_or_salary": "={{ ($json.salaryMin != null ? $json.salaryMin : '') + ($json.salaryMax != null ? ' - ' + $json.salaryMax : '') + ' INR' }}",
+            "summary_highlights": "={{ $json.description }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "fb100e32-f076-4a5d-beda-1facb4f3dc24",
+      "name": "Save to Data Table",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1504,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "80152584-4b44-41e7-a7c8-c85fa098d438",
+              "leftValue": "={{ $('Format Details & Message').item.json.telegram_chat_id }}",
+              "operator": {
+                "operation": "notEmpty",
+                "type": "string"
+              }
+            }
+          ],
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          }
+        },
+        "looseTypeValidation": "={{ true }}",
+        "options": {}
+      },
+      "id": "6a620ccd-69a3-499e-98bb-5bdd13cfc51e",
+      "name": "Is Telegram Submission?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1728,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Format Details & Message').item.json.telegram_chat_id }}",
+        "text": "={{ $('Format Details & Message').item.json.telegram_message }}",
+        "additionalFields": {
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "c6d01aab-1e3f-4ceb-806e-efebac7d8ed5",
+      "name": "Send Telegram Response",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1952,
+        16
+      ],
+      "webhookId": "b1534e82-5aaa-4e25-ba84-dcb99d8cf331",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "return {\n  json: $('Format Details & Message').item.json.contractOutput\n};"
+      },
+      "id": "7423dbec-77e2-4820-9d74-ea19b1344e5e",
+      "name": "Set Webhook Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1952,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "model": "qwen/qwen3.8-27b",
+        "options": {
+          "maxTokensToSample": 900
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        944,
+        352
+      ],
+      "id": "e3d780bc-a99c-42a6-8488-155478dc1dd8",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "3bdFsSqvBcNJVcPx",
+          "name": "Groq account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Prepare Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Job Extraction Agent": {
+      "main": [
+        [
+          {
+            "node": "Format Details & Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Job Details Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Job Extraction Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Details & Message": {
+      "main": [
+        [
+          {
+            "node": "Save to Data Table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save to Data Table": {
+      "main": [
+        [
+          {
+            "node": "Is Telegram Submission?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Telegram Submission?": {
+      "main": [
+        [
+          {
+            "node": "Send Telegram Response",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Prepare Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Webhook Response": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Input": {
+      "main": [
+        [
+          {
+            "node": "Is URL Input?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is URL Input?": {
+      "main": [
+        [
+          {
+            "node": "Fetch Webpage",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Job Extraction Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Webpage": {
+      "main": [
+        [
+          {
+            "node": "Parse & Clean Webpage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse & Clean Webpage": {
+      "main": [
+        [
+          {
+            "node": "Job Extraction Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Job Extraction Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "timezone": "Asia/Kolkata",
+    "binaryMode": "separate"
+  },
+  "staticData": null,
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp",
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "98ef1d9e-0e50-4bee-aeac-872bc42c6705"
+}

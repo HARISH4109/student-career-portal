@@ -73,10 +73,10 @@ export function AuditLogsTab(): React.JSX.Element {
   return (
     <div className="space-y-6">
       {/* Search & Filter Bar */}
-      <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="flex flex-col gap-4 rounded-xl border border-border bg-card p-4 shadow-sm">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input
               type="text"
               placeholder="Search by action, entity type, origin, request ID, or user agent..."
@@ -85,7 +85,7 @@ export function AuditLogsTab(): React.JSX.Element {
                 setSearch(e.target.value);
                 setPage(1);
               }}
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-9 pr-4 text-sm text-slate-800 placeholder-slate-400 transition-colors focus:border-blue-500 focus:bg-white focus:outline-none"
+              className="w-full rounded-lg border border-border bg-background py-2 pl-9 pr-4 text-sm text-foreground placeholder-muted-foreground transition-colors focus:border-primary focus:outline-none"
             />
           </div>
 
@@ -96,7 +96,7 @@ export function AuditLogsTab(): React.JSX.Element {
                 setActionFilter(e.target.value);
                 setPage(1);
               }}
-              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:border-blue-500 focus:outline-none"
+              className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
             >
               <option value="">All Actions</option>
               {filterOptions?.actions.map((act) => (
@@ -112,7 +112,7 @@ export function AuditLogsTab(): React.JSX.Element {
                 setEntityFilter(e.target.value);
                 setPage(1);
               }}
-              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:border-blue-500 focus:outline-none"
+              className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
             >
               <option value="">All Entity Types</option>
               {filterOptions?.entityTypes.map((et) => (
@@ -131,9 +131,9 @@ export function AuditLogsTab(): React.JSX.Element {
                   setDateFrom(e.target.value);
                   setPage(1);
                 }}
-                className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 focus:border-blue-500 focus:outline-none"
+                className="rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground focus:border-primary focus:outline-none"
               />
-              <span className="text-xs text-slate-400">to</span>
+              <span className="text-xs text-muted-foreground font-mono">to</span>
               <input
                 type="date"
                 title="Date To"
@@ -142,14 +142,14 @@ export function AuditLogsTab(): React.JSX.Element {
                   setDateTo(e.target.value);
                   setPage(1);
                 }}
-                className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 focus:border-blue-500 focus:outline-none"
+                className="rounded-lg border border-border bg-background px-3 py-2 text-xs text-foreground focus:border-primary focus:outline-none"
               />
             </div>
 
             <button
               onClick={handleResetFilters}
               title="Reset all filters"
-              className="flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
+              className="flex items-center gap-1.5 rounded-lg border border-border bg-muted/20 px-3 py-2 text-xs font-semibold text-muted-foreground hover:bg-muted/40 hover:text-foreground transition-colors cursor-pointer"
             >
               <RotateCcw className="h-3.5 w-3.5" /> Reset
             </button>
@@ -158,70 +158,70 @@ export function AuditLogsTab(): React.JSX.Element {
       </div>
 
       {/* Audit Log Table */}
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-slate-200">
-            <thead className="bg-slate-50">
+          <table className="min-w-full divide-y divide-border">
+            <thead className="bg-muted/30">
               <tr>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                <th className="px-6 py-3.5 text-left text-xs font-medium text-muted-foreground">
                   Timestamp
                 </th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                <th className="px-6 py-3.5 text-left text-xs font-medium text-muted-foreground">
                   Action
                 </th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                <th className="px-6 py-3.5 text-left text-xs font-medium text-muted-foreground">
                   Entity
                 </th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                <th className="px-6 py-3.5 text-left text-xs font-medium text-muted-foreground">
                   Actor
                 </th>
-                <th className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                <th className="px-6 py-3.5 text-left text-xs font-medium text-muted-foreground">
                   Request ID
                 </th>
-                <th className="px-6 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
+                <th className="px-6 py-3.5 text-right text-xs font-medium text-muted-foreground">
                   Details
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200 bg-white">
+            <tbody className="divide-y divide-border bg-card">
               {isLoading ? (
                 <tr>
                   <td colSpan={6} className="py-12 text-center">
-                    <div className="flex flex-col items-center justify-center gap-2 text-slate-500">
-                      <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+                    <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
+                      <Loader2 className="h-6 w-6 animate-spin text-primary" />
                       <span className="text-sm">Fetching immutable audit logs...</span>
                     </div>
                   </td>
                 </tr>
               ) : logs.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-sm text-slate-500">
+                  <td colSpan={6} className="py-12 text-center text-sm text-muted-foreground">
                     No audit records found matching your filters.
                   </td>
                 </tr>
               ) : (
                 logs.map((log) => (
-                  <tr key={log.id} className="transition-colors hover:bg-slate-50/70">
-                    <td className="px-6 py-4 whitespace-nowrap text-xs text-slate-500">
-                      <div className="flex flex-col">
-                        <span className="font-semibold text-slate-800">
+                  <tr key={log.id} className="transition-colors hover:bg-muted/20">
+                    <td className="px-6 py-4 whitespace-nowrap text-xs text-muted-foreground">
+                      <div className="flex flex-col font-mono">
+                        <span className="font-semibold text-foreground">
                           {new Date(log.createdAt).toLocaleDateString()}
                         </span>
-                        <span className="text-[11px] text-slate-400">
+                        <span className="text-[11px] text-muted-foreground/70">
                           {new Date(log.createdAt).toLocaleTimeString()}
                         </span>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="inline-flex rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-mono font-medium text-slate-800 border border-slate-200">
+                      <span className="inline-flex rounded-full bg-muted/40 px-2.5 py-0.5 text-xs font-mono font-medium text-foreground border border-border">
                         {log.action}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-xs">
                       <div className="flex flex-col">
-                        <span className="font-semibold text-slate-900">{log.entityType}</span>
+                        <span className="font-semibold text-foreground">{log.entityType}</span>
                         {log.entityId && (
-                          <span className="font-mono text-[10px] text-slate-400 truncate max-w-[140px]" title={log.entityId}>
+                          <span className="font-mono text-[10px] text-muted-foreground/70 truncate max-w-[140px]" title={log.entityId}>
                             {log.entityId}
                           </span>
                         )}
@@ -229,43 +229,43 @@ export function AuditLogsTab(): React.JSX.Element {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-xs">
                       <div className="flex flex-col">
-                        <span className="font-medium text-slate-800">
+                        <span className="font-medium text-foreground">
                           {log.userFullName || 'System / Anonymous'}
                         </span>
-                        {log.userEmail && <span className="text-[11px] text-slate-500">{log.userEmail}</span>}
+                        {log.userEmail && <span className="text-[11px] text-muted-foreground font-mono">{log.userEmail}</span>}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-xs">
                       {log.requestId ? (
                         <div className="flex items-center gap-1.5">
                           <span
-                            className="font-mono text-[11px] text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded-sm max-w-[120px] truncate"
+                            className="font-mono text-[11px] text-muted-foreground bg-muted/30 px-1.5 py-0.5 rounded border border-border max-w-[120px] truncate"
                             title={log.requestId}
                           >
                             {log.requestId}
                           </span>
                           <button
                             onClick={() => handleCopyRequestId(log.requestId!)}
-                            className="p-1 rounded text-slate-400 hover:text-blue-600 hover:bg-slate-100 transition-colors"
+                            className="p-1 rounded text-muted-foreground hover:text-primary hover:bg-muted/40 transition-colors cursor-pointer"
                             title="Copy Request ID"
                           >
                             {copiedRequestId === log.requestId ? (
-                              <Check className="h-3.5 w-3.5 text-emerald-600" />
+                              <Check className="h-3.5 w-3.5 text-emerald-700 dark:text-emerald-400" />
                             ) : (
                               <Copy className="h-3.5 w-3.5" />
                             )}
                           </button>
                         </div>
                       ) : (
-                        <span className="text-slate-400 font-mono text-[11px]">—</span>
+                        <span className="text-muted-foreground/50 font-mono text-[11px]">—</span>
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
                       <button
                         onClick={() => setInspectEntry(log)}
-                        className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
+                        className="inline-flex items-center gap-1 rounded-lg border border-border bg-muted/20 px-2.5 py-1 text-xs font-semibold text-foreground hover:bg-muted/40 transition-colors cursor-pointer"
                       >
-                        <Eye className="h-3.5 w-3.5 text-blue-600" /> View
+                        <Eye className="h-3.5 w-3.5 text-primary" /> View
                       </button>
                     </td>
                   </tr>
@@ -277,7 +277,7 @@ export function AuditLogsTab(): React.JSX.Element {
 
         {/* Pagination Bar */}
         {meta && meta.totalPages > 1 && (
-          <div className="flex items-center justify-between border-t border-slate-200 bg-slate-50 px-6 py-3.5 text-xs text-slate-500">
+          <div className="flex items-center justify-between border-t border-border bg-muted/20 px-6 py-3.5 text-xs text-muted-foreground">
             <span>
               Showing Page {meta.page} of {meta.totalPages} ({meta.totalItems} total audit events)
             </span>
@@ -285,14 +285,14 @@ export function AuditLogsTab(): React.JSX.Element {
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page <= 1}
-                className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-slate-600 hover:bg-slate-100 disabled:opacity-50"
+                className="flex items-center gap-1 rounded-lg border border-border bg-card px-2.5 py-1 text-foreground hover:bg-muted/40 disabled:opacity-50 cursor-pointer"
               >
                 <ChevronLeft className="h-4 w-4" /> Previous
               </button>
               <button
                 onClick={() => setPage((p) => Math.min(meta.totalPages, p + 1))}
                 disabled={page >= meta.totalPages}
-                className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-slate-600 hover:bg-slate-100 disabled:opacity-50"
+                className="flex items-center gap-1 rounded-lg border border-border bg-card px-2.5 py-1 text-foreground hover:bg-muted/40 disabled:opacity-50 cursor-pointer"
               >
                 Next <ChevronRight className="h-4 w-4" />
               </button>
@@ -303,67 +303,67 @@ export function AuditLogsTab(): React.JSX.Element {
 
       {/* Metadata Detail Modal */}
       {inspectEntry && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
-          <div className="w-full max-w-xl rounded-2xl bg-white p-6 shadow-xl border border-slate-200">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
+          <div className="w-full max-w-xl rounded-xl bg-card p-6 shadow-xl border border-border">
+            <div className="flex items-center justify-between border-b border-border pb-3">
               <div className="flex items-center gap-2">
-                <FileText className="h-5 w-5 text-blue-600" />
-                <h3 className="font-bold text-slate-900">Audit Log Event Payload</h3>
+                <FileText className="h-5 w-5 text-primary" />
+                <h3 className="font-bold text-foreground">Audit Log Event Payload</h3>
               </div>
               <button
                 onClick={() => setInspectEntry(null)}
-                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100"
+                className="rounded-lg p-1 text-muted-foreground hover:bg-muted/40 cursor-pointer"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             <div className="mt-4 space-y-3 text-xs">
-              <div className="grid grid-cols-2 gap-2.5 rounded-xl bg-slate-50 p-3.5 border border-slate-100">
+              <div className="grid grid-cols-2 gap-2.5 rounded-lg bg-muted/20 p-3.5 border border-border">
                 <div>
-                  <span className="text-slate-400 block text-[11px]">Action</span>
-                  <span className="font-mono font-bold text-slate-900">{inspectEntry.action}</span>
+                  <span className="text-muted-foreground block text-[11px]">Action</span>
+                  <span className="font-mono font-bold text-foreground">{inspectEntry.action}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[11px]">Entity Target</span>
-                  <span className="font-semibold text-slate-900">
+                  <span className="text-muted-foreground block text-[11px]">Entity Target</span>
+                  <span className="font-semibold text-foreground">
                     {inspectEntry.entityType} ({inspectEntry.entityId || 'none'})
                   </span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[11px]">Actor Identity</span>
-                  <span className="text-slate-900 font-medium">{inspectEntry.userFullName || 'System / Anonymous'}</span>
+                  <span className="text-muted-foreground block text-[11px]">Actor Identity</span>
+                  <span className="text-foreground font-medium">{inspectEntry.userFullName || 'System / Anonymous'}</span>
                   {inspectEntry.userEmail && (
-                    <span className="text-[10px] text-slate-500 block">{inspectEntry.userEmail}</span>
+                    <span className="text-[10px] text-muted-foreground block font-mono">{inspectEntry.userEmail}</span>
                   )}
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[11px]">Request Origin</span>
-                  <span className="inline-flex items-center rounded-sm bg-blue-50 px-1.5 py-0.5 text-xs font-medium text-blue-700 border border-blue-200">
+                  <span className="text-muted-foreground block text-[11px]">Request Origin</span>
+                  <span className="inline-flex items-center rounded-sm bg-primary/10 px-1.5 py-0.5 text-xs font-medium text-primary border border-primary/20">
                     {inspectEntry.origin || 'direct-api'}
                   </span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[11px]">Client IP Address</span>
-                  <span className="font-mono text-slate-800">{inspectEntry.ipAddress || '—'}</span>
+                  <span className="text-muted-foreground block text-[11px]">Client IP Address</span>
+                  <span className="font-mono text-foreground">{inspectEntry.ipAddress || '—'}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[11px]">Event Timestamp</span>
-                  <span className="text-slate-800">{new Date(inspectEntry.createdAt).toLocaleString()}</span>
+                  <span className="text-muted-foreground block text-[11px]">Event Timestamp</span>
+                  <span className="text-foreground font-mono">{new Date(inspectEntry.createdAt).toLocaleString()}</span>
                 </div>
                 {inspectEntry.requestId && (
-                  <div className="col-span-2 flex items-center justify-between bg-white rounded-lg p-2 border border-slate-200">
+                  <div className="col-span-2 flex items-center justify-between bg-card rounded-lg p-2 border border-border">
                     <div>
-                      <span className="text-slate-400 block text-[10px] uppercase font-semibold">End-to-End Correlation Request ID</span>
-                      <span className="font-mono text-slate-900 font-semibold">{inspectEntry.requestId}</span>
+                      <span className="text-muted-foreground block text-[10px] uppercase font-semibold">End-to-End Correlation Request ID</span>
+                      <span className="font-mono text-foreground font-semibold">{inspectEntry.requestId}</span>
                     </div>
                     <button
                       onClick={() => handleCopyRequestId(inspectEntry.requestId!)}
-                      className="inline-flex items-center gap-1 rounded px-2 py-1 text-[11px] font-medium text-slate-600 bg-slate-50 border border-slate-200 hover:bg-slate-100"
+                      className="inline-flex items-center gap-1 rounded px-2 py-1 text-[11px] font-medium text-muted-foreground bg-muted/30 border border-border hover:bg-muted/50 cursor-pointer"
                     >
                       {copiedRequestId === inspectEntry.requestId ? (
                         <>
-                          <Check className="h-3 w-3 text-emerald-600" /> Copied
+                          <Check className="h-3 w-3 text-emerald-700 dark:text-emerald-400" /> Copied
                         </>
                       ) : (
                         <>
@@ -375,29 +375,29 @@ export function AuditLogsTab(): React.JSX.Element {
                 )}
                 {inspectEntry.userAgent && (
                   <div className="col-span-2">
-                    <span className="text-slate-400 block text-[11px]">Client User Agent</span>
-                    <span className="text-slate-600 font-mono text-[11px] break-all">{inspectEntry.userAgent}</span>
+                    <span className="text-muted-foreground block text-[11px]">Client User Agent</span>
+                    <span className="text-muted-foreground font-mono text-[11px] break-all">{inspectEntry.userAgent}</span>
                   </div>
                 )}
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-slate-600 font-semibold text-xs">Recorded Audit Metadata</span>
-                  <span className="inline-flex items-center gap-1 text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 font-medium">
+                  <span className="text-foreground font-semibold text-xs">Recorded Audit Metadata</span>
+                  <span className="inline-flex items-center gap-1 text-[10px] text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20 font-medium">
                     <ShieldCheck className="h-3 w-3" /> Immutable Audit Trail
                   </span>
                 </div>
-                <pre className="max-h-56 overflow-y-auto rounded-xl bg-slate-900 p-3 font-mono text-[11px] text-emerald-400 border border-slate-800">
+                <pre className="max-h-56 overflow-y-auto rounded-lg bg-background p-3 font-mono text-[11px] text-emerald-700 dark:text-emerald-400 border border-border">
                   {JSON.stringify(inspectEntry.metadata, null, 2)}
                 </pre>
               </div>
             </div>
 
-            <div className="mt-5 flex justify-end border-t border-slate-100 pt-3">
+            <div className="mt-5 flex justify-end border-t border-border pt-3">
               <button
                 onClick={() => setInspectEntry(null)}
-                className="rounded-xl bg-slate-100 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-200 transition-colors"
+                className="rounded-lg bg-muted/30 px-4 py-2 text-xs font-semibold text-foreground hover:bg-muted/50 transition-colors cursor-pointer"
               >
                 Close
               </button>

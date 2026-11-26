@@ -2,10 +2,9 @@ import type { MockInterviewTemplateDto } from '@career-portal/shared-types';
 import {
   AlertCircle,
   Briefcase,
-  CheckCircle,
+  CheckCircle2,
   Loader2,
   Plus,
-  Sparkles,
   Trash2,
   X,
 } from 'lucide-react';
@@ -85,7 +84,6 @@ export function FacultyInterviewTracksModal({
 
   const handleRoleTitleChange = (newRole: string) => {
     setRoleTitle(newRole);
-    // Automatically update question 1 & 2 templates if they haven't been deeply customized
     setQuestions((prev) => {
       const updated = [...prev];
       if (updated[0] && updated[0].questionText.includes('interested in the')) {
@@ -182,102 +180,101 @@ export function FacultyInterviewTracksModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs overflow-y-auto">
-      <div className="relative w-full max-w-4xl rounded-3xl bg-white shadow-2xl border border-slate-200 overflow-hidden my-8 max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs overflow-y-auto">
+      <div className="relative w-full max-w-4xl rounded-xl bg-card shadow-xl border border-border overflow-hidden my-8 max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4 bg-slate-50">
-          <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-indigo-100 p-2 text-indigo-700">
-              <Briefcase className="h-5 w-5" />
-            </div>
+        <div className="flex items-center justify-between border-b border-border/80 px-6 py-4 bg-muted/20">
+          <div className="flex items-center gap-2.5">
+            <span className="h-4 w-1 rounded-full bg-[#B9903B]" aria-hidden="true" />
             <div>
-              <h2 className="text-lg font-bold text-slate-900">Manage Mock Interview Tracks</h2>
-              <p className="text-xs text-slate-500">
-                Curate role-specific interview tracks and tailored questions for campus placement preparation.
+              <h2 className="text-base font-bold text-foreground">Manage Mock Interview Tracks</h2>
+              <p className="text-xs text-muted-foreground">
+                Curate role-specific interview tracks and questions for student placement preparation
               </p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-xl p-1.5 text-slate-400 hover:bg-slate-200 hover:text-slate-700 transition"
+            className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted/40 hover:text-foreground transition-colors cursor-pointer"
+            aria-label="Close modal"
           >
-            <X className="h-5 w-5" />
+            <X className="h-4 w-4" />
           </button>
         </div>
 
         {/* Content Area */}
-        <div className="p-6 overflow-y-auto flex-1 space-y-6">
+        <div className="p-6 overflow-y-auto flex-1 space-y-5">
           {!isCreating ? (
-            <div className="space-y-5">
+            <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-bold text-slate-900">Faculty-Curated Interview Tracks</h3>
-                  <p className="text-xs text-slate-500">
+                  <h3 className="text-xs font-semibold text-foreground">Faculty-Curated Tracks</h3>
+                  <p className="text-xs text-muted-foreground">
                     Tracks created here appear directly in the student mock interview practice module.
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={handleStartCreate}
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-indigo-700 transition"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-1.5 text-xs font-semibold text-primary-foreground shadow-xs hover:bg-primary/90 transition-colors cursor-pointer"
                 >
-                  <Plus className="h-4 w-4" />
+                  <Plus className="h-3.5 w-3.5" />
                   <span>Create Interview Track</span>
                 </button>
               </div>
 
               {isLoading ? (
-                <div className="py-12 flex flex-col items-center justify-center gap-2 text-slate-400">
-                  <Loader2 className="h-6 w-6 animate-spin text-indigo-600" />
+                <div className="py-12 flex flex-col items-center justify-center gap-2 text-muted-foreground">
+                  <Loader2 className="h-5 w-5 animate-spin text-primary" />
                   <p className="text-xs font-medium">Loading interview tracks...</p>
                 </div>
               ) : templates.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-slate-200 p-10 text-center space-y-3">
-                  <Sparkles className="mx-auto h-8 w-8 text-indigo-400" />
-                  <h4 className="text-sm font-semibold text-slate-800">No Custom Tracks Created Yet</h4>
-                  <p className="text-xs text-slate-500 max-w-md mx-auto">
+                <div className="rounded-xl border border-border/70 p-8 text-center space-y-2.5 bg-muted/10">
+                  <Briefcase className="mx-auto h-6 w-6 text-muted-foreground" />
+                  <h4 className="text-xs font-semibold text-foreground">No Custom Tracks Created Yet</h4>
+                  <p className="text-xs text-muted-foreground max-w-md mx-auto">
                     Students currently practice with the 6 standard industry roles. Create a track to test students on specific campus drive questions.
                   </p>
                   <button
                     type="button"
                     onClick={handleStartCreate}
-                    className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-50 border border-indigo-200 px-4 py-2 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 transition"
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-card border border-border/80 px-3.5 py-1.5 text-xs font-medium text-foreground hover:bg-muted/40 transition-colors cursor-pointer"
                   >
-                    <Plus className="h-4 w-4" /> Create First Track
+                    <Plus className="h-3.5 w-3.5" /> Create First Track
                   </button>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                   {templates.map((tpl: MockInterviewTemplateDto) => (
                     <div
                       key={tpl.id}
-                      className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs hover:border-slate-300 transition space-y-3 relative"
+                      className="rounded-xl border border-border/70 bg-card p-4 shadow-xs hover:border-border transition-colors space-y-2.5 relative"
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div>
                           <div className="flex items-center gap-2">
-                            <h4 className="text-sm font-bold text-slate-900">{tpl.roleTitle}</h4>
-                            <span className="rounded-full bg-indigo-50 text-indigo-700 px-2 py-0.5 text-[10px] font-semibold border border-indigo-200">
+                            <h4 className="text-xs font-semibold text-foreground">{tpl.roleTitle}</h4>
+                            <span className="rounded-md bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
                               Active Track
                             </span>
                           </div>
                           {tpl.description ? (
-                            <p className="text-xs text-slate-600 mt-1 line-clamp-2">{tpl.description}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{tpl.description}</p>
                           ) : null}
                         </div>
                         <button
                           type="button"
                           onClick={() => { handleDelete(tpl.id); }}
                           disabled={deleteMutation.isPending}
-                          className="text-slate-400 hover:text-red-500 p-1 rounded-lg hover:bg-red-50 transition"
+                          className="text-muted-foreground hover:text-destructive p-1 rounded-md hover:bg-destructive/10 transition-colors cursor-pointer"
                           title="Delete Track"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-3.5 w-3.5" />
                         </button>
                       </div>
 
-                      <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+                      <div className="pt-2 border-t border-border/50 flex items-center justify-between text-[11px] text-muted-foreground font-mono">
                         <span>{tpl.questions.length} Question{tpl.questions.length === 1 ? '' : 's'}</span>
                         <span>By {tpl.creatorName || 'Faculty'}</span>
                       </div>
@@ -288,50 +285,50 @@ export function FacultyInterviewTracksModal({
             </div>
           ) : (
             /* Creation Form with Auto-Generated Questions */
-            <div className="space-y-6">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+            <div className="space-y-5">
+              <div className="flex items-center justify-between pb-2.5 border-b border-border/60">
                 <div>
-                  <h3 className="text-sm font-bold text-slate-900">New Role-Specific Interview Track</h3>
-                  <p className="text-xs text-slate-500">
-                    Type a Target Role. The system auto-generates 4 tailored questions below, which you can customize or keep as-is.
+                  <h3 className="text-xs font-semibold text-foreground">New Role-Specific Interview Track</h3>
+                  <p className="text-xs text-muted-foreground">
+                    Enter a Target Role. The system generates 4 tailored questions below, which you can customize.
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => { setIsCreating(false); }}
-                  className="text-xs font-semibold text-slate-500 hover:text-slate-800"
+                  className="text-xs font-medium text-muted-foreground hover:text-foreground cursor-pointer"
                 >
                   Cancel
                 </button>
               </div>
 
               {formError ? (
-                <div className="flex items-center gap-2 rounded-xl bg-red-50 border border-red-200 px-4 py-2.5 text-xs text-red-700">
+                <div className="flex items-center gap-2 rounded-lg bg-destructive/10 border border-destructive/20 px-3.5 py-2 text-xs text-destructive">
                   <AlertCircle className="h-4 w-4 shrink-0" />
                   <span>{formError}</span>
                 </div>
               ) : null}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-slate-700">
+                  <label className="block text-xs font-medium text-foreground">
                     Target Role Title *
                   </label>
                   <input
                     type="text"
                     value={roleTitle}
                     onChange={(e) => { handleRoleTitleChange(e.target.value); }}
-                    placeholder="e.g. Data Scientist & ML Engineer, Flutter Developer, Cloud Architect"
-                    className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                    placeholder="e.g. Data Scientist, Flutter Developer, Cloud Architect"
+                    className="w-full rounded-lg border border-border bg-card px-3 py-1.5 text-xs text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                   />
-                  <div className="flex flex-wrap gap-1.5 pt-1">
-                    <span className="text-[10px] text-slate-400">Quick suggestions:</span>
-                    {['Data Engineer', 'Cybersecurity Specialist', 'iOS Developer', 'AI Prompt Engineer'].map((sug) => (
+                  <div className="flex flex-wrap gap-1.5 pt-0.5">
+                    <span className="text-[10px] text-muted-foreground">Quick suggestions:</span>
+                    {['Data Engineer', 'Cybersecurity Specialist', 'iOS Developer', 'Cloud Engineer'].map((sug) => (
                       <button
                         key={sug}
                         type="button"
                         onClick={() => { handleRoleTitleChange(sug); }}
-                        className="text-[10px] bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 text-slate-600 px-2 py-0.5 rounded-md font-medium transition"
+                        className="text-[10px] bg-muted/40 hover:bg-muted text-muted-foreground px-2 py-0.5 rounded-md font-medium transition-colors cursor-pointer"
                       >
                         + {sug}
                       </button>
@@ -340,7 +337,7 @@ export function FacultyInterviewTracksModal({
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-bold text-slate-700">
+                  <label className="block text-xs font-medium text-foreground">
                     Track Description / Company Notes (Optional)
                   </label>
                   <input
@@ -348,44 +345,44 @@ export function FacultyInterviewTracksModal({
                     value={description}
                     onChange={(e) => { setDescription(e.target.value); }}
                     placeholder="e.g. Curated for Zoho, TCS, and Amazon technical rounds"
-                    className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                    className="w-full rounded-lg border border-border bg-card px-3 py-1.5 text-xs text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                   />
                 </div>
               </div>
 
               {/* Questions List */}
-              <div className="space-y-3 pt-2">
+              <div className="space-y-2.5 pt-1">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <h4 className="text-xs font-bold text-slate-800">
+                    <h4 className="text-xs font-semibold text-foreground">
                       Interview Questions ({questions.length})
                     </h4>
-                    <span className="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full font-semibold">
+                    <span className="text-[10px] bg-muted text-muted-foreground px-2 py-0.5 rounded-md font-medium font-mono">
                       Auto-Populated
                     </span>
                   </div>
                   <button
                     type="button"
                     onClick={handleAddQuestion}
-                    className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-700"
+                    className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline cursor-pointer"
                   >
-                    <Plus className="h-3.5 w-3.5" /> Add Question
+                    <Plus className="h-3 w-3" /> Add Question
                   </button>
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-2.5">
                   {questions.map((q, idx) => (
                     <div
                       key={q.id || idx}
-                      className="rounded-xl border border-slate-200 p-3.5 bg-slate-50/70 space-y-2 relative"
+                      className="rounded-lg border border-border/70 p-3 bg-muted/20 space-y-2 relative"
                     >
                       <div className="flex items-center justify-between gap-2">
-                        <span className="text-[11px] font-bold text-slate-700">Question {idx + 1}</span>
+                        <span className="text-[11px] font-medium text-muted-foreground font-mono">Question {idx + 1}</span>
                         <div className="flex items-center gap-2">
                           <select
                             value={q.category}
                             onChange={(e) => { handleCategoryChange(idx, e.target.value); }}
-                            className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 focus:outline-none"
+                            className="rounded-md border border-border bg-card px-2 py-0.5 text-[11px] text-muted-foreground focus:outline-none"
                           >
                             <option value="technical">Technical</option>
                             <option value="behavioral">Behavioral</option>
@@ -394,7 +391,7 @@ export function FacultyInterviewTracksModal({
                           <select
                             value={q.difficulty}
                             onChange={(e) => { handleDifficultyChange(idx, e.target.value); }}
-                            className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-[11px] text-slate-700 focus:outline-none"
+                            className="rounded-md border border-border bg-card px-2 py-0.5 text-[11px] text-muted-foreground focus:outline-none"
                           >
                             <option value="easy">Easy</option>
                             <option value="medium">Medium</option>
@@ -404,7 +401,7 @@ export function FacultyInterviewTracksModal({
                             <button
                               type="button"
                               onClick={() => { handleRemoveQuestion(idx); }}
-                              className="text-slate-400 hover:text-red-500 p-1"
+                              className="text-muted-foreground hover:text-destructive p-0.5 cursor-pointer"
                               title="Delete Question"
                             >
                               <Trash2 className="h-3.5 w-3.5" />
@@ -418,7 +415,7 @@ export function FacultyInterviewTracksModal({
                         value={q.questionText}
                         onChange={(e) => { handleQuestionTextChange(idx, e.target.value); }}
                         placeholder="Type question prompt..."
-                        className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
+                        className="w-full rounded-md border border-border bg-card px-3 py-1.5 text-xs text-foreground focus:outline-none focus:border-primary"
                       />
                     </div>
                   ))}
@@ -426,11 +423,11 @@ export function FacultyInterviewTracksModal({
               </div>
 
               {/* Action Buttons */}
-              <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+              <div className="pt-3.5 border-t border-border/60 flex items-center justify-end gap-2.5">
                 <button
                   type="button"
                   onClick={() => { setIsCreating(false); }}
-                  className="rounded-xl px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 transition"
+                  className="rounded-lg px-3.5 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted/40 transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -438,7 +435,7 @@ export function FacultyInterviewTracksModal({
                   type="button"
                   disabled={createMutation.isPending}
                   onClick={handleSaveTrack}
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-indigo-700 disabled:opacity-60 transition"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-1.5 text-xs font-semibold text-primary-foreground shadow-xs hover:bg-primary/90 disabled:opacity-60 transition-colors cursor-pointer"
                 >
                   {createMutation.isPending ? (
                     <>
@@ -447,7 +444,7 @@ export function FacultyInterviewTracksModal({
                     </>
                   ) : (
                     <>
-                      <CheckCircle className="h-3.5 w-3.5" />
+                      <CheckCircle2 className="h-3.5 w-3.5" />
                       <span>Save Interview Track</span>
                     </>
                   )}

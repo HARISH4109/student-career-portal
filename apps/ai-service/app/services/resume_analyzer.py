@@ -4,7 +4,7 @@ import re
 from typing import Any, Dict, List, Optional, Set
 
 from app.core.config import get_settings
-from app.core.llm import get_llm_client, get_llm_model
+from app.core.llm import get_llm_client, get_llm_model, get_llm_provider
 from app.schemas.resume import (
     ImprovementItem,
     ResumeAnalysisData,
@@ -295,7 +295,7 @@ class ResumeAnalyzerService:
         1. Deep personalized insights (3-5 bullet points)
         2. A rewritten professional summary (if the current one is weak)
         """
-        if not settings.nvidia_api_key and not settings.openai_api_key:
+        if not settings.groq_api_key and not settings.nvidia_api_key and not settings.openai_api_key:
             logger.debug("No LLM API key configured, skipping AI insights")
             return None
 
@@ -711,7 +711,7 @@ Rules:
                 modelVersion="local-rule-engine-v1.0",
             )
 
-        if not settings.nvidia_api_key and not settings.openai_api_key:
+        if not settings.groq_api_key and not settings.nvidia_api_key and not settings.openai_api_key:
             return local_fallback()
 
         try:
@@ -874,7 +874,7 @@ Respond ONLY with this exact JSON format:
                 enhancedText=enhanced_text,
                 bulletPoints=bullets[:4],
                 keyChanges=changes[:3],
-                modelVersion=f"nvidia-nim-{model_name}",
+                modelVersion=f"{get_llm_provider()}-{model_name}",
             )
 
         except Exception as exc:
