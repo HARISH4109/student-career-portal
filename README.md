@@ -102,24 +102,6 @@ to the Compose Postgres, Redis, and AI services. To use an external PostgreSQL
 database instead, set `DOCKER_DATABASE_URL` in `.env`. Apply migrations and seed
 the chosen database before using the portal.
 
-## Recommended execution order
-
-1. 00-master-agent-instructions
-2. 01-phase-0-foundation
-3. 02-phase-1-auth-rbac
-4. 03-phase-2-student-profile-resume
-5. 04-phase-3-opportunities-applications
-6. 05-phase-4-ai-opportunity-ingestion
-7. 06-phase-5-preparation
-8. 07-phase-6-career-roadmaps-resources-skill-gap
-9. 08-phase-7-notices-notifications-analytics
-10. 09-phase-8-admin-audit-security
-11. 10-phase-9-testing-quality
-12. 11-phase-10-deployment-devops
-13. 12-phase-11-frontend-ui-ux
-14. 13-phase-12-api-contracts
-15. 14-phase-13-agent-handoff
-
 ## Important architectural decisions
 
 - Three roles only: STUDENT, PLACEMENT_FACULTY, ADMIN.
