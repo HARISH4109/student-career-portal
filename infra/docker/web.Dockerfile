@@ -9,7 +9,7 @@ COPY apps/web/package.json ./apps/web/package.json
 COPY apps/api/package.json ./apps/api/package.json
 COPY packages/db/package.json ./packages/db/package.json
 COPY packages/shared-types/package.json ./packages/shared-types/package.json
-RUN npm ci
+RUN npm ci --ignore-scripts
 
 FROM base AS build
 ARG VITE_API_BASE_URL

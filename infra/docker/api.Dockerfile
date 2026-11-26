@@ -10,7 +10,7 @@ COPY apps/api/package.json ./apps/api/package.json
 COPY apps/web/package.json ./apps/web/package.json
 COPY packages/db/package.json ./packages/db/package.json
 COPY packages/shared-types/package.json ./packages/shared-types/package.json
-RUN npm ci
+RUN npm ci --ignore-scripts
 
 # ── Build ────────────────────────────────────────────────────────────────
 FROM base AS build
@@ -27,7 +27,7 @@ COPY apps/api/package.json ./apps/api/package.json
 COPY apps/web/package.json ./apps/web/package.json
 COPY packages/db/package.json ./packages/db/package.json
 COPY packages/shared-types/package.json ./packages/shared-types/package.json
-RUN npm ci --omit=dev
+RUN npm ci --omit=dev --ignore-scripts
 
 # ── Runtime ──────────────────────────────────────────────────────────────
 FROM node:20-alpine AS runtime

@@ -27,7 +27,7 @@
     "test:benchmark": "node scripts/performance-benchmark.cjs",
     "test:e2e": "npx playwright test apps/web/e2e/journeys-student.spec.ts apps/web/e2e/journeys-faculty-admin.spec.ts -c apps/web/playwright.config.ts",
     "test:smoke": "node scripts/production-smoke.cjs",
-    "prepare": "husky install",
+    "prepare": "husky install || true",
     "verify": "node scripts/verify-portal.cjs"
   },
   "devDependencies": {
