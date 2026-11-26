@@ -292,7 +292,7 @@ export function AuthLandingPage({
             className="w-full bg-[#065F43] hover:bg-[#04422E] text-[#F4F1EA] font-semibold shadow-lg shadow-black/40 border border-[#B9903B]/30 active:scale-[0.98] transition-colors cursor-pointer flex items-center justify-center gap-2"
             size="lg"
           >
-            <span>Log In</span>
+            <span>Sign In</span>
             <ArrowRight className="h-4 w-4" />
           </Button>
 

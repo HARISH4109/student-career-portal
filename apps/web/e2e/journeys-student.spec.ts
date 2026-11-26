@@ -322,7 +322,7 @@ test.describe('Student Critical Journeys (1-10)', () => {
     const bookmarkBtn = page.locator('button[title*="Save"]').first();
     await expect(bookmarkBtn).toBeVisible();
     await bookmarkBtn.click();
-    expect(saveCalled).toBe(true);
+    await expect.poll(() => saveCalled).toBe(true);
   });
 
   // ── Journey 6: Apply to Opportunity ─────────────────────────────────────
@@ -400,7 +400,7 @@ test.describe('Student Critical Journeys (1-10)', () => {
     const applyBtn = page.getByRole('button', { name: /mark as applied/i });
     await expect(applyBtn).toBeVisible();
     await applyBtn.click();
-    expect(applicationSubmitted).toBe(true);
+    await expect.poll(() => applicationSubmitted).toBe(true);
   });
 
   // ── Journey 7: View Application Status ──────────────────────────────────
