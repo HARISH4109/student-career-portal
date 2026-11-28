@@ -25,4 +25,5 @@ noticesRouter.put('/:id', requirePermission('notices.publish'), controller.updat
 noticesRouter.patch('/:id/pin', requirePermission('notices.publish'), controller.pinNotice);
 noticesRouter.patch('/:id/expire', requirePermission('notices.publish'), controller.expireNotice);
 noticesRouter.patch('/:id/publish', requirePermission('notices.publish'), controller.publishNotice);
+noticesRouter.post('/:id/publish', requirePermission('notices.publish'), controller.publishNotice);
 

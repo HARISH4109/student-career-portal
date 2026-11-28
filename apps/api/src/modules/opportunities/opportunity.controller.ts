@@ -63,6 +63,34 @@ export class OpportunityController {
     }
   };
 
+  publish = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const id = String(req.params.id);
+      const opportunity = await this.opportunityService.updateStatus(
+        id,
+        { status: 'published' },
+        requestUser(req),
+      );
+      sendSuccess(res, opportunity);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  close = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const id = String(req.params.id);
+      const opportunity = await this.opportunityService.updateStatus(
+        id,
+        { status: 'closed' },
+        requestUser(req),
+      );
+      sendSuccess(res, opportunity);
+    } catch (error) {
+      next(error);
+    }
+  };
+
   getById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const id = String(req.params.id);

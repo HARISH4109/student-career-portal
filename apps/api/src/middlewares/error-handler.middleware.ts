@@ -52,12 +52,22 @@ export function errorHandler(
       logger.warn({ err: error, path: req.path }, error.message);
     }
 
+    const reqId =
+      (req as Request & { id?: string }).id ??
+      (typeof res.getHeader('X-Request-Id') === 'string'
+        ? (res.getHeader('X-Request-Id') as string)
+        : undefined);
+
     const response: ApiErrorResponse = {
       success: false,
+      data: null,
       error: {
         code: error.code,
         message: error.message,
         ...(error.details ? { details: error.details } : {}),
+      },
+      meta: {
+        ...(reqId ? { requestId: reqId } : {}),
       },
     };
     res.status(error.statusCode).json(response);
@@ -66,9 +76,19 @@ export function errorHandler(
 
   // Unrecognized error — never leak internals to the client.
   logger.error({ err: error, path: req.path }, 'Unhandled error');
+  const reqId =
+    (req as Request & { id?: string }).id ??
+    (typeof res.getHeader('X-Request-Id') === 'string'
+      ? (res.getHeader('X-Request-Id') as string)
+      : undefined);
+
   const response: ApiErrorResponse = {
     success: false,
+    data: null,
     error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred' },
+    meta: {
+      ...(reqId ? { requestId: reqId } : {}),
+    },
   };
   res.status(500).json(response);
 }

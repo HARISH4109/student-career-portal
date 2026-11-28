@@ -19,6 +19,7 @@ resumeRouter.post('/', requirePermission('resumes.manage_own'), controller.creat
 resumeRouter.post('/upload', express.json({ limit: '20mb' }), requirePermission('resumes.manage_own'), controller.uploadResume);
 resumeRouter.get('/:id', controller.getResumeById);
 resumeRouter.put('/:id', requirePermission('resumes.manage_own'), controller.updateResume);
+resumeRouter.patch('/:id', requirePermission('resumes.manage_own'), controller.updateResume);
 resumeRouter.post('/:id/duplicate', requirePermission('resumes.manage_own'), controller.duplicateResume);
 resumeRouter.patch('/:id/primary', requirePermission('resumes.manage_own'), controller.setPrimaryResume);
 resumeRouter.delete('/:id', requirePermission('resumes.manage_own'), controller.deleteResume);

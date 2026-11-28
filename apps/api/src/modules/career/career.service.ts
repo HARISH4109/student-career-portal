@@ -25,7 +25,7 @@ import { CareerRepository } from './career.repository';
 import { ForbiddenError, NotFoundError, ValidationError } from '@/shared/errors/app-error';
 
 const snapshotSchema = careerStageSchema.extend({
-  skillNames: z.record(z.string()),
+  skillNames: z.record(z.string(), z.string()),
   resources: z.array(
     z.object({ id: z.string().uuid(), title: z.string(), url: z.string(), type: z.string() }),
   ),

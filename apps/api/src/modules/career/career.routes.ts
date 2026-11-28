@@ -34,3 +34,4 @@ skillGapRouter.use(requireAuth, requirePermission('skill_gap.analyze_own'));
 skillGapRouter.get('/me', controller.analyses);
 skillGapRouter.get('/:id', controller.analysis);
 skillGapRouter.post('/', controller.analyze);
+skillGapRouter.post('/analyze', controller.analyze);

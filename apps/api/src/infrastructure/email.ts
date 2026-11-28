@@ -9,9 +9,11 @@ export interface EmailOptions {
   html?: string;
 }
 
-let transporter: nodemailer.Transporter | null = null;
+type MailTransporter = ReturnType<typeof nodemailer.createTransport>;
 
-function getTransporter(): nodemailer.Transporter | null {
+let transporter: MailTransporter | null = null;
+
+function getTransporter(): MailTransporter | null {
   if (transporter) return transporter;
 
   if (env.SMTP_HOST) {

@@ -4,7 +4,7 @@ import { z } from 'zod';
 
 const errorResponseSchema = z.object({
   success: z.literal(false),
-  error: z.object({ code: z.enum(API_ERROR_CODES), message: z.string(), details: z.record(z.array(z.string())).optional() }),
+  error: z.object({ code: z.enum(API_ERROR_CODES), message: z.string(), details: z.record(z.string(), z.array(z.string())).optional() }),
 });
 
 /**

@@ -1,3 +1,4 @@
+import type { ApiErrorResponse } from '@career-portal/shared-types';
 import compression from 'compression';
 import cors from 'cors';
 import express, { type Express } from 'express';
@@ -11,6 +12,7 @@ import { getUploadsDir } from '@/infrastructure/uploads';
 import { errorHandler } from '@/middlewares/error-handler.middleware';
 import { requestId } from '@/middlewares/request-id.middleware';
 import { apiRouter } from '@/routes';
+import { NotFoundError } from '@/shared/errors/app-error';
 
 export function createApp(): Express {
   const app = express();
@@ -30,12 +32,34 @@ export function createApp(): Express {
       credentials: true,
     }),
   );
+  // Request-ID before rate limiting & pino-http so every response (including 429) carries the correlation ID
+  app.use(requestId);
+
   app.use(
     rateLimit({
       windowMs: env.RATE_LIMIT_WINDOW_MS,
       limit: env.RATE_LIMIT_MAX_REQUESTS,
       standardHeaders: true,
       legacyHeaders: false,
+      handler: (req, res) => {
+        const reqId =
+          (req as express.Request & { id?: string }).id ??
+          (typeof res.getHeader('X-Request-Id') === 'string'
+            ? (res.getHeader('X-Request-Id') as string)
+            : undefined);
+        const body: ApiErrorResponse = {
+          success: false,
+          data: null,
+          error: {
+            code: 'RATE_LIMITED',
+            message: 'Too many requests. Please try again later.',
+          },
+          meta: {
+            ...(reqId ? { requestId: reqId } : {}),
+          },
+        };
+        res.status(429).json(body);
+      },
     }),
   );
 
@@ -44,8 +68,6 @@ export function createApp(): Express {
   app.use(express.json({ limit: '1mb' }));
   app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
-  // Request-ID before pino-http so every log line carries the correlation ID
-  app.use(requestId);
   app.use(
     pinoHttp({
       logger,
@@ -68,6 +90,11 @@ export function createApp(): Express {
 
   // ── Routes ───────────────────────────────────────────────────────────
   app.use('/api/v1', apiRouter);
+
+  // ── 404 catch-all for unmatched routes ───────────────────────────────
+  app.use((_req, _res, next) => {
+    next(new NotFoundError('Endpoint'));
+  });
 
   // ── Error handling (always last) ────────────────────────────────────
   app.use(errorHandler);

@@ -1,5 +1,6 @@
 import {
   createResumeSchema,
+  paginationQuerySchema,
   resumeEnhanceTextRequestSchema,
   resumeMatchRequestSchema,
   updateResumeSchema,
@@ -18,8 +19,12 @@ export class ResumeController {
 
   getResumes = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
+      const { page, pageSize } = paginationQuerySchema.parse(req.query);
       const resumes = await this.resumeService.getResumes(requestUser(req).id);
-      sendSuccess(res, resumes);
+      const totalItems = resumes.length;
+      const totalPages = Math.ceil(totalItems / pageSize) || 1;
+      const paged = resumes.slice((page - 1) * pageSize, page * pageSize);
+      sendSuccess(res, paged, 200, { page, pageSize, totalItems, totalPages });
     } catch (error) {
       next(error);
     }

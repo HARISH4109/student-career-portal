@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router';
+import { safeHref } from '@/shared/lib/safe-url';
 import {
   ArrowDown,
   ArrowLeft,
@@ -779,7 +780,7 @@ export function CareerManagePage() {
                           <div>
                             <p className="text-sm font-semibold text-foreground">{r.title}</p>
                             <a
-                              href={r.url}
+                              href={safeHref(r.url)}
                               target="_blank"
                               rel="noreferrer"
                               className="text-xs text-primary hover:text-primary/80 line-clamp-1 max-w-sm flex items-center gap-1 mt-0.5 transition-colors"
@@ -827,7 +828,7 @@ export function CareerManagePage() {
                               <span>Edit</span>
                             </button>
                             <a
-                              href={r.url}
+                              href={safeHref(r.url)}
                               target="_blank"
                               rel="noreferrer"
                               className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted/40 hover:text-muted-foreground transition"

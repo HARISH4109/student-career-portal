@@ -20,3 +20,4 @@ userManagementRouter.post('/:id/roles', requirePermission('admin.manage_roles'),
 userManagementRouter.delete('/:id/roles/:role', requirePermission('admin.manage_roles'), controller.revokeRole);
 userManagementRouter.patch('/:id/activate', requirePermission('admin.manage_users'), controller.activateUser);
 userManagementRouter.patch('/:id/deactivate', requirePermission('admin.manage_users'), controller.deactivateUser);
+userManagementRouter.patch('/:id/status', requirePermission('admin.manage_users'), controller.updateStatus);

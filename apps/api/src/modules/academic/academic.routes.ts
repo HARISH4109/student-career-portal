@@ -29,6 +29,12 @@ academicRouter.put(
   requireRole('ADMIN'),
   controller.updateProgram,
 );
+academicRouter.patch(
+  '/programs/:id',
+  requireAuth,
+  requireRole('ADMIN'),
+  controller.updateProgram,
+);
 academicRouter.delete(
   '/programs/:id',
   requireAuth,
@@ -44,6 +50,12 @@ academicRouter.post(
   controller.createStream,
 );
 academicRouter.put(
+  '/streams/:id',
+  requireAuth,
+  requireRole('ADMIN'),
+  controller.updateStream,
+);
+academicRouter.patch(
   '/streams/:id',
   requireAuth,
   requireRole('ADMIN'),
@@ -69,6 +81,12 @@ academicRouter.put(
   requireRole('ADMIN'),
   controller.updateDepartment,
 );
+academicRouter.patch(
+  '/departments/:id',
+  requireAuth,
+  requireRole('ADMIN'),
+  controller.updateDepartment,
+);
 academicRouter.delete(
   '/departments/:id',
   requireAuth,
@@ -84,6 +102,12 @@ academicRouter.post(
   controller.createBatch,
 );
 academicRouter.put(
+  '/batches/:id',
+  requireAuth,
+  requireRole('ADMIN'),
+  controller.updateBatch,
+);
+academicRouter.patch(
   '/batches/:id',
   requireAuth,
   requireRole('ADMIN'),

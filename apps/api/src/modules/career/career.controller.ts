@@ -1,6 +1,7 @@
 import {
   careerCatalogQuerySchema,
   careerPathInputSchema,
+  paginationQuerySchema,
   resourceInputSchema,
   resourceStatusSchema,
   skillGapInputSchema,
@@ -83,7 +84,16 @@ export class CareerController {
       requestUser(req).id,
     ),
   );
-  roadmaps: RequestHandler = action((req) => this.service.roadmaps(requestUser(req).id));
+  roadmaps: RequestHandler = catalog(async (req) => {
+    const { page, pageSize } = paginationQuerySchema.parse(req.query);
+    const items = await this.service.roadmaps(requestUser(req).id);
+    const totalItems = items.length;
+    const totalPages = Math.ceil(totalItems / pageSize) || 1;
+    return {
+      data: items.slice((page - 1) * pageSize, page * pageSize),
+      meta: { page, pageSize, totalItems, totalPages },
+    };
+  });
   roadmap: RequestHandler = action((req) => this.service.roadmap(id(req), requestUser(req).id));
   start: RequestHandler = action(
     (req) =>
@@ -102,6 +112,15 @@ export class CareerController {
     (req) => this.service.analyze(skillGapInputSchema.parse(req.body), requestUser(req)),
     true,
   );
-  analyses: RequestHandler = action((req) => this.service.analyses(requestUser(req).id));
+  analyses: RequestHandler = catalog(async (req) => {
+    const { page, pageSize } = paginationQuerySchema.parse(req.query);
+    const items = await this.service.analyses(requestUser(req).id);
+    const totalItems = items.length;
+    const totalPages = Math.ceil(totalItems / pageSize) || 1;
+    return {
+      data: items.slice((page - 1) * pageSize, page * pageSize),
+      meta: { page, pageSize, totalItems, totalPages },
+    };
+  });
   analysis: RequestHandler = action((req) => this.service.analysis(id(req), requestUser(req).id));
 }

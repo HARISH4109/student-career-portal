@@ -181,7 +181,7 @@ export type ResumeMatchResponseDto = z.infer<typeof resumeMatchResponseSchema>;
 export const resumeEnhanceTextRequestSchema = z.object({
   text: z.string().min(1, 'Text is required to enhance'),
   sectionType: z.enum(['experience', 'project', 'summary']).default('experience'),
-  context: z.record(z.any()).optional().default({}),
+  context: z.record(z.string(), z.any()).optional().default({}),
 });
 export type ResumeEnhanceTextRequestDto = z.infer<typeof resumeEnhanceTextRequestSchema>;
 

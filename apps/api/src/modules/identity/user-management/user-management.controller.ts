@@ -4,6 +4,7 @@ import {
   type RoleName,
 } from '@career-portal/shared-types';
 import type { NextFunction, Request, Response } from 'express';
+import { z } from 'zod';
 
 import type { UserManagementService } from './user-management.service';
 
@@ -114,6 +115,42 @@ export class UserManagementController {
       };
       await this.userManagementService.deactivateUser(id, actor?.id, ctx);
       sendSuccess(res, { message: 'User deactivated successfully' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  updateStatus = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const id = String(req.params.id);
+      const parsed = z
+        .union([
+          z.object({ status: z.enum(['ACTIVE', 'INACTIVE']) }),
+          z.object({ isActive: z.boolean() }),
+        ])
+        .safeParse(req.body);
+
+      if (!parsed.success) {
+        throw new ValidationError('Invalid user status payload');
+      }
+
+      const shouldActivate =
+        'status' in parsed.data ? parsed.data.status === 'ACTIVE' : parsed.data.isActive;
+
+      const actor = req.user ? requestUser(req) : undefined;
+      const ctx = {
+        requestId: (req as Request & { id?: string }).id,
+        ipAddress: req.ip,
+        userAgent: typeof req.headers['user-agent'] === 'string' ? req.headers['user-agent'] : undefined,
+      };
+
+      if (shouldActivate) {
+        await this.userManagementService.activateUser(id, actor?.id, ctx);
+        sendSuccess(res, { id, status: 'ACTIVE', isActive: true, message: 'User activated successfully' });
+      } else {
+        await this.userManagementService.deactivateUser(id, actor?.id, ctx);
+        sendSuccess(res, { id, status: 'INACTIVE', isActive: false, message: 'User deactivated successfully' });
+      }
     } catch (error) {
       next(error);
     }
