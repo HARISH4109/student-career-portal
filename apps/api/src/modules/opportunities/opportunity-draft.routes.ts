@@ -26,3 +26,14 @@ opportunityDraftRouter.post('/:id/retry', requirePermission('opportunities.creat
 opportunityDraftRouter.post('/:id/approve', requirePermission('opportunities.publish'), controller.approve);
 opportunityDraftRouter.post('/:id/reject', requirePermission('opportunities.publish'), controller.reject);
 opportunityDraftRouter.delete('/:id', requirePermission('opportunities.create'), controller.delete);
+
+// Canonical Phase 12 /extraction router
+export const extractionRouter = Router();
+extractionRouter.use(requireAuth);
+extractionRouter.post('/sources', express.json({ limit: '20mb' }), requirePermission('opportunities.create'), aiRateLimiter, controller.ingest);
+extractionRouter.get('/drafts', requirePermission('opportunities.create'), controller.list);
+extractionRouter.get('/drafts/:id', requirePermission('opportunities.create'), controller.getById);
+extractionRouter.patch('/drafts/:id', requirePermission('opportunities.create'), controller.update);
+extractionRouter.post('/drafts/:id/approve', requirePermission('opportunities.publish'), controller.approve);
+extractionRouter.post('/drafts/:id/reject', requirePermission('opportunities.publish'), controller.reject);
+extractionRouter.post('/runs/:id/retry', requirePermission('opportunities.create'), aiRateLimiter, controller.retryByRun);

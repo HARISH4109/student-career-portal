@@ -22,7 +22,7 @@ import {
   User,
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, type Resolver } from 'react-hook-form';
 import { useQuery } from '@tanstack/react-query';
 import { getAcademicPrograms } from '@/features/academic/services/academic-api';
 
@@ -74,7 +74,7 @@ export function ProfilePage(): React.JSX.Element {
     watch,
     formState: { errors },
   } = useForm<UpdateStudentProfileDto>({
-    resolver: zodResolver(updateStudentProfileSchema),
+    resolver: zodResolver(updateStudentProfileSchema) as Resolver<UpdateStudentProfileDto>,
   });
 
   const watchedProgramId = watch('programId');

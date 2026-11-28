@@ -44,7 +44,7 @@ services:
       REDIS_URL: redis://redis:6379
       AI_SERVICE_BASE_URL: http://ai-service:8000
     ports:
-      - '4000:4000'
+      - '127.0.0.1:4000:4000'
     depends_on:
       postgres:
         condition: service_healthy
@@ -74,7 +74,6 @@ services:
         VITE_SOCKET_URL: ''
     container_name: career-portal-web
     restart: unless-stopped
-    env_file: .env
     ports:
       - '5173:80'
     depends_on:

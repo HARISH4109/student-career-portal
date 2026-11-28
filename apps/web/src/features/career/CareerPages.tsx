@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '@/features/auth/use-auth';
+import { safeHref } from '@/shared/lib/safe-url';
 import {
   ArrowLeft,
   Settings2,
@@ -452,7 +453,7 @@ export function RoadmapPage() {
                           className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl border border-border bg-card"
                         >
                           <a
-                            href={r.url}
+                            href={safeHref(r.url)}
                             target="_blank"
                             rel="noreferrer"
                             className="text-primary hover:underline font-semibold text-sm flex items-center gap-1.5"
@@ -666,7 +667,7 @@ export function ResourcesPage() {
               <p className="text-sm leading-relaxed text-muted-foreground mb-3">{r.description}</p>
               <a
                 className="my-3 inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
-                href={r.url}
+                href={safeHref(r.url)}
                 target="_blank"
                 rel="noreferrer"
               >
@@ -908,12 +909,12 @@ export function SkillGapPage() {
                     {s.actions.map((a, i) => (
                       <li key={i} className="rounded-xl border border-border p-3 bg-muted/20 text-xs space-y-1">
                         <div>
-                          {a.url ? (
+                          {safeHref(a.url) ? (
                             <a
                               className="font-bold text-primary hover:underline text-sm"
-                              href={a.url}
+                              href={safeHref(a.url)}
                               rel="noreferrer"
-                              target={a.url.startsWith('http') ? '_blank' : undefined}
+                              target={a.url?.startsWith('http') ? '_blank' : undefined}
                             >
                               {a.title}
                             </a>

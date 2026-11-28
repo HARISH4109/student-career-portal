@@ -1,6 +1,8 @@
 import type { ApiSuccessResponse, PaginationMeta } from '@career-portal/shared-types';
 import type { Response } from 'express';
 
+import { requestContextStorage } from '@/shared/context/request-context';
+
 /**
  * `data` is intentionally `unknown` rather than a generic — this function
  * returns `void`, so a type parameter here would give callers no inference
@@ -13,6 +15,22 @@ export function sendSuccess(
   statusCode = 200,
   meta?: PaginationMeta,
 ): void {
-  const body: ApiSuccessResponse<unknown> = { success: true, data, ...(meta ? { meta } : {}) };
+  const requestId =
+    requestContextStorage.getStore()?.requestId ??
+    (typeof res.getHeader('X-Request-Id') === 'string'
+      ? (res.getHeader('X-Request-Id') as string)
+      : undefined);
+
+  const responseMeta = {
+    ...(meta ?? {}),
+    ...(requestId ? { requestId } : {}),
+  };
+
+  const body: ApiSuccessResponse<unknown> = {
+    success: true,
+    data,
+    error: null,
+    meta: responseMeta,
+  };
   res.status(statusCode).json(body);
 }

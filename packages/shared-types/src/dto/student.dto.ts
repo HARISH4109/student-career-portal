@@ -97,7 +97,7 @@ export const createStudentProfileSchema = z.object({
   departmentId: z.string().uuid('Valid department ID is required'),
   programId: z.string().uuid('Valid program ID is required'),
   batchId: z.string().uuid('Valid batch ID is required'),
-  cgpa: z.number().min(0).max(10).optional().nullable(),
+  cgpa: z.number().min(0, 'Number must be greater than or equal to 0').max(10, 'Number must be less than or equal to 10').optional().nullable(),
   bio: z.string().max(2000).optional().nullable(),
   linkedinUrl: optionalHttpUrlSchema('Invalid LinkedIn URL'),
   githubUrl: optionalHttpUrlSchema('Invalid GitHub URL'),

@@ -13,7 +13,7 @@ export const StudentAnalyticsResponseSchema = z.object({
     totalStages: z.number().int().nonnegative(),
   }),
   applicationsCount: z.number().int().nonnegative(),
-  applicationsByStatus: z.record(z.number().int().nonnegative()),
+  applicationsByStatus: z.record(z.string(), z.number().int().nonnegative()),
   interviewsCount: z.number().int().nonnegative(),
   selectionsCount: z.number().int().nonnegative(),
 });

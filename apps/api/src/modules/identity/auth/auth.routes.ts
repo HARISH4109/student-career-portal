@@ -29,3 +29,8 @@ authRouter.post('/signout', requireAuth, authController.signOut);
 authRouter.get('/me', requireAuth, authController.getMe);
 authRouter.post('/sync', requireIdentity, authController.sync);
 authRouter.put('/profile', requireAuth, authController.updateProfile);
+
+export const usersRouter = Router();
+usersRouter.use(requireAuth);
+usersRouter.get('/me', authController.getMe);
+usersRouter.patch('/me', authController.updateProfile);

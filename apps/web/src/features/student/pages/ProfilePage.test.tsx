@@ -20,25 +20,25 @@ const mockProfile: StudentProfileResponseDto = {
   phone: '1234567890',
   avatarUrl: null,
   rollNumber: '2023CSE001',
-  departmentId: '11111111-1111-1111-1111-111111111111',
+  departmentId: '11111111-1111-4111-8111-111111111111',
   department: {
-    id: '11111111-1111-1111-1111-111111111111',
+    id: '11111111-1111-4111-8111-111111111111',
     name: 'Computer Science and Engineering',
     code: 'CSE',
     isActive: true,
   },
-  programId: '22222222-2222-2222-2222-222222222222',
+  programId: '22222222-2222-4222-8222-222222222222',
   program: {
-    id: '22222222-2222-2222-2222-222222222222',
-    departmentId: '11111111-1111-1111-1111-111111111111',
+    id: '22222222-2222-4222-8222-222222222222',
+    departmentId: '11111111-1111-4111-8111-111111111111',
     name: 'B.Tech Computer Science',
     degreeLevel: 'Bachelor',
     durationYears: 4,
     isActive: true,
   },
-  batchId: '33333333-3333-3333-3333-333333333333',
+  batchId: '33333333-3333-4333-8333-333333333333',
   batch: {
-    id: '33333333-3333-3333-3333-333333333333',
+    id: '33333333-3333-4333-8333-333333333333',
     graduationYear: 2027,
     isActive: true,
   },
@@ -59,7 +59,7 @@ const mockProfile: StudentProfileResponseDto = {
 
 const mockDepartments: DepartmentDto[] = [
   {
-    id: '11111111-1111-1111-1111-111111111111',
+    id: '11111111-1111-4111-8111-111111111111',
     name: 'Computer Science and Engineering',
     code: 'CSE',
     isActive: true,
@@ -68,12 +68,12 @@ const mockDepartments: DepartmentDto[] = [
 
 const mockBatches: BatchDto[] = [
   {
-    id: '33333333-3333-3333-3333-333333333333',
+    id: '33333333-3333-4333-8333-333333333333',
     graduationYear: 2027,
     isActive: true,
   },
   {
-    id: '44444444-4444-4444-4444-444444444444',
+    id: '44444444-4444-4444-8444-444444444444',
     graduationYear: 2028,
     isActive: true,
   },
@@ -110,8 +110,8 @@ vi.mock('../api/student-api', () => ({
 vi.mock('@/features/academic/services/academic-api', () => ({
   getAcademicPrograms: vi.fn().mockResolvedValue([
     {
-      id: '22222222-2222-2222-2222-222222222222',
-      departmentId: '11111111-1111-1111-1111-111111111111',
+      id: '22222222-2222-4222-8222-222222222222',
+      departmentId: '11111111-1111-4111-8111-111111111111',
       name: 'B.Tech Computer Science',
       degreeLevel: 'Bachelor',
       durationYears: 4,
@@ -163,7 +163,7 @@ describe('ProfilePage', () => {
     // Batch select
     const batchSelect = container.querySelector('select[name="batchId"]');
     expect(batchSelect).toBeInTheDocument();
-    expect(batchSelect).toHaveValue('33333333-3333-3333-3333-333333333333');
+    expect(batchSelect).toHaveValue('33333333-3333-4333-8333-333333333333');
   });
 
   it('validates CGPA range (0-10) and shows error on out of range value', async () => {
@@ -224,9 +224,9 @@ describe('ProfilePage', () => {
       expect.objectContaining({
         rollNumber: '2023CSE999',
         cgpa: 9.25,
-        departmentId: '11111111-1111-1111-1111-111111111111',
-        programId: '22222222-2222-2222-2222-222222222222',
-        batchId: '33333333-3333-3333-3333-333333333333',
+        departmentId: '11111111-1111-4111-8111-111111111111',
+        programId: '22222222-2222-4222-8222-222222222222',
+        batchId: '33333333-3333-4333-8333-333333333333',
       }),
     );
   });

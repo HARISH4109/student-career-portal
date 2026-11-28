@@ -112,11 +112,22 @@ export class OpportunityDraftController {
     }
   };
 
-  /** Retry AI extraction for a failed extraction run */
+  /** Retry AI extraction for a failed draft */
   retry = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const id = String(req.params.id);
       const retried = await this.draftService.retryExtraction(id, requestUser(req));
+      sendSuccess(res, retried);
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /** Retry AI extraction for a failed extraction run (canonical /extraction/runs/:id/retry) */
+  retryByRun = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const id = String(req.params.id);
+      const retried = await this.draftService.retryExtractionByRunId(id, requestUser(req));
       sendSuccess(res, retried);
     } catch (error) {
       next(error);

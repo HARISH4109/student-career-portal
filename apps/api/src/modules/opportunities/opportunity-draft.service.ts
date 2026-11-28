@@ -390,6 +390,20 @@ export class OpportunityDraftService {
   // ── Retry Extraction ─────────────────────────────────────────────────
 
   /**
+   * Re-trigger AI extraction for a failed run by extraction run ID (or draft ID fallback).
+   */
+  async retryExtractionByRunId(
+    runOrDraftId: string,
+    user: AuthenticatedUser,
+  ): Promise<OpportunityDraftResponseDto> {
+    const draftByRun = await this.draftRepo.findDraftByExtractionRunId(runOrDraftId);
+    if (draftByRun) {
+      return this.retryExtraction(draftByRun.id, user);
+    }
+    return this.retryExtraction(runOrDraftId, user);
+  }
+
+  /**
    * Re-trigger AI extraction for a failed run. Creates a new extraction run
    * against the same source and updates the existing draft.
    */

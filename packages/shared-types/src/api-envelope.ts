@@ -5,20 +5,27 @@ import { z } from 'zod';
  * entities — always wrapped, so the frontend has one predictable shape to
  * unwrap regardless of endpoint (success flag, typed error codes, pagination).
  */
+export interface ApiMeta {
+  requestId?: string;
+}
+
 export interface ApiSuccessResponse<T> {
   success: true;
   data: T;
-  meta?: PaginationMeta;
+  error?: null;
+  meta?: PaginationMeta | ApiMeta;
 }
 
 export interface ApiErrorResponse {
   success: false;
+  data?: null;
   error: {
     code: ApiErrorCode;
     message: string;
     /** Field-level validation errors, present for 422 VALIDATION_ERROR responses */
     details?: Record<string, string[]>;
   };
+  meta?: ApiMeta;
 }
 
 export type ApiResponse<T> = ApiSuccessResponse<T> | ApiErrorResponse;

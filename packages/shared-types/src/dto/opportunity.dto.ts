@@ -297,7 +297,12 @@ export const extractedOpportunitySchema = z.object({
   applyUrl: z.string().refine((val) => isSafeHttpUrl(val), 'Use an HTTP or HTTPS URL').nullable().optional().default(null),
   applicationEmail: z.string().nullable().optional().default(null),
   skills: z.array(z.string()).default([]),
-  eligibility: extractedEligibilitySchema.default({}),
+  eligibility: extractedEligibilitySchema.default({
+    minCgpa: null,
+    departmentCodes: [],
+    allowedBatches: [],
+    description: null,
+  }),
   confidenceScore: z.number().min(0).max(100).nullable().default(null),
 });
 export type ExtractedOpportunityDto = z.infer<typeof extractedOpportunitySchema>;
@@ -370,7 +375,12 @@ export const opportunityDraftResponseSchema = z.object({
   salaryMin: z.number().nullable().optional(),
   salaryMax: z.number().nullable().optional(),
   extractedSkills: z.array(z.string()).default([]),
-  extractedEligibility: extractedEligibilitySchema.passthrough().default({}),
+  extractedEligibility: extractedEligibilitySchema.passthrough().default({
+    minCgpa: null,
+    departmentCodes: [],
+    allowedBatches: [],
+    description: null,
+  }),
   applicationDeadline: z.string().nullable().optional(),
   applyUrl: z.string().nullable().optional(),
   applicationEmail: z.string().nullable().optional(),
